@@ -3,7 +3,7 @@ import { Context } from 'koishi';
 import { get, getJSON } from './api';
 import { sendMessageList } from '../../modules/sender';
 
-module.exports = async (ctx: Context) => {
+export default async (ctx: Context) => {
 	ctx.command('domcer.user <username>', '查询用户信息')
 		.action(async (arg, name) => {
 			const data = await getJSON('/player/getByName', { name });
