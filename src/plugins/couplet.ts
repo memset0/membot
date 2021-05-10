@@ -3,7 +3,7 @@ import * as request from 'superagent';
 const apiRoot = 'https://ai-backend.binwang.me/chat/couplet/';
 
 module.exports = (ctx) => {
-	ctx.command('couplet <text>')
+	ctx.command('couplet <text>', '对对联')
 		.action(async (_, text) => {
 			const res = await request.get(apiRoot + encodeURIComponent(text));
 			if (res.status !== 200) {
