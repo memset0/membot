@@ -1,0 +1,15 @@
+{
+  "name": "membot",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "repository": "https://github.com/memset0/membot.git",
+  "author": "memset0 <34177126+memset0@users.noreply.github.com>",
+  "license": "GNU v3",
+  "dependencies": {
+    "koishi": "^3.10.2",
+    "koishi-adapter-kaiheila": "^1.1.2",
+    "koishi-adapter-onebot": "^3.0.8",
+    "rd": "^2.0.1",
+    "yaml": "^1.10.2"
+  }
+}
