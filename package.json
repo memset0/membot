@@ -11,5 +11,8 @@
     "koishi-adapter-onebot": "^3.0.8",
     "rd": "^2.0.1",
     "yaml": "^1.10.2"
+  },
+  "scripts": {
+    "start": "ts-node src/index.js"
   }
 }

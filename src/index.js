@@ -3,7 +3,7 @@ const { App } = require('koishi');
 require('koishi-adapter-onebot');
 require('koishi-adapter-kaiheila');
 
-const config = require('./config');
+const config = require('./config').default;
 const appConfig = config.bots;
 const app = new App(appConfig);
 
