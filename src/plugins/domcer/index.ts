@@ -4,14 +4,16 @@ import { get, getJSON } from './api';
 import { sendMessageList } from '../../modules/sender';
 
 export default async (ctx: Context) => {
+	ctx.command('domcer', '查询 Domcer 服务器相关数据');
+
 	ctx.command('domcer.user <username>', '查询用户信息')
-		.action(async (arg, name) => {
+		.action(async ({ session }, name) => {
 			const data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) {
 				return `接口返回错误: ${data.status}`;
 			}
 
-			sendMessageList(arg.session, [
+			sendMessageList(session, [
 				(data.data.rank !== 'DEFAUL' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
 				`大厅等级: ${data.data.networkLevel} 大厅经验: ${data.data.networkExp} 街机硬币: ${data.data.networkCoins}`,
 				`注册时间: ${(new Date(data.data.firstLogin)).toString()}`,
@@ -20,7 +22,7 @@ export default async (ctx: Context) => {
 		});
 
 	ctx.command('domcer.uhc <username>', '查询 UHC 数据')
-		.action(async (arg, name) => {
+		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) {
 				return `接口返回错误: ${data.status}`;
@@ -32,7 +34,7 @@ export default async (ctx: Context) => {
 				return `接口返回错误: ${data.status}`;
 			}
 
-			sendMessageList(arg.session, [
+			sendMessageList(session, [
 				`${name} 的 UHC 数据`,
 				`硬币: ${data.data.coins}`,
 				`组队模式击杀: ${data.data.teamKills} 死亡: ${data.data.teamDeath} KD比: ${(data.data.teamKills / data.data.teamDeath).toFixed(4)}`,
@@ -42,7 +44,7 @@ export default async (ctx: Context) => {
 
 	ctx.command('domcer.bedwars <username>', '查询起床战争数据')
 		.alias('domcer.bw')
-		.action(async (arg, name) => {
+		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) {
 				return `接口返回错误: ${data.status}`;
@@ -54,7 +56,7 @@ export default async (ctx: Context) => {
 				return `接口返回错误: ${data.status}`;
 			}
 
-			sendMessageList(arg.session, [
+			sendMessageList(session, [
 				`${name} 的起床战争数据`,
 				`硬币: ${data.data.coins} 奖励箱: ${data.data.chest} 等级: ${data.data.level} 经验: ${data.data.xp}`,
 				`总摧毁床数: ${data.data.bedDestroyed} 总被摧毁床数: ${data.data.bedBeenDestroyed}`,
@@ -66,7 +68,7 @@ export default async (ctx: Context) => {
 
 	ctx.command('domcer.megawalls <username>', '查询超级战墙数据')
 		.alias('domcer.mw')
-		.action(async (arg, name) => {
+		.action(async ({ session }, name) => {
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) {
 				return `接口返回错误: ${data.status}`;
@@ -107,7 +109,7 @@ export default async (ctx: Context) => {
 				}
 			}
 
-			sendMessageList(arg.session, [
+			sendMessageList(session, [
 				`${name} 的超级战墙数据（经典模式）`,
 				`最终击杀: ${sum.finalKills} 最终助攻: ${sum.finalAssists}`,
 				`对局数: ${sum.games} 存活到死斗局数: ${sum.alives} 获胜局数: ${sum.wins} MVP次数: ${sum.mvps}`,
