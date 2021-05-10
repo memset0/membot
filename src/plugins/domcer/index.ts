@@ -112,7 +112,7 @@ export default async (ctx: Context) => {
 			sendMessageList(session, [
 				`${name} 的超级战墙数据（经典模式）`,
 				`最终击杀: ${sum.finalKills} 最终助攻: ${sum.finalAssists}`,
-				`对局数: ${sum.games} 存活到死斗局数: ${sum.alives} 获胜局数: ${sum.wins} MVP次数: ${sum.mvps}`,
+				`对局数: ${sum.games} 死斗存活局数: ${sum.alives} 获胜局数: ${sum.wins} MVP次数: ${sum.mvps}`,
 				`总伤害: ${sum.totalDamage} 平均伤害: ${(sum.totalDamage / sum.alives).toFixed(4)}`,
 				`总承伤: ${sum.takenDamage} 平均承伤: ${(sum.takenDamage / sum.alives).toFixed(4)}`,
 			]);
