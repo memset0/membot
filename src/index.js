@@ -11,5 +11,5 @@ const plugins = require('./plugins');
 plugins.forEach(plugin => app.plugin(plugin));
 
 app.options.nickname = config.nickname;
-app.options.prefix = ['.', '/'];
+app.options.prefix = config.prefix;
 app.start();
