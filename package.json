@@ -10,6 +10,7 @@
     "koishi-adapter-kaiheila": "^1.1.2",
     "koishi-adapter-onebot": "^3.0.8",
     "rd": "^2.0.1",
+    "superagent": "^6.1.0",
     "yaml": "^1.10.2"
   },
   "scripts": {
