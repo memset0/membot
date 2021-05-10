@@ -1,16 +1,7 @@
 import { Context } from 'koishi';
 
 import { get, getJSON } from './api';
-
-async function sendMessages(session, messageList) {
-	if (session.platform === 'kaiheila') {
-		for await (const message of messageList) {
-			await session.send(message);
-		}
-	} else {
-		await session.send(messageList.join('\n'));
-	}
-}
+import { sendMessageList } from '../../modules/sender';
 
 module.exports = async (ctx: Context) => {
 	ctx.command('domcer.user <username>', '查询用户信息')
@@ -20,7 +11,7 @@ module.exports = async (ctx: Context) => {
 				return `接口返回错误: ${data.status}`;
 			}
 
-			sendMessages(arg.session, [
+			sendMessageList(arg.session, [
 				(data.data.rank !== 'DEFAUL' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
 				`大厅等级: ${data.data.networkLevel} 大厅经验: ${data.data.networkExp} 街机硬币: ${data.data.networkCoins}`,
 				`注册时间: ${(new Date(data.data.firstLogin)).toString()}`,
@@ -41,7 +32,7 @@ module.exports = async (ctx: Context) => {
 				return `接口返回错误: ${data.status}`;
 			}
 
-			sendMessages(arg.session, [
+			sendMessageList(arg.session, [
 				`${name} 的 UHC 数据`,
 				`硬币: ${data.data.coins}`,
 				`组队模式击杀: ${data.data.teamKills} 死亡: ${data.data.teamDeath} KD比: ${(data.data.teamKills / data.data.teamDeath).toFixed(4)}`,
@@ -63,7 +54,7 @@ module.exports = async (ctx: Context) => {
 				return `接口返回错误: ${data.status}`;
 			}
 
-			sendMessages(arg.session, [
+			sendMessageList(arg.session, [
 				`${name} 的起床战争数据`,
 				`硬币: ${data.data.coins} 奖励箱: ${data.data.chest} 等级: ${data.data.level} 经验: ${data.data.xp}`,
 				`总摧毁床数: ${data.data.bedDestroyed} 总被摧毁床数: ${data.data.bedBeenDestroyed}`,
@@ -116,7 +107,7 @@ module.exports = async (ctx: Context) => {
 				}
 			}
 
-			sendMessages(arg.session, [
+			sendMessageList(arg.session, [
 				`${name} 的超级战墙数据（经典模式）`,
 				`最终击杀: ${sum.finalKills} 最终助攻: ${sum.finalAssists}`,
 				`对局数: ${sum.games} 存活到死斗局数: ${sum.alives} 获胜局数: ${sum.wins} MVP次数: ${sum.mvps}`,
