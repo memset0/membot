@@ -11,6 +11,12 @@ function itob(n: number, length: number) {
 	return result;
 }
 
+function parseDescripiton(content: string) {
+	return content
+		.replace(/^\s+|\s+$/g, '') //strip
+		.replace(/§./g, ''); // remove color tag
+}
+
 export default (ctx: Context) => {
 	ctx.command('mcping <url>', '查看 Minecraft 服务器信息')
 		.action(async ({ session }, address) => {
@@ -68,7 +74,7 @@ export default (ctx: Context) => {
 							`版本：${status.version.name}`,
 							`人数：${status.players.online} / ${status.players.max}`,
 						];
-						if (status.description) output.unshift(`简介：${status.description.text}`);
+						if (status.description) output.unshift(`简介：${parseDescripiton(status.description)}`);
 						// data:image/png;base64,
 						if (status.favicon) output.unshift(segment.image('base64://' + status.favicon.slice(22)));
 						session.send(output.join('\n'));
