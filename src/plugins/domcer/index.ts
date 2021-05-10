@@ -3,8 +3,12 @@ import { Context } from 'koishi';
 import { get, getJSON } from './api';
 
 async function sendMessages(session, messageList) {
-	for await (const message of messageList) {
-		await session.send(message);
+	if (session.platform === 'kaiheila') {
+		for await (const message of messageList) {
+			await session.send(message);
+		}
+	} else {
+		await session.send(messageList.join('\n'));
 	}
 }
 
@@ -83,7 +87,6 @@ module.exports = async (ctx: Context) => {
 				totalDamage: 0,
 				takenDamage: 0,
 			};
-			console.log(data.data);
 
 			for (const game of data.data) {
 				sum.games += 1;
@@ -106,7 +109,7 @@ module.exports = async (ctx: Context) => {
 				`对局数: ${sum.games} 获胜局数: ${sum.wins} 存活到死斗局数: ${sum.alives}`,
 				`总伤害: ${sum.totalDamage} 平均伤害: ${(sum.totalDamage / sum.alives).toFixed(4)}`,
 				`总承伤: ${sum.takenDamage} 平均承伤: ${(sum.takenDamage / sum.alives).toFixed(4)}`,
-				'（官方 API 提供的数据可能有误，仅供参考）'
+				'（官方 API 提供的数据疑似有误，仅供参考）'
 			]);
 		});
 };
