@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { Context } from 'koishi-core';
 
 import { initSpider, getJSON } from './api';
@@ -8,6 +9,21 @@ export interface Config {
 	key: string,
 };
 
+export function codeErrorMessage(statusCode) {
+	let res = `接口返回错误: ${statusCode}`;
+	if (statusCode === 401) {
+		res += '（未找到该用户，请确认用户名及大小写是否正确）'
+	}
+	if (statusCode === 500) {
+		res += '（API 访问次数达到上限）'
+	}
+	return res;
+}
+
+export function transformUTC(clock) {
+	return moment(clock).format('YYYY年MM月DD日 hh:mm:ss');
+}
+
 export default async (ctx: Context, config: Config) => {
 	initSpider(config.root, config.key);
 
@@ -16,30 +32,24 @@ export default async (ctx: Context, config: Config) => {
 	ctx.command('domcer.user <username>', '查询用户信息')
 		.action(async ({ session }, name) => {
 			const data = await getJSON('/player/getByName', { name });
-			if (data.status !== 200) {
-				return `接口返回错误: ${data.status}`;
-			}
+			if (data.status !== 200) return codeErrorMessage(data.status);
 
 			sendMessageList(session, [
 				(data.data.rank !== 'DEFAUL' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
 				`大厅等级: ${data.data.networkLevel} 大厅经验: ${data.data.networkExp} 街机硬币: ${data.data.networkCoins}`,
-				`注册时间: ${(new Date(data.data.firstLogin)).toString()}`,
-				data.data.lastLogout ? `上次登出时间: ${(new Date(data.data.lastLogout)).toString()}\n` : '当前在线',
+				`注册时间: ${transformUTC(data.data.firstLogin)}`,
+				data.data.lastLogout ? `上次登出时间: ${transformUTC(data.data.lastLogout)}\n` : '当前在线',
 			]);
 		});
 
 	ctx.command('domcer.uhc <username>', '查询 UHC 数据')
 		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
-			if (data.status !== 200) {
-				return `接口返回错误: ${data.status}`;
-			}
+			if (data.status !== 200) return codeErrorMessage(data.status);
 
 			const uuid = data.data.uuid;
 			data = await getJSON('/stats/getStats', { uuid, statsName: 'UHC' });
-			if (data.status !== 200) {
-				return `接口返回错误: ${data.status}`;
-			}
+			if (data.status !== 200) return codeErrorMessage(data.status);
 
 			sendMessageList(session, [
 				`${name} 的 UHC 数据`,
@@ -54,15 +64,11 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.bedwar')
 		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
-			if (data.status !== 200) {
-				return `接口返回错误: ${data.status}`;
-			}
+			if (data.status !== 200) return codeErrorMessage(data.status);
 
 			const uuid = data.data.uuid;
 			data = await getJSON('/stats/getStats', { uuid, statsName: 'BedWars' });
-			if (data.status !== 200) {
-				return `接口返回错误: ${data.status}`;
-			}
+			if (data.status !== 200) return codeErrorMessage(data.status);
 
 			sendMessageList(session, [
 				`${name} 的起床战争数据`,
@@ -82,12 +88,8 @@ export default async (ctx: Context, config: Config) => {
 		.option('minTakenDamage', '-t [value]')
 		.action(async ({ session, options }, name) => {
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
-			if (data.status !== 200) {
-				return `接口返回错误: ${data.status}`;
-			}
-			if (data.data.length === 0) {
-				return `该玩家没有超级战墙游玩历史`;
-			}
+			if (data.status !== 200) return codeErrorMessage(data.status);
+			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
 
 			if (options.minTotalDamage && isNaN(parseInt(options.minTotalDamage))) {
 				return '最小伤害限制应是整数';
