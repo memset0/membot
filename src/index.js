@@ -8,7 +8,14 @@ const appConfig = config.bots;
 const app = new App(appConfig);
 
 const plugins = require('./plugins');
-plugins.forEach(plugin => app.plugin(plugin));
+for (const name in plugins) {
+	// console.log('[load plugin]', name, Object.keys(config.plugins).includes(name));
+	if (Object.keys(config.plugins).includes(name)) {
+		app.plugin(plugins[name], config.plugins[name]);
+	} else {
+		app.plugin(plugins[name]);
+	}
+}
 
 app.options.nickname = config.nickname;
 app.options.prefix = config.prefix;

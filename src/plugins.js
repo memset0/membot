@@ -1,14 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-let plugins = [];
+let plugins = {};
 let names = fs.readdirSync(path.join(__dirname, './plugins'));
 
 for (let name of names) {
 	if (name.endsWith('.ts')) {
-		plugins.push(require(path.join(__dirname, './plugins', name)).default);
+		name = name.slice(0, name.length - 3);
+		plugins[name] = require(path.join(__dirname, './plugins', name)).default;
 	} else {
-		plugins.push(require(path.join(__dirname, './plugins', name, './index.ts')).default);
+		plugins[name] = require(path.join(__dirname, './plugins', name, './index.ts')).default;
 	}
 }
 

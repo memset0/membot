@@ -1,5 +1,9 @@
-import config from '../config';
+import { Context } from 'koishi-core';
 
-export default (ctx) => {
-	ctx.command('about', '关于本 bot').action((_) => config.about.msg.join('\n'));
+export interface Config {
+	msg: Array<String>,
+};
+
+export default function (ctx: Context, config: Config) {
+	ctx.command('about', '关于本 bot').action((_) => config.msg.join('\n'));
 };

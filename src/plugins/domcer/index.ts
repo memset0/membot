@@ -1,9 +1,16 @@
-import { Context } from 'koishi';
+import { Context } from 'koishi-core';
 
-import { get, getJSON } from './api';
+import { initSpider, getJSON } from './api';
 import { sendMessageList } from '../../modules/sender';
 
-export default async (ctx: Context) => {
+export interface Config {
+	root: string,
+	key: string,
+};
+
+export default async (ctx: Context, config: Config) => {
+	initSpider(config.root, config.key);
+
 	ctx.command('domcer', '查询 Domcer 服务器相关数据');
 
 	ctx.command('domcer.user <username>', '查询用户信息')
