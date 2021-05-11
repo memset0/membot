@@ -7,6 +7,8 @@ const config = require('./config').default;
 const appConfig = config.bots;
 const app = new App(appConfig);
 
+app.plugin(require('koishi-plugin-mysql'), config.mysql);
+
 const plugins = require('./plugins');
 for (const name in plugins) {
 	// console.log('[load plugin]', name, Object.keys(config.plugins).includes(name));
