@@ -51,6 +51,7 @@ export default async (ctx: Context, config: Config) => {
 
 	ctx.command('domcer.bedwars <username>', '查询起床战争数据')
 		.alias('domcer.bw')
+		.alias('domcer.bedwar')
 		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) {
@@ -75,7 +76,11 @@ export default async (ctx: Context, config: Config) => {
 
 	ctx.command('domcer.megawalls <username>', '查询超级战墙数据')
 		.alias('domcer.mw')
-		.action(async ({ session }, name) => {
+		.alias('domcer.megawall')
+		.option('allmode', '-a')
+		.option('minTotalDamage', '-d [value]')
+		.option('minTakenDamage', '-t [value]')
+		.action(async ({ session, options }, name) => {
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) {
 				return `接口返回错误: ${data.status}`;
@@ -84,11 +89,19 @@ export default async (ctx: Context, config: Config) => {
 				return `该玩家没有超级战墙游玩历史`;
 			}
 
+			if (options.minTotalDamage && isNaN(parseInt(options.minTotalDamage))) {
+				return '最小伤害限制应是整数';
+			}
+			if (options.minTakenDamage && isNaN(parseInt(options.minTakenDamage))) {
+				return '最小承伤限制应是整数';
+			}
+
 			let sum = {
 				mvps: 0,
 				games: 0,
 				alives: 0,
 				wins: 0,
+				counter: 0,
 				finalKills: 0,
 				finalAssists: 0,
 				totalDamage: 0,
@@ -96,7 +109,7 @@ export default async (ctx: Context, config: Config) => {
 			};
 
 			for (const game of data.data) {
-				if (game.mode === 'NORMAL') {
+				if (game.mode === 'NORMAL' || options.allmode) {
 					sum.games += 1;
 					sum.finalKills += game.finalKills;
 					sum.finalAssists += game.finalAssists;
@@ -110,18 +123,45 @@ export default async (ctx: Context, config: Config) => {
 
 					if (game.liveInDeathMatch) {
 						sum.alives += 1;
-						sum.totalDamage += game.totalDamage;
-						sum.takenDamage += game.takenDamage;
+						if (!options.minTotalDamage || parseInt(options.minTotalDamage) <= game.totalDamage) {
+							if (!options.minTakenDamage || parseInt(options.minTakenDamage) <= game.takenDamage) {
+								sum.counter += 1;
+								sum.totalDamage += game.totalDamage;
+								sum.takenDamage += game.takenDamage;
+							}
+						}
 					}
 				}
 			}
 
-			sendMessageList(session, [
-				`${name} 的超级战墙数据（经典模式）`,
+			let res = [
+				`${name} 的超级战墙数据（${options.allmode ? '全部模式' : '经典模式'}）`,
 				`最终击杀: ${sum.finalKills} 最终助攻: ${sum.finalAssists}`,
 				`对局数: ${sum.games} 死斗存活局数: ${sum.alives} 获胜局数: ${sum.wins} MVP次数: ${sum.mvps}`,
-				`总伤害: ${sum.totalDamage} 平均伤害: ${(sum.totalDamage / sum.alives).toFixed(4)}`,
-				`总承伤: ${sum.takenDamage} 平均承伤: ${(sum.takenDamage / sum.alives).toFixed(4)}`,
-			]);
+			];
+
+			if (!options.minTakenDamage && !options.minTotalDamage) {
+				res = res.concat([
+					`总伤害: ${sum.totalDamage} 平均伤害: ${(sum.totalDamage / sum.alives).toFixed(4)}`,
+					`总承伤: ${sum.takenDamage} 平均承伤: ${(sum.takenDamage / sum.alives).toFixed(4)}`,
+				]);
+			} else {
+				let limit = [];
+				if (options.minTotalDamage) limit.push(`最少 ${options.minTotalDamage} 伤害`);
+				if (options.minTakenDamage) limit.push(`最少 ${options.minTakenDamage} 承伤`);
+
+				res = res.concat([
+					`（筛选器已启用：${limit.join('，')}；符合条件的对局 ${sum.counter} 场）`,
+				]);
+
+				if (sum.counter) {
+					res = res.concat([
+						`总伤害: ${sum.totalDamage} 平均伤害: ${(sum.totalDamage / sum.counter).toFixed(4)}`,
+						`总承伤: ${sum.takenDamage} 平均承伤: ${(sum.takenDamage / sum.counter).toFixed(4)}`,
+					]);
+				}
+			}
+
+			sendMessageList(session, res);
 		});
 };
