@@ -9,6 +9,7 @@
     "koishi": "^3.10.2",
     "koishi-adapter-kaiheila": "^1.1.2",
     "koishi-adapter-onebot": "^3.0.8",
+    "koishi-plugin-puppeteer": "^2.1.2",
     "qrcode": "^1.4.4",
     "rd": "^2.0.1",
     "superagent": "^6.1.0",
