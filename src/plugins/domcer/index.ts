@@ -35,7 +35,7 @@ export default async (ctx: Context, config: Config) => {
 			if (data.status !== 200) return codeErrorMessage(data.status);
 
 			sendMessageList(session, [
-				(data.data.rank !== 'DEFAUL' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
+				(data.data.rank !== 'DEFAUL' && data.data.rank !== 'default' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
 				`大厅等级: ${data.data.networkLevel} 大厅经验: ${data.data.networkExp} 街机硬币: ${data.data.networkCoins}`,
 				`注册时间: ${transformUTC(data.data.firstLogin)}`,
 				data.data.lastLogout ? `上次登出时间: ${transformUTC(data.data.lastLogout)}\n` : '当前在线',
