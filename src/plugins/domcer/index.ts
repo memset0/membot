@@ -15,12 +15,13 @@ export class Checker {
 	}
 
 	static isUserName(username) {
-		if (username.length > 20 || username.length <= 0) return '用户名好像不大对...';
+		if (!username || !username.length) return '[E] 请输入用户名';
+		if (username.length > 20 || username.length <= 0) return '[E] 用户名不合法';
 		return undefined;
 	}
 
 	static isInteger(number) {
-		return isNaN(parseInt(number)) ? '参数必须为整数...' : undefined;
+		return isNaN(parseInt(number)) ? '[E] 参数必须为整数' : undefined;
 	}
 };
 
