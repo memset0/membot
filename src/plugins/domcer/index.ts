@@ -9,6 +9,21 @@ export interface Config {
 	key: string,
 };
 
+export class Checker {
+	static isNotEmpty(value) {
+		return typeof value !== 'undefined' ? true : undefined
+	}
+
+	static isUserName(username) {
+		if (username.length > 20 || username.length <= 0) return '用户名好像不大对...';
+		return undefined;
+	}
+
+	static isInteger(number) {
+		return isNaN(parseInt(number)) ? '参数必须为整数...' : undefined;
+	}
+};
+
 export function codeErrorMessage(statusCode) {
 	let res = `接口返回错误: ${statusCode}`;
 	if (statusCode === 401) {
@@ -30,6 +45,7 @@ export default async (ctx: Context, config: Config) => {
 	ctx.command('domcer', '查询 Domcer 服务器相关数据');
 
 	ctx.command('domcer.user <username>', '查询用户信息')
+		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
 			const data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
@@ -43,6 +59,7 @@ export default async (ctx: Context, config: Config) => {
 		});
 
 	ctx.command('domcer.uhc <username>', '查询 UHC 数据')
+		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
@@ -62,6 +79,7 @@ export default async (ctx: Context, config: Config) => {
 	ctx.command('domcer.bedwars <username>', '查询起床战争数据')
 		.alias('domcer.bw')
 		.alias('domcer.bedwar')
+		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
@@ -86,17 +104,13 @@ export default async (ctx: Context, config: Config) => {
 		.option('allmode', '-a')
 		.option('minTotalDamage', '-d [value]')
 		.option('minTakenDamage', '-t [value]')
+		.check((_, name) => Checker.isUserName(name))
+		.check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
+		.check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
-
-			if (options.minTotalDamage && isNaN(parseInt(options.minTotalDamage))) {
-				return '最小伤害限制应是整数';
-			}
-			if (options.minTakenDamage && isNaN(parseInt(options.minTakenDamage))) {
-				return '最小承伤限制应是整数';
-			}
 
 			let sum = {
 				mvps: 0,
@@ -115,12 +129,9 @@ export default async (ctx: Context, config: Config) => {
 					sum.games += 1;
 					sum.finalKills += game.finalKills;
 					sum.finalAssists += game.finalAssists;
-
 					if (game.winner == game.team) {
 						sum.wins += 1;
-						if (game.mvp) {
-							sum.mvps += 1;
-						}
+						if (game.mvp) sum.mvps += 1;
 					}
 
 					if (game.liveInDeathMatch) {
@@ -147,6 +158,7 @@ export default async (ctx: Context, config: Config) => {
 					`总伤害: ${sum.totalDamage} 平均伤害: ${(sum.totalDamage / sum.alives).toFixed(4)}`,
 					`总承伤: ${sum.takenDamage} 平均承伤: ${(sum.takenDamage / sum.alives).toFixed(4)}`,
 				]);
+
 			} else {
 				let limit = [];
 				if (options.minTotalDamage) limit.push(`最少 ${options.minTotalDamage} 伤害`);
@@ -155,7 +167,6 @@ export default async (ctx: Context, config: Config) => {
 				res = res.concat([
 					`（筛选器已启用：${limit.join('，')}；符合条件的对局 ${sum.counter} 场）`,
 				]);
-
 				if (sum.counter) {
 					res = res.concat([
 						`总伤害: ${sum.totalDamage} 平均伤害: ${(sum.totalDamage / sum.counter).toFixed(4)}`,
