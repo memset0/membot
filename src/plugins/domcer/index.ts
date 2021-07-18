@@ -15,6 +15,7 @@ export class Checker {
 	}
 
 	static isUserName(username) {
+		username = String(username);
 		if (!username || !username.length) return '[E] 请输入用户名';
 		if (username.length > 20 || username.length <= 0) return '[E] 用户名不合法';
 		return undefined;

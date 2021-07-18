@@ -10,6 +10,8 @@ export function initSpider(_root: string, _key: string) {
 export async function get(uri: string, data = null) {
 	data = data || {};
 	if (!data.key) data.key = key;
+	if (data.uuid) data.uuid = String(data.uuid);
+	if (data.name) data.name = String(data.name);
 
 	return (await request.get(root + uri).query(data)).res.text;
 }
