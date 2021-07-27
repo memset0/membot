@@ -54,9 +54,9 @@ export default async (ctx: Context, config: Config) => {
 
 			sendMessageList(session, [
 				(data.data.rank !== 'DEFAUL' && data.data.rank !== 'default' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
-				`「大厅等级」${data.data.networkLevel}「大厅经验」${data.data.networkExp}「街机硬币」${data.data.networkCoins}`,
-				`「注册时间」${transformUTC(data.data.firstLogin)}`,
-				data.data.lastLogout ? `「上次登出时间」${transformUTC(data.data.lastLogout)}` : '当前在线',
+				`【大厅等级】${data.data.networkLevel}【大厅经验】${data.data.networkExp}【街机硬币】${data.data.networkCoins}`,
+				`【注册时间】${transformUTC(data.data.firstLogin)}`,
+				data.data.lastLogout ? `【上次登出时间】${transformUTC(data.data.lastLogout)}` : '当前在线',
 			]);
 		});
 
@@ -72,9 +72,9 @@ export default async (ctx: Context, config: Config) => {
 
 			sendMessageList(session, [
 				`${name} 的 UHC 数据`,
-				`「硬币」${data.data.coins}`,
-				`「组队模式击杀」${data.data.teamKills}「死亡」${data.data.teamDeath}「KD 比」${(data.data.teamKills / data.data.teamDeath).toFixed(4)}`,
-				`「组队模式获胜」${data.data.teamWins}「场次」${data.data.teamGames}「获胜率」${(data.data.teamWins / data.data.teamGames * 100).toFixed(2)}%`,
+				`【硬币】${data.data.coins}`,
+				`【组队模式击杀】${data.data.teamKills}【死亡】${data.data.teamDeath}【KD 比】${(data.data.teamKills / data.data.teamDeath).toFixed(4)}`,
+				`【组队模式获胜】${data.data.teamWins}【场次】${data.data.teamGames}【获胜率】${(data.data.teamWins / data.data.teamGames * 100).toFixed(2)}%`,
 			])
 		});
 
@@ -92,11 +92,11 @@ export default async (ctx: Context, config: Config) => {
 
 			sendMessageList(session, [
 				`${name} 的起床战争数据`,
-				`「硬币」${data.data.coins}「奖励箱」${data.data.chest}「等级」${data.data.level}「经验」${data.data.xp}`,
-				`「总摧毁床数」${data.data.bedDestroyed}「总被摧毁床数」${data.data.bedBeenDestroyed}`,
-				`「总获胜场次」${data.data.wins}「总局数」${data.data.games}「获胜率」${(data.data.wins / data.data.games * 100).toFixed(2)}%`,
-				`「总击杀」${data.data.kills}「总死亡」${data.data.deaths}「KD 比」${(data.data.kills / data.data.deaths).toFixed(4)}`,
-				`「总最终击杀」${data.data.finalKills}「总最终死亡」${data.data.finalDeaths}「Final KD比」${(data.data.finalKills / data.data.finalDeaths).toFixed(4)}`,
+				`【硬币】${data.data.coins}【奖励箱】${data.data.chest}【等级】${data.data.level}【经验】${data.data.xp}`,
+				`【总摧毁床数】${data.data.bedDestroyed}【总被摧毁床数】${data.data.bedBeenDestroyed}`,
+				`【总获胜场次】${data.data.wins}【总局数】${data.data.games}【获胜率】${(data.data.wins / data.data.games * 100).toFixed(2)}%`,
+				`【总击杀】${data.data.kills}【总死亡】${data.data.deaths}【KD 比】${(data.data.kills / data.data.deaths).toFixed(4)}`,
+				`【总最终击杀】${data.data.finalKills}【总最终死亡】${data.data.finalDeaths}【Final KD比】${(data.data.finalKills / data.data.finalDeaths).toFixed(4)}`,
 			]);
 		});
 
@@ -153,13 +153,13 @@ export default async (ctx: Context, config: Config) => {
 				if (options.allmode) limit.push('全部模式');
 				if (options.minTotalDamage) limit.push(`最少 ${options.minTotalDamage} 输出`);
 				if (options.minTakenDamage) limit.push(`最少 ${options.minTakenDamage} 承伤`);
-				res = res.slice(0, res.length - 1) + `（筛选器已启用：${limit.join('、')}）\n`;
+				res = res.slice(0, -1) + `（筛选器已启用：${limit.join('、')}）\n`;
 			}
 
-			res += `「最终击杀」${sum.finalKills}「最终助攻」${sum.finalAssists}「MVP」${sum.mvps}\n`;
-			res += `「对局数」${sum.games}「DM 数」${sum.alives}「胜局数」${sum.wins}「胜率」${(sum.wins / sum.alives * 100).toFixed(2)}%\n`;
-			if (sum.alives) res += `「平均输出」${(sum.totalDamage / sum.alives).toFixed(4)}「平均承伤」${(sum.takenDamage / sum.alives).toFixed(4)}\n`;
+			res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
+			res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.alives * 100).toFixed(2)}%\n`;
+			if (sum.alives) res += `【平均输出】${(sum.totalDamage / sum.alives).toFixed(4)}【平均承伤】${(sum.takenDamage / sum.alives).toFixed(4)}\n`;
 
-			session.send(res);
+			session.send(res.slice(0, -1));
 		});
 };
