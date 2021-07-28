@@ -13,7 +13,8 @@ export async function get(uri: string, data = null) {
 	if (data.uuid) data.uuid = String(data.uuid);
 	if (data.name) data.name = String(data.name);
 
-	return (await request.get(root + uri).query(data)).res.text;
+	const rsp = await request.get(root + uri).query(data);
+	return rsp.text;
 }
 
 export async function getJSON(uri: string, data = null) {

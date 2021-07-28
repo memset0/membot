@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import { Context, Session } from 'koishi-core';
 
 import { initSpider, getJSON } from './api';
@@ -116,9 +116,7 @@ export default async (ctx: Context, config: Config) => {
 		.check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
 		.check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
-			console.log(session, options);
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
-			
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
 
