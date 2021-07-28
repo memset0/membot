@@ -6,6 +6,7 @@
   "author": "memset0 <34177126+memset0@users.noreply.github.com>",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
+    "@types/superagent": "^4.1.12",
     "koishi": "^3.12.3",
     "koishi-adapter-kaiheila": "^1.2.1",
     "koishi-adapter-onebot": "^3.1.0",

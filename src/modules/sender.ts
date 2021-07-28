@@ -1,6 +1,6 @@
 import { Session } from 'koishi';
 
-export async function sendMessageList(session: Session, messageList) {
+export async function sendMessageList(session: Session, messageList: Array<String>) {
 	await session.send(messageList.join('\n'));
 
 	// if (session.platform === 'kaiheila') {

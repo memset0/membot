@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import { Context } from 'koishi-core';
+import { Context, Session } from 'koishi-core';
 
 import { initSpider, getJSON } from './api';
 import { sendMessageList } from '../../modules/sender';
@@ -24,6 +24,12 @@ export class Checker {
 	static isInteger(number) {
 		return isNaN(parseInt(number)) ? '[E] 参数必须为整数' : undefined;
 	}
+};
+
+export class MegaWallsOptions {
+	allmode: null | boolean;
+	minTotalDamage: null | number;
+	minTakenDamage: null | number;
 };
 
 export function codeErrorMessage(statusCode) {
@@ -110,7 +116,9 @@ export default async (ctx: Context, config: Config) => {
 		.check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
 		.check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
+			console.log(session, options);
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
+			
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
 
