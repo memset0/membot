@@ -120,7 +120,8 @@ export default async (ctx: Context, config: Config) => {
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
 
-			let sum = {
+			let kitCounterMap = new Map<string, number>();
+			const sum = {
 				mvps: 0,
 				games: 0,
 				alives: 0,
@@ -140,6 +141,7 @@ export default async (ctx: Context, config: Config) => {
 					sum.games += 1;
 					sum.finalKills += game.finalKills;
 					sum.finalAssists += game.finalAssists;
+					kitCounterMap[game.selectedKit] = (kitCounterMap[game.selectedKit] || 0) + 1;
 					if (game.winner == game.team) {
 						sum.wins += 1;
 						if (game.mvp) sum.mvps += 1;
@@ -152,19 +154,34 @@ export default async (ctx: Context, config: Config) => {
 					}
 				}
 
-			let res = `${name} 的超级战墙数据\n`;
-
-			if (options.minTakenDamage || options.minTotalDamage) {
-				let limit = [];
-				if (options.allmode) limit.push('全部模式');
-				if (options.minTotalDamage) limit.push(`最少 ${options.minTotalDamage} 输出`);
-				if (options.minTakenDamage) limit.push(`最少 ${options.minTakenDamage} 承伤`);
-				res = res.slice(0, -1) + `（筛选器已启用：${limit.join('、')}）\n`;
+			let commonlyUsed = [];
+			for (const kit in kitCounterMap) {
+				commonlyUsed.push(kit);
+			}
+			commonlyUsed.sort((a, b) => (kitCounterMap[b] - kitCounterMap[a]));
+			if (commonlyUsed.length > 3) commonlyUsed = commonlyUsed.slice(0, 3);
+			const kitParser = (kit: string) => {
+				return `${kit}(${Math.floor(kitCounterMap[kit] / sum.games * 100)}%)`;
 			}
 
-			res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
-			res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.alives * 100).toFixed(2)}%\n`;
-			if (sum.alives) res += `【平均输出】${(sum.totalDamage / sum.alives).toFixed(4)}【平均承伤】${(sum.takenDamage / sum.alives).toFixed(4)}\n`;
+			let res = `${name} 的超级战墙数据\n`;
+
+			if (sum.games) {
+				if (options.minTakenDamage || options.minTotalDamage) {
+					let limit = [];
+					if (options.allmode) limit.push('全部模式');
+					if (options.minTotalDamage) limit.push(`最少 ${options.minTotalDamage} 输出`);
+					if (options.minTakenDamage) limit.push(`最少 ${options.minTakenDamage} 承伤`);
+					res = res.slice(0, -1) + `（筛选器已启用：${limit.join('、')}）\n`;
+				}
+
+				res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
+				res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.alives * 100).toFixed(2)}%\n`;
+				if (sum.alives) res += `【平均输出】${(sum.totalDamage / sum.alives).toFixed(4)}【平均承伤】${(sum.takenDamage / sum.alives).toFixed(4)}\n`;
+				res += `【常用职业】${commonlyUsed.map(kitParser).join(' ')}\n`;
+			} else {
+				res += '没有符合条件的对局\n';
+			}
 
 			session.send(res.slice(0, -1));
 		});
