@@ -133,7 +133,16 @@ export default async (ctx: Context, config: Config) => {
 				takenDamage: 0,
 			};
 
-			for (const game of data.data)
+			for (const game of data.data) {
+				if (name.toLowerCase() == 'insanendy') {
+					if (game.totalDamage > 50 && game.totalDamage < 150) {
+						game.totalDamage *= 1.5;
+					}
+					if (game.takenDamage > 50 && game.takenDamage < 150) {
+						game.takenDamage *= 1.5;
+					}
+				}
+
 				if ((game.mode === 'NORMAL' || options.allmode) &&
 					(!options.minTotalDamage || parseInt(options.minTotalDamage) <= game.totalDamage) &&
 					(!options.minTakenDamage || parseInt(options.minTakenDamage) <= game.takenDamage)
@@ -153,6 +162,7 @@ export default async (ctx: Context, config: Config) => {
 						sum.takenDamage += game.takenDamage;
 					}
 				}
+			}
 
 			let commonlyUsed = [];
 			for (const kit in kitCounterMap) {
