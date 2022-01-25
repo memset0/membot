@@ -186,7 +186,7 @@ export default async (ctx: Context, config: Config) => {
 				}
 
 				res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
-				res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.alives * 100).toFixed(2)}%\n`;
+				res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.games * 100).toFixed(2)}%\n`;
 				if (sum.alives) res += `【平均输出】${(sum.totalDamage / sum.alives).toFixed(4)}【平均承伤】${(sum.takenDamage / sum.alives).toFixed(4)}\n`;
 				res += `【常用职业】${commonlyUsed.map(kitParser).join(' ')}\n`;
 			} else {
