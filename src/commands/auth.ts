@@ -4,23 +4,44 @@ import config from '../config';
 export default async (ctx: Context) => {
 	const db = ctx.database;
 	const logger = new Logger('plugin-auth');
-	logger.info(ctx.database);
 
 	for (const masterPlatform in config.master) {
 		const masterId = config.master[masterPlatform];
-		logger.info('give root authority', { platform: masterPlatform, userId: masterId });
-		db.setUser(masterPlatform, masterId, { authority: 4 })
-			.then(async () => {
-				// async callback
-				logger.info(masterPlatform, masterId, await db.getUser(masterPlatform, masterId));
-			});
+		await db.setUser(masterPlatform, masterId, { authority: 4 })
+		logger.info('root', masterPlatform, masterId, JSON.stringify(await db.getUser(masterPlatform, masterId)));
 	}
 
 	ctx.command('auth', '用户权限');
 
-	ctx.command('auth.show', '查看我的权限')
+	ctx.command('auth.show <id>', '查看用户权限')
 		// .userFields(['authority'])
-		.action(({ session }) => `你的权限为${session.user['authority']}级`);
+		.action(async ({ session }, id) => {
+			if (!id) {
+				return `你的权限为${session.user['authority']}级`;
+			}
+			if (session.user['authority'] !== 4) {
+				return '你的没有查看其他用户权限等级的权限';
+			}
+
+			const target = s.parse(id)[0];
+			const platform = session.platform;
+			let userId;
+			if (target.type == 'at') {
+				userId = target.data.id;
+			} else if (target.type == 'text') {
+				userId = target.data.content;
+			}
+
+			const user = await db.getUser(platform, userId);
+			const authority = user && Object.keys(user).includes('authority') ? user['authority'] : 1;
+			return `用户${s('at', { id: id })} 的权限为${authority}级`;
+		});
+
+	ctx.command('auth.ban <id>', '封禁用户')
+		// .userFields(['authority'])
+		.action(async ({ session }, id) => {
+			return session.execute('auth.give 0 ' + id);
+		});
 
 	ctx.command('auth.give <level> <id>', '用户授权', { authority: 4 })
 		// .userFields(['authority'])
@@ -51,7 +72,7 @@ export default async (ctx: Context) => {
 				return '不能给自己授权';
 			} else {
 				await db.setUser(platform, id, { authority: level });
-				return `已授予${s('at', { id: id })} ${level}级权限。`;
+				return `已授予${s('at', { id: id })} ${level}级权限`;
 			}
 		})
 }
