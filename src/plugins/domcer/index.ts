@@ -113,15 +113,21 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.megawall')
 		.alias('domcer.megawalls')
 		.option('allmode', '-a')
-		.option('minTotalDamage', '-d [value]')
-		.option('minTakenDamage', '-t [value]')
+		.option('clonemode', '-c')
+		.option('infinitemode', '-f')
+		// .option('minTotalDamage', '-d [value]')
+		// .option('minTakenDamage', '-t [value]')
 		.check((_, name) => Checker.isUserName(name))
-		.check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
-		.check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
+		// .check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
+		// .check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
+
+			if ((options.allmode ? 1 : 0) + (options.infinitemode ? 1 : 0) + (options.clonemode ? 1 : 0) > 1) {
+				return '模式筛选器至多启用一个'
+			}
 
 			let kitCounterMap = new Map<string, number>();
 			const sum = {
@@ -151,23 +157,28 @@ export default async (ctx: Context, config: Config) => {
 					}
 				}
 
-				if ((game.mode === 'NORMAL' || options.allmode) &&
-					(!options.minTotalDamage || parseInt(options.minTotalDamage) <= game.totalDamage) &&
-					(!options.minTakenDamage || parseInt(options.minTakenDamage) <= game.takenDamage)
-				) {
-					sum.games += 1;
-					sum.finalKills += game.finalKills;
-					sum.finalAssists += game.finalAssists;
-					kitCounterMap[game.selectedKit] = (kitCounterMap[game.selectedKit] || 0) + 1;
-					if (game.winner == game.team) {
-						sum.wins += 1;
-						if (game.mvp) sum.mvps += 1;
-					}
+				if (game.mode == 'NORMAL' && (options.infinitemode || options.clonemode)) {
+					continue;
+				}
+				if (game.mode == 'CLONE' && !(options.clonemode || options.allmode)) {
+					continue;
+				}
+				if (game.mode == 'INFINITE' && !(options.infinitemode || options.allmode)) {
+					continue;
+				}
 
-					if (game.liveInDeathMatch) {
-						sum.alives += 1;
-						sortedRounds.push([game.totalDamage, game.takenDamage]);
-					}
+				sum.games += 1;
+				sum.finalKills += game.finalKills;
+				sum.finalAssists += game.finalAssists;
+				kitCounterMap[game.selectedKit] = (kitCounterMap[game.selectedKit] || 0) + 1;
+				if (game.winner == game.team) {
+					sum.wins += 1;
+					if (game.mvp) sum.mvps += 1;
+				}
+
+				if (game.liveInDeathMatch) {
+					sum.alives += 1;
+					sortedRounds.push([game.totalDamage, game.takenDamage]);
 				}
 			}
 
@@ -194,12 +205,12 @@ export default async (ctx: Context, config: Config) => {
 			let res = `${name} 的超级战墙数据\n`;
 
 			if (sum.games) {
-				if (options.minTakenDamage || options.minTotalDamage) {
-					let limit = [];
-					if (options.allmode) limit.push('全部模式');
-					if (options.minTotalDamage) limit.push(`最少 ${options.minTotalDamage} 输出`);
-					if (options.minTakenDamage) limit.push(`最少 ${options.minTakenDamage} 承伤`);
-					res = res.slice(0, -1) + `（筛选器已启用：${limit.join('、')}）\n`;
+				if (options.allmode || options.clonemode || options.infinitemode) {
+					let limits = [];
+					if (options.allmode) limits.push('全部模式');
+					if (options.clonemode) limits.push('克隆模式');
+					if (options.infinitemode) limits.push('无限火力模式');
+					res = res.slice(0, -1) + `（筛选器已启用：${limits.join('、')}）\n`;
 				}
 
 				res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
