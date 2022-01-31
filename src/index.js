@@ -3,6 +3,8 @@ const { App } = require('koishi');
 const config = require('./config').default;
 const appConfig = config.adapter;
 const app = new App(appConfig);
+app.options.nickname = config.nickname;
+app.options.prefix = config.prefix;
 
 app.plugin('database-mysql', config.mysql);
 
@@ -18,17 +20,16 @@ app.middleware((session, next) => {
 	}
 }, true);
 
-const plugins = require('./plugins');
-for (const name in plugins) {
-	// console.log('[load plugin]', name, Object.keys(config.plugins).includes(name));
-	if (Object.keys(config.plugins).includes(name)) {
-		app.plugin(plugins[name], config.plugins[name]);
-	} else {
-		app.plugin(plugins[name]);
+app.using(['database'], (ctx) => {
+	const plugins = require('./plugins');
+	for (const name in plugins) {
+		// console.log('[load plugin]', name, Object.keys(config.plugins).includes(name));
+		if (Object.keys(config.plugins).includes(name)) {
+			ctx.plugin(plugins[name], config.plugins[name]);
+		} else {
+			ctx.plugin(plugins[name]);
+		}
 	}
-}
+})
 
-app.options.nickname = config.nickname;
-app.options.prefix = config.prefix;
-app.options.help = { hidden: true, shortcut: false };
 app.start();
