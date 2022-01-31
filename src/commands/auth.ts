@@ -26,10 +26,10 @@ export default async (ctx: Context) => {
 		// .userFields(['authority'])
 		.action(async ({ session }, id) => {
 			if (!id) {
-				return `你的权限为${session.user['authority']}级`;
+				return `你的权限为${session.user['authority']}级。`;
 			}
 			if (session.user['authority'] !== 4) {
-				return '你的没有查看其他用户权限等级的权限';
+				return '你的没有查看其他用户权限等级的权限。';
 			}
 
 			const platform = session.platform;
@@ -37,7 +37,7 @@ export default async (ctx: Context) => {
 			const user = await db.getUser(platform, userId);
 
 			const authority = user && Object.keys(user).includes('authority') ? user['authority'] : 1;
-			return `用户${s('at', { id: userId })}的权限为${authority}级`;
+			return `用户${s('at', { id: userId })}的权限为${authority}级。`;
 		});
 
 	ctx.command('auth.ban <id>', '封禁用户')
@@ -53,22 +53,22 @@ export default async (ctx: Context) => {
 		})
 		.action(async ({ session }, levelText, id) => {
 			const level = parseInt(levelText);
-			if (isNaN(level) || level >= 5 || level < 0) return '无效的用户权限';
-			if (level >= session.user['authority']) return '只能授予比自己低的权限';
+			if (isNaN(level) || level >= 5 || level < 0) return '无效的用户权限。';
+			if (level >= session.user['authority']) return '只能授予比自己低的权限。';
 
 			const platform = session.platform;
 			const userId = parseUserId(id);
 			const user = await db.getUser(platform, userId);
 
 			if (userId == session.selfId) {
-				return `不能给${config.nickname}自己授权`;
+				return `不能给${config.nickname}自己授权。`;
 			} else if (!user) {
-				return '用户信息不正确';
+				return '用户信息不正确。';
 			} else if (session.userId == user[platform]) {
-				return '不能给自己授权';
+				return '不能给自己授权。';
 			} else {
 				await db.setUser(platform, userId, { authority: level });
-				return `已授予${s('at', { id: userId })}${level}级权限`;
+				return `已授予${s('at', { id: userId })}${level}级权限。`;
 			}
 		})
 }
