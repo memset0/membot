@@ -1,6 +1,15 @@
 import { s, Context, Logger } from 'koishi';
 import config from '../config';
 
+export function parseUserId(id) {
+	const target = s.parse(id)[0];
+	if (target.type == 'at') {
+		return target.data.id;
+	} else if (target.type == 'text') {
+		return target.data.content;
+	}
+}
+
 export default async (ctx: Context) => {
 	const db = ctx.database;
 	const logger = new Logger('plugin-auth');
@@ -23,18 +32,12 @@ export default async (ctx: Context) => {
 				return '你的没有查看其他用户权限等级的权限';
 			}
 
-			const target = s.parse(id)[0];
 			const platform = session.platform;
-			let userId;
-			if (target.type == 'at') {
-				userId = target.data.id;
-			} else if (target.type == 'text') {
-				userId = target.data.content;
-			}
-
+			const userId = parseUserId(id);
 			const user = await db.getUser(platform, userId);
+
 			const authority = user && Object.keys(user).includes('authority') ? user['authority'] : 1;
-			return `用户${s('at', { id: id })} 的权限为${authority}级`;
+			return `用户${s('at', { id: userId })} 的权限为${authority}级`;
 		});
 
 	ctx.command('auth.ban <id>', '封禁用户')
@@ -53,26 +56,19 @@ export default async (ctx: Context) => {
 			if (isNaN(level) || level >= 5 || level < 0) return '无效的用户权限';
 			if (level >= session.user['authority']) return '只能授予比自己低的权限';
 
-			const target = s.parse(id)[0];
 			const platform = session.platform;
-			let user;
-			if (target.type == 'at') {
-				id = target.data.id;
-				user = await db.getUser(platform, id);
-			} else if (target.type == 'text') {
-				id = target.data.content;
-				user = await db.getUser(platform, id);
-			}
+			const userId = parseUserId(id);
+			const user = await db.getUser(platform, userId);
 
-			if (id == session.selfId) {
+			if (userId == session.selfId) {
 				return `不能给${config.nickname}自己授权`;
 			} else if (!user) {
 				return '用户信息不正确';
 			} else if (session.userId == user[platform]) {
 				return '不能给自己授权';
 			} else {
-				await db.setUser(platform, id, { authority: level });
-				return `已授予${s('at', { id: id })} ${level}级权限`;
+				await db.setUser(platform, userId, { authority: level });
+				return `已授予${s('at', { id: userId })} ${level}级权限`;
 			}
 		})
 }
