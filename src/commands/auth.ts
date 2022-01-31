@@ -37,7 +37,7 @@ export default async (ctx: Context) => {
 			const user = await db.getUser(platform, userId);
 
 			const authority = user && Object.keys(user).includes('authority') ? user['authority'] : 1;
-			return `用户${s('at', { id: userId })} 的权限为${authority}级`;
+			return `用户${s('at', { id: userId })}的权限为${authority}级`;
 		});
 
 	ctx.command('auth.ban <id>', '封禁用户')
@@ -68,7 +68,7 @@ export default async (ctx: Context) => {
 				return '不能给自己授权';
 			} else {
 				await db.setUser(platform, userId, { authority: level });
-				return `已授予${s('at', { id: userId })} ${level}级权限`;
+				return `已授予${s('at', { id: userId })}${level}级权限`;
 			}
 		})
 }
