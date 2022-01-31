@@ -132,6 +132,11 @@ export default async (ctx: Context, config: Config) => {
 				totalDamage: 0,
 				takenDamage: 0,
 			};
+			const average = {
+				totalDamage: 0,
+				takenDamage: 0,
+			};
+			let sortedRounds = [];
 
 			for (const game of data.data) {
 				if (name.toLowerCase() == 'insanendy') {
@@ -158,11 +163,20 @@ export default async (ctx: Context, config: Config) => {
 
 					if (game.liveInDeathMatch) {
 						sum.alives += 1;
-						sum.totalDamage += game.totalDamage;
-						sum.takenDamage += game.takenDamage;
+						sortedRounds.push([game.totalDamage, game.takenDamage]);
 					}
 				}
 			}
+
+			sortedRounds.sort((a, b) => ((b[0] + b[1]) - (a[0] + a[1])));
+			sortedRounds = sortedRounds.slice(0, Math.ceil(sortedRounds.length * 0.25));
+
+			for (const roundData of sortedRounds) {
+				sum.totalDamage += roundData[0];
+				sum.takenDamage += roundData[1];
+			}
+			average.totalDamage = sum.totalDamage / sortedRounds.length / 2.;
+			average.takenDamage = sum.takenDamage / sortedRounds.length / 2.;
 
 			let commonlyUsed = [];
 			for (const kit in kitCounterMap) {
@@ -187,7 +201,7 @@ export default async (ctx: Context, config: Config) => {
 
 				res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
 				res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.games * 100).toFixed(2)}%\n`;
-				if (sum.alives) res += `【平均输出】${(sum.totalDamage / sum.alives).toFixed(4)}【平均承伤】${(sum.takenDamage / sum.alives).toFixed(4)}\n`;
+				if (sum.alives) res += `【平均输出】${average.totalDamage.toFixed(4)}【平均承伤】${average.takenDamage.toFixed(4)}\n`;
 				res += `【常用职业】${commonlyUsed.map(kitParser).join(' ')}\n`;
 			} else {
 				res += '没有符合条件的对局\n';
