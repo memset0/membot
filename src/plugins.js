@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const logger = new (require('koishi').Logger)('plugin');
+
 function scanDir(dir) {
 	return fs.readdirSync(dir).map(subdir => path.join(dir, subdir));
 }
@@ -12,6 +14,9 @@ dirs.push.apply(dirs, scanDir(path.join(__dirname, './commands')));
 
 for (let dir of dirs) {
 	let name = path.basename(dir);
+	if (name == '_scoped') {
+		continue;
+	}
 
 	let plugin;
 	if (name.endsWith('.ts')) {
@@ -22,6 +27,7 @@ for (let dir of dirs) {
 	}
 
 	if (plugin) {
+		logger.info('Load Plugin', name, 'from', dir);
 		plugins[name] = plugin;
 	}
 }
