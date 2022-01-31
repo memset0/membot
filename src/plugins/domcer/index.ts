@@ -278,7 +278,7 @@ export default async (ctx: Context, config: Config) => {
 			const currentPage = options.page ? parseInt(options.page) : 1;
 
 			if (currentPage < 1 || currentPage > totalPage) {
-				return `总页数为 ${totalPage}，当前页数为 ${currentPage}，不在合法范围内`
+				return `共${totalPage}页，当前页数${currentPage}不在合法范围内`;
 			}
 
 			for (let i = 1 + (currentPage - 1) * perPage; i <= currentPage * perPage && i <= rounds.length; i++) {
@@ -290,11 +290,11 @@ export default async (ctx: Context, config: Config) => {
 					TeamColorRemap[round.team] + '队',
 					round.team == round.winner ? '胜' : '负',
 					`${round.finalKills}FK${round.finalAssists}FA`,
-					round.liveInDeathMatch ? `${round.totalDamage.toFixed(2)} 输出 / ${round.takenDamage.toFixed(2)} 承伤` : '未参与死亡竞赛',
+					round.liveInDeathMatch ? `${(round.totalDamage / 2).toFixed(2)}输出 / ${(round.takenDamage / 2).toFixed(2)}承伤` : '未参与死亡竞赛',
 				].join(' / '));
 			}
 
-			result.push(`第 ${currentPage} 页，共 ${totalPage} 页`);
+			result.push(`第${currentPage}页，共${totalPage}页`);
 			session.send(result.join('\n'));
 		});
 
@@ -328,14 +328,14 @@ export default async (ctx: Context, config: Config) => {
 				teamPlayers.sort((a, b) => ((b.totalDamage + b.takenDamage) - (a.totalDamage + a.takenDamage)));
 				if (teamPlayers.length) {
 					result.push(`【${TeamColorRemap[teamColor]}队】`);
-					for (let i = 1; i <= Math.min(5, teamPlayers.length); i++) {
+					for (let i = 1; i <= Math.min(teamColor == round.winner ? 5 : 3, teamPlayers.length); i++) {
 						const player = teamPlayers[i - 1];
 						result.push([
 							`#${i}. ${player.realName}`,
 							player.selectedKit,
 							`${player.finalKills}FK${player.finalAssists}FA`,
-							`${player.totalDamage.toFixed(2)} 输出`,
-							`${player.takenDamage.toFixed(2)} 承伤`,
+							`${(player.totalDamage / 2).toFixed(2)}输出`,
+							`${(player.takenDamage / 2).toFixed(2)}承伤`,
 						].join(' / '));
 					}
 				}
