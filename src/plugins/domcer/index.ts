@@ -23,6 +23,14 @@ export class Checker {
 	static isInteger(number) {
 		return isNaN(parseInt(number)) ? '[E] 参数必须为整数' : undefined;
 	}
+
+	static isMegaWallsKit(name: string) {
+		// const megaWallsKits = [
+		// 	'凤凰'
+		// ];
+		// return megaWallsKits.includes(name);
+		return undefined;
+	}
 };
 
 export class MegaWallsOptions {
@@ -115,9 +123,11 @@ export default async (ctx: Context, config: Config) => {
 		.option('allmode', '-a')
 		.option('clonemode', '-c')
 		.option('infinitemode', '-f')
+		.option('kit', '-k [name]')
 		// .option('minTotalDamage', '-d [value]')
 		// .option('minTakenDamage', '-t [value]')
 		.check((_, name) => Checker.isUserName(name))
+		.check(({ options }) => Checker.isMegaWallsKit(options.kit))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
@@ -166,6 +176,9 @@ export default async (ctx: Context, config: Config) => {
 				if (game.mode == 'INFINITE' && !(options.infinitemode || options.allmode)) {
 					continue;
 				}
+				if (options.kit && game.selectedKit != options.kit) {
+					continue;
+				}
 
 				sum.games += 1;
 				sum.finalKills += game.finalKills;
@@ -205,18 +218,19 @@ export default async (ctx: Context, config: Config) => {
 			let res = `${name} 的超级战墙数据\n`;
 
 			if (sum.games) {
-				if (options.allmode || options.clonemode || options.infinitemode) {
+				if (options.allmode || options.clonemode || options.infinitemode || options.kit) {
 					let limits = [];
 					if (options.allmode) limits.push('全部模式');
 					if (options.clonemode) limits.push('克隆模式');
 					if (options.infinitemode) limits.push('无限火力模式');
+					if (options.kit) limits.push(options.kit + '职业');
 					res = res.slice(0, -1) + `（筛选器已启用：${limits.join('、')}）\n`;
 				}
 
 				res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
 				res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.games * 100).toFixed(2)}%\n`;
 				if (sum.alives) res += `【平均输出】${average.totalDamage.toFixed(4)}【平均承伤】${average.takenDamage.toFixed(4)}\n`;
-				res += `【常用职业】${commonlyUsed.map(kitParser).join(' ')}\n`;
+				if (!options.kit) res += `【常用职业】${commonlyUsed.map(kitParser).join(' ')}\n`;
 			} else {
 				res += '没有符合条件的对局\n';
 			}
