@@ -1,7 +1,8 @@
 import moment from 'moment';
 import { Context, Session } from '@koishijs/core';
 
-import { initSpider, getJSON } from './api';
+import { initSpider, get, getJSON } from './api';
+
 
 export const TeamColorRemap = {
 	'BLUE': '蓝',
@@ -21,9 +22,14 @@ export interface Config {
 	key: string,
 };
 
+
 export class Checker {
 	static isNotEmpty(value) {
 		return typeof value !== 'undefined' ? true : undefined
+	}
+
+	static isInteger(number) {
+		return isNaN(parseInt(number)) ? '[E] 参数必须为整数' : undefined;
 	}
 
 	static isUserName(username) {
@@ -33,8 +39,10 @@ export class Checker {
 		return undefined;
 	}
 
-	static isInteger(number) {
-		return isNaN(parseInt(number)) ? '[E] 参数必须为整数' : undefined;
+	static isMatchID(matchID) {
+		if (matchID.length !== 8) return '[E] 对局 ID 的长度不正确';
+		if (!/^[0-9A-Z]+$/i.test(matchID)) return '[E] 对局 ID 不合法';
+		return undefined;
 	}
 
 	static isMegaWallsKit(name: string) {
@@ -46,11 +54,6 @@ export class Checker {
 	}
 };
 
-export class MegaWallsOptions {
-	allmode: null | boolean;
-	minTotalDamage: null | number;
-	minTakenDamage: null | number;
-};
 
 export function codeErrorMessage(statusCode) {
 	let res = `[E] 接口返回: ${statusCode}`;
@@ -69,10 +72,12 @@ export function transformUTC(clock) {
 	return moment(clock).format('YYYY年MM月DD日 hh:mm:ss');
 }
 
+
 export default async (ctx: Context, config: Config) => {
 	initSpider(config.root, config.key);
 
 	ctx.command('domcer', '查询 DoMCer 服务器数据');
+
 
 	ctx.command('domcer.user <username>', '查询用户信息')
 		.check((_, name) => Checker.isUserName(name))
@@ -87,6 +92,7 @@ export default async (ctx: Context, config: Config) => {
 				data.data.lastLogout ? `【上次登出时间】${transformUTC(data.data.lastLogout)}` : '当前在线',
 			].join('\n'));
 		});
+
 
 	ctx.command('domcer.uhc <username>', '查询 UHC 数据')
 		.alias('domcer.buhc')
@@ -106,6 +112,7 @@ export default async (ctx: Context, config: Config) => {
 				`【组队模式获胜】${data.data.teamWins}【场次】${data.data.teamGames}【获胜率】${(data.data.teamWins / data.data.teamGames * 100).toFixed(2)}%`,
 			].join('\n'));
 		});
+
 
 	ctx.command('domcer.bw <username>', '查询起床战争数据')
 		.alias('domcer.bedwar')
@@ -128,6 +135,7 @@ export default async (ctx: Context, config: Config) => {
 				`【总最终击杀】${data.data.finalKills}【总最终死亡】${data.data.finalDeaths}【Final KD比】${(data.data.finalKills / data.data.finalDeaths).toFixed(4)}`,
 			].join('\n'));
 		});
+
 
 	ctx.command('domcer.mw <username>', '查询超级战墙数据')
 		.usage('（22.1.31更新）超级战墙平均战绩现只统计数据值前 25% 的对局；同时修复数据值翻倍的问题')
@@ -256,11 +264,13 @@ export default async (ctx: Context, config: Config) => {
 			session.send(res.slice(0, -1));
 		});
 
+
 	ctx.command('domcer.mwl <username>', '查询超级战墙对局列表')
 		.alias('domcer.mwlist')
 		.alias('domcer.megawallList')
 		.alias('domcer.megawallsList')
 		.option('page', '-p [page]')
+		.check((_, name) => Checker.isUserName(name))
 		.check(({ options }) => Checker.isNotEmpty(options.page) && Checker.isInteger(options.page))
 		.action(async ({ session, options }, name) => {
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
@@ -298,13 +308,19 @@ export default async (ctx: Context, config: Config) => {
 			session.send(result.join('\n'));
 		});
 
+
 	ctx.command('domcer.mwr <roundID>', '查询超级战墙对局')
 		.alias('domcer.mwround')
 		.alias('domcer.megawallRound')
 		.alias('domcer.megawallsRound')
-		.action(async ({ session, options }, roundID) => {
-			const data = await getJSON('/match/megawalls', { id: roundID });
-			if (!data) return '对局不存在';
+		.check((_, matchID) => Checker.isMatchID(matchID))
+		.action(async ({ session, options }, matchID) => {
+			const plain = await get('/match/megawalls', { id: matchID });
+			if (plain == '') {
+				return '对局不存在';
+			}
+
+			const data = JSON.parse(plain);
 
 			const round = data;
 			const result = [];
