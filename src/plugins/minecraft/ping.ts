@@ -1,4 +1,4 @@
-import { Context, Session, segment } from 'koishi-core';
+import { Context, Session, segment } from '@koishijs/core';
 import { Socket } from 'net';
 
 function itob(n: number, length: number) {

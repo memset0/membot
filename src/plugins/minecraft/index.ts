@@ -1,4 +1,4 @@
-import { Context } from 'koishi-core';
+import { Context } from '@koishijs/core';
 
 import ping from './ping';
 

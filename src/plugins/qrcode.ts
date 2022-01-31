@@ -1,4 +1,4 @@
-import { Context, segment } from 'koishi-core';
+import { Context, segment } from '@koishijs/core';
 import { toDataURL } from 'qrcode';
 
 export default function (ctx: Context) {

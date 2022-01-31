@@ -1,8 +1,7 @@
 import moment from 'moment';
-import { Context, Session } from 'koishi-core';
+import { Context, Session } from '@koishijs/core';
 
 import { initSpider, getJSON } from './api';
-import { sendMessageList } from '../../modules/sender';
 
 export interface Config {
 	root: string,
@@ -50,10 +49,10 @@ export function transformUTC(clock) {
 export default async (ctx: Context, config: Config) => {
 	initSpider(config.root, config.key);
 
-	ctx.command('domcer',
-		'查询 DoMCer 服务器相关数据\n' +
-		'【22.1.31更新】超级战墙平均战绩现只统计前 25% 的对局；修复先前数据值翻倍的问题\n'
-	);
+	ctx.command('domcer', '查询 DoMCer 服务器数据')
+		.usage('更新日志：\n' +
+			'（22.1.31）超级战墙平均战绩现只统计数据值前 25% 的对局；修复先前数据值翻倍的问题'
+		);
 
 	ctx.command('domcer.user <username>', '查询用户信息')
 		.check((_, name) => Checker.isUserName(name))
@@ -61,12 +60,12 @@ export default async (ctx: Context, config: Config) => {
 			const data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 
-			sendMessageList(session, [
+			session.send([
 				(data.data.rank !== 'DEFAUL' && data.data.rank !== 'default' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
 				`【大厅等级】${data.data.networkLevel}【大厅经验】${data.data.networkExp}【街机硬币】${data.data.networkCoins}`,
 				`【注册时间】${transformUTC(data.data.firstLogin)}`,
 				data.data.lastLogout ? `【上次登出时间】${transformUTC(data.data.lastLogout)}` : '当前在线',
-			]);
+			].join('\n'));
 		});
 
 	ctx.command('domcer.uhc <username>', '查询 UHC 数据')
@@ -80,12 +79,12 @@ export default async (ctx: Context, config: Config) => {
 			data = await getJSON('/stats/getStats', { uuid, statsName: 'UHC' });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 
-			sendMessageList(session, [
+			session.send([
 				`${name} 的 UHC 数据`,
 				`【硬币】${data.data.coins}`,
 				`【组队模式击杀】${data.data.teamKills}【死亡】${data.data.teamDeath}【KD 比】${(data.data.teamKills / data.data.teamDeath).toFixed(4)}`,
 				`【组队模式获胜】${data.data.teamWins}【场次】${data.data.teamGames}【获胜率】${(data.data.teamWins / data.data.teamGames * 100).toFixed(2)}%`,
-			])
+			].join('\n'));
 		});
 
 	ctx.command('domcer.bw <username>', '查询起床战争数据')
@@ -100,14 +99,14 @@ export default async (ctx: Context, config: Config) => {
 			data = await getJSON('/stats/getStats', { uuid, statsName: 'BedWars' });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 
-			sendMessageList(session, [
+			session.send([
 				`${name} 的起床战争数据`,
 				`【硬币】${data.data.coins}【奖励箱】${data.data.chest}【等级】${data.data.level}【经验】${data.data.xp}`,
 				`【总摧毁床数】${data.data.bedDestroyed}【总被摧毁床数】${data.data.bedBeenDestroyed}`,
 				`【总获胜场次】${data.data.wins}【总局数】${data.data.games}【获胜率】${(data.data.wins / data.data.games * 100).toFixed(2)}%`,
 				`【总击杀】${data.data.kills}【总死亡】${data.data.deaths}【KD 比】${(data.data.kills / data.data.deaths).toFixed(4)}`,
 				`【总最终击杀】${data.data.finalKills}【总最终死亡】${data.data.finalDeaths}【Final KD比】${(data.data.finalKills / data.data.finalDeaths).toFixed(4)}`,
-			]);
+			].join('\n'));
 		});
 
 	ctx.command('domcer.mw <username>', '查询超级战墙数据')

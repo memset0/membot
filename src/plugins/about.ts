@@ -1,4 +1,4 @@
-import { Context } from 'koishi-core';
+import { Context } from '@koishijs/core';
 
 export interface Config {
 	msg: Array<String>,

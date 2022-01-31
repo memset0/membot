@@ -1,13 +1,13 @@
 const { App } = require('koishi');
 
-require('koishi-adapter-onebot');
-require('koishi-adapter-kaiheila');
-
 const config = require('./config').default;
-const appConfig = config.bots;
+const appConfig = config.adapter;
 const app = new App(appConfig);
 
-app.plugin(require('koishi-plugin-mysql'), config.mysql);
+app.plugin('database-mysql', config.mysql);
+
+app.plugin('adapter-onebot', { bots: config.bots.onebot });
+app.plugin('adapter-kaiheila', { bots: config.bots.kaiheila });
 
 const plugins = require('./plugins');
 for (const name in plugins) {
@@ -21,4 +21,5 @@ for (const name in plugins) {
 
 app.options.nickname = config.nickname;
 app.options.prefix = config.prefix;
+app.options.help = { hidden: true, shortcut: false };
 app.start();

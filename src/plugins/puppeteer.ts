@@ -1,8 +1,8 @@
-import { Context } from 'koishi-core';
-import { apply as applyDefault, Config as ConfigDefault } from 'koishi-plugin-puppeteer';
+// import { Context } from '@koishijs/core';
+// import { apply as applyDefault, Config as ConfigDefault } from '@koishijs/plugin-puppeteer';
 
-export interface Config extends ConfigDefault { };
+// export interface Config extends ConfigDefault { };
 
-export default function (ctx: Context, config: Config) {
-	applyDefault(ctx, config);
-}
+// export default function (ctx: Context, config: Config) {
+// 	applyDefault(ctx, config);
+// }
