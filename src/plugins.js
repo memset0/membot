@@ -12,7 +12,6 @@ dirs.push.apply(dirs, scanDir(path.join(__dirname, './commands')));
 
 for (let dir of dirs) {
 	let name = path.basename(dir);
-	console.log(name, dir);
 
 	let plugin;
 	if (name.endsWith('.ts')) {
