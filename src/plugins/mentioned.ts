@@ -20,7 +20,6 @@ export default (ctx: Context) => {
 	ctx.middleware((session: Session, next) => {
 		if (session.platform == 'onebot') {
 			if (session.content.indexOf(mentionedKeyString) !== -1) {
-				console.log(session, session.content.search(mentionedKeyString));
 				let content = session.content;
 				content = content.replace(mentionedKeyString, '@' + config.nickname);
 				if (!session.guildId) {
