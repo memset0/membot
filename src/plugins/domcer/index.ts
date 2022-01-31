@@ -3,6 +3,13 @@ import { Context, Session } from '@koishijs/core';
 
 import { initSpider, getJSON } from './api';
 
+export const TeamColorReMap = {
+	'BLUE': '蓝',
+	'RED': '红',
+	'YELLOW': '黄',
+	'GREEN': '绿',
+};
+
 export interface Config {
 	root: string,
 	key: string,
@@ -157,41 +164,41 @@ export default async (ctx: Context, config: Config) => {
 			};
 			let sortedRounds = [];
 
-			for (const game of data.data) {
+			for (const round of data.data) {
 				if (name.toLowerCase() == 'insanendy') {
-					if (game.totalDamage > 50 && game.totalDamage < 150) {
-						game.totalDamage *= 1.5;
+					if (round.totalDamage > 50 && round.totalDamage < 150) {
+						round.totalDamage *= 1.5;
 					}
-					if (game.takenDamage > 50 && game.takenDamage < 150) {
-						game.takenDamage *= 1.5;
+					if (round.takenDamage > 50 && round.takenDamage < 150) {
+						round.takenDamage *= 1.5;
 					}
 				}
 
-				if (game.mode == 'NORMAL' && (options.infinitemode || options.clonemode)) {
+				if (round.mode == 'NORMAL' && (options.infinitemode || options.clonemode)) {
 					continue;
 				}
-				if (game.mode == 'CLONE' && !(options.clonemode || options.allmode)) {
+				if (round.mode == 'CLONE' && !(options.clonemode || options.allmode)) {
 					continue;
 				}
-				if (game.mode == 'INFINITE' && !(options.infinitemode || options.allmode)) {
+				if (round.mode == 'INFINITE' && !(options.infinitemode || options.allmode)) {
 					continue;
 				}
-				if (options.kit && game.selectedKit != options.kit) {
+				if (options.kit && round.selectedKit != options.kit) {
 					continue;
 				}
 
 				sum.games += 1;
-				sum.finalKills += game.finalKills;
-				sum.finalAssists += game.finalAssists;
-				kitCounterMap[game.selectedKit] = (kitCounterMap[game.selectedKit] || 0) + 1;
-				if (game.winner == game.team) {
+				sum.finalKills += round.finalKills;
+				sum.finalAssists += round.finalAssists;
+				kitCounterMap[round.selectedKit] = (kitCounterMap[round.selectedKit] || 0) + 1;
+				if (round.winner == round.team) {
 					sum.wins += 1;
-					if (game.mvp) sum.mvps += 1;
+					if (round.mvp) sum.mvps += 1;
 				}
 
-				if (game.liveInDeathMatch) {
+				if (round.liveInDeathMatch) {
 					sum.alives += 1;
-					sortedRounds.push([game.totalDamage, game.takenDamage]);
+					sortedRounds.push([round.totalDamage, round.takenDamage]);
 				}
 			}
 
@@ -236,5 +243,48 @@ export default async (ctx: Context, config: Config) => {
 			}
 
 			session.send(res.slice(0, -1));
+		});
+
+	ctx.command('domcer.mwl <username>', '查询超级战墙对局列表')
+		.alias('domcer.mwlist')
+		.alias('domcer.megawalllist')
+		.alias('domcer.megawallslist')
+		.option('page', '-p [page]')
+		.check(({ options }) => Checker.isNotEmpty(options.page) && Checker.isInteger(options.page))
+		.action(async ({ session, options }, name) => {
+			const data = await getJSON('/match/getMegaWallsMatchList', { name });
+			if (data.status !== 200) return codeErrorMessage(data.status);
+			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
+
+			const result = [];
+			result.push(`${name} 的超级战墙对局列表`);
+
+			const rounds = data.data;
+			rounds.sort((a, b) => (b.endTime - a.endTime));
+
+			const perPage = 10;
+			const totalPage = Math.ceil(rounds.length / perPage);
+			const currentPage = options.page ? parseInt(options.page) : 1;
+
+			if (currentPage < 1 || currentPage > totalPage) {
+				return `总页数为 ${totalPage}，当前页数为 ${currentPage}，不在合法范围内`
+			}
+
+			for (let i = 1 + (currentPage - 1) * perPage; i <= currentPage * perPage && i <= rounds.length; i++) {
+				const round = rounds[i - 1];
+				const values = [
+					round.id,
+					round.mapName,
+					round.selectedKit,
+					TeamColorReMap[round.team],
+					round.team == round.winner ? '胜' : '负',
+					`${round.finalKills}FK ${round.finalAssists}FA`,
+				]
+				console.log(round);
+				result.push(`#${i}. ` + values.join(' / '));
+			}
+
+			result.push(`第 ${currentPage} 页，共 ${totalPage} 页`);
+			session.send(result.join('\n'));
 		});
 };
