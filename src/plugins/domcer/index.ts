@@ -33,12 +33,12 @@ export class MegaWallsOptions {
 };
 
 export function codeErrorMessage(statusCode) {
-	let res = `接口返回错误: ${statusCode}`;
+	let res = `[E] 接口返回: ${statusCode}，可能原因：`;
 	if (statusCode === 401) {
-		res += '（未找到该用户，请确认用户名及大小写是否正确）'
+		res += '未找到该用户，请确认用户名及大小写是否正确'
 	}
 	if (statusCode === 500) {
-		res += '（API 访问次数达到上限）'
+		res += 'API 访问次数达到上限'
 	}
 	return res;
 }
@@ -50,7 +50,10 @@ export function transformUTC(clock) {
 export default async (ctx: Context, config: Config) => {
 	initSpider(config.root, config.key);
 
-	ctx.command('domcer', '查询 Domcer 服务器数据');
+	ctx.command('domcer',
+		'查询 DoMCer 服务器相关数据\n' +
+		'【22.1.31更新】超级战墙平均战绩现只统计前 25% 的对局；修复先前数据值翻倍的问题\n'
+	);
 
 	ctx.command('domcer.user <username>', '查询用户信息')
 		.check((_, name) => Checker.isUserName(name))
@@ -67,6 +70,7 @@ export default async (ctx: Context, config: Config) => {
 		});
 
 	ctx.command('domcer.uhc <username>', '查询 UHC 数据')
+		.alias('domcer.buhc')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
@@ -84,9 +88,9 @@ export default async (ctx: Context, config: Config) => {
 			])
 		});
 
-	ctx.command('domcer.bedwars <username>', '查询起床战争数据')
-		.alias('domcer.bw')
+	ctx.command('domcer.bw <username>', '查询起床战争数据')
 		.alias('domcer.bedwar')
+		.alias('domcer.bedwars')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
 			let data = await getJSON('/player/getByName', { name });
@@ -106,9 +110,9 @@ export default async (ctx: Context, config: Config) => {
 			]);
 		});
 
-	ctx.command('domcer.megawalls <username>', '查询超级战墙数据')
-		.alias('domcer.mw')
+	ctx.command('domcer.mw <username>', '查询超级战墙数据')
 		.alias('domcer.megawall')
+		.alias('domcer.megawalls')
 		.option('allmode', '-a')
 		.option('minTotalDamage', '-d [value]')
 		.option('minTakenDamage', '-t [value]')
