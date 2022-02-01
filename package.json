@@ -1,6 +1,6 @@
 {
   "name": "membot",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "main": "src/index.js",
   "repository": "https://github.com/memset0/membot.git",
   "author": "memset0 <34177126+memset0@users.noreply.github.com>",
