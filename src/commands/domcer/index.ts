@@ -120,6 +120,7 @@ export default async (ctx: Context, config: Config) => {
 		// .check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
 			if (!name) return session.execute('domcer.mw --help');
+			name = String(name);
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
