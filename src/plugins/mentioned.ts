@@ -1,4 +1,4 @@
-import { Bot, Context, Session } from 'koishi';
+import { s, Bot, Context, Session } from 'koishi';
 
 import config from '../config';
 
@@ -28,6 +28,7 @@ export default (ctx: Context) => {
 					content = `【被提到的消息】来自 ${session.author.username}(${session.author.userId}) 的群聊 ${session.guildId}\n` + content;
 				}
 				bot.sendPrivateMessage(config.master.onebot, content);
+				session.send(`${s('at', { id: session.author.userId })}你的反馈已成功转发给我的主人，还有别的话想说就继续@我吧。`)
 			}
 		}
 
