@@ -10,7 +10,7 @@ export function parseUserId(id) {
 	}
 }
 
-export default async (ctx: Context) => {
+async function pluginAuth(ctx: Context) {
 	const db = ctx.database;
 	const logger = new Logger('plugin-auth');
 
@@ -72,3 +72,6 @@ export default async (ctx: Context) => {
 			}
 		})
 }
+
+pluginAuth.using = ['database'];
+export default pluginAuth;
