@@ -19,16 +19,16 @@ export default (ctx: Context) => {
 
 	ctx.middleware((session: Session, next) => {
 		if (session.platform == 'onebot') {
-			if (session.content.indexOf(mentionedKeyString) !== -1) {
+			if (session.content.indexOf(mentionedKeyString) !== -1 && !session.content.startsWith('[CQ:quote,id=')) {
 				let content = session.content;
 				content = content.replace(mentionedKeyString, '@' + config.nickname);
 				if (!session.guildId) {
-					content = `【被提到的消息】来自 ${session.author.username}(${session.author.userId}) 的私聊\n` + content;
+					content = `【消息转发】来自 ${session.author.username}(${session.author.userId}) 的私聊\n` + content;
 				} else {
-					content = `【被提到的消息】来自 ${session.author.username}(${session.author.userId}) 的群聊 ${session.guildId}\n` + content;
+					content = `【消息转发】来自 ${session.author.username}(${session.author.userId}) 的群聊 ${session.guildId}\n` + content;
 				}
 				bot.sendPrivateMessage(config.master.onebot, content);
-				session.send(`${s('at', { id: session.author.userId })}你的反馈已成功转发给我的主人，还有别的话想说就继续@我吧。`)
+				session.send(`${s('at', { id: session.author.userId })}你的反馈已成功转发给主人，还有别的话想说就继续@我吧。`)
 			}
 		}
 
