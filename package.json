@@ -25,6 +25,11 @@
     "yaml": "^1.10.2"
   },
   "scripts": {
-    "start": "ts-node src/index.js"
+    "start": "yarn koishi start -- -- -r ts-node/register",
+    "test": "ts-node src/index.js"
+  },
+  "devDependencies": {
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5"
   }
 }
