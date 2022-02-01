@@ -40,7 +40,7 @@ export default async (ctx: Context, config: Config) => {
 	const logger = new Logger('command-domcer');
 	initSpider(config.root, config.key);
 
-	ctx.command('domcer', '查询 DoMCer 服务器数据');
+	ctx.command('domcer', '查询 DoMCer 服务器数据', { hidden: true });
 
 
 	ctx.command('domcer.user <username>', '查询用户信息')
