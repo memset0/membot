@@ -19,7 +19,6 @@
     "@types/superagent": "^4.1.15",
     "cheerio": "^1.0.0-rc.10",
     "koishi": "^4.1.1",
-    "moment": "^2.29.1",
     "qrcode": "^1.5.0",
     "rd": "^2.0.1",
     "superagent": "^7.1.1",

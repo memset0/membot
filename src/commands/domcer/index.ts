@@ -1,9 +1,8 @@
-import moment from 'moment';
-import { Context, Session } from '@koishijs/core';
+import { Context, Logger } from '@koishijs/core';
 
 import { initSpider, get, getJSON } from './api';
 import { Checker } from './utils';
-
+import '../../utils';
 
 export const TeamColorRemap = {
 	'BLUE': '蓝',
@@ -36,12 +35,9 @@ export function codeErrorMessage(statusCode) {
 	return res;
 }
 
-export function transformUTC(clock) {
-	return moment(clock).format('YYYY年MM月DD日 hh:mm:ss');
-}
-
 
 export default async (ctx: Context, config: Config) => {
+	const logger = new Logger('command-domcer');
 	initSpider(config.root, config.key);
 
 	ctx.command('domcer', '查询 DoMCer 服务器数据');
@@ -57,8 +53,8 @@ export default async (ctx: Context, config: Config) => {
 			session.send([
 				(data.data.rank !== 'DEFAUL' && data.data.rank !== 'default' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
 				`【大厅等级】${data.data.networkLevel}【大厅经验】${data.data.networkExp}【街机硬币】${data.data.networkCoins}`,
-				`【注册时间】${transformUTC(data.data.firstLogin)}`,
-				data.data.lastLogout ? `【上次登出时间】${transformUTC(data.data.lastLogout)}` : '当前在线',
+				`【注册时间】${new Date(data.data.firstLogin).toChineseString()}`,
+				data.data.lastLogout ? `【上次登出时间】${new Date(data.data.lastLogout).toChineseString()}` : '当前在线',
 			].join('\n'));
 		});
 
@@ -301,9 +297,11 @@ export default async (ctx: Context, config: Config) => {
 			const data = JSON.parse(plain);
 
 			const round = data;
+			const time = new Date(round.endTime);
 			const result = [];
 			result.push(`超级战墙对局 ${round.id} / ${round.mapName} / ${MegaWallsModeRemap[round.mode]}`);
-			result.push(`【获胜队伍】${TeamColorRemap[round.winner]}队【MVP】${round.mvp}`);
+			result.push(`【时间】${time.toChineseString()}`);
+			result.push(`【胜利】${TeamColorRemap[round.winner]}队【MVP】${round.mvp}`);
 
 			const teams = {};
 			teams[round.winner] = [];
