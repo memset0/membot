@@ -13,8 +13,8 @@ module.exports = {
 
 	plugins: {
 		'database-mysql': config.mysql,
-		'adapter-onebot': { bots: config.bots.onebot },
-		'adapter-kaiheila': { bots: config.bots.kaiheila },
+		'adapter-onebot': { ...config.options.onebot, bots: config.bots.onebot },
+		'adapter-kaiheila': { ...config.options.kaiheila, bots: config.bots.kaiheila },
 	}
 };
 

@@ -22,7 +22,6 @@ app.using(['database'], (ctx) => {
 	}
 })
 
-console.log(app.options);
 app.start();
 
 
