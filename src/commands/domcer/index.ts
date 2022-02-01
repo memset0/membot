@@ -2,6 +2,7 @@ import moment from 'moment';
 import { Context, Session } from '@koishijs/core';
 
 import { initSpider, get, getJSON } from './api';
+import { Checker } from './utils';
 
 
 export const TeamColorRemap = {
@@ -22,41 +23,8 @@ export interface Config {
 	key: string,
 };
 
-
-export class Checker {
-	static isNotEmpty(value) {
-		return typeof value !== 'undefined' ? true : undefined
-	}
-
-	static isInteger(number) {
-		return isNaN(parseInt(number)) ? '[E] 参数必须为整数' : undefined;
-	}
-
-	static isUserName(username) {
-		username = String(username);
-		if (!username || !username.length) return '[E] 请输入用户名';
-		if (username.length > 20 || username.length <= 0) return '[E] 用户名不合法';
-		return undefined;
-	}
-
-	static isMatchID(matchID) {
-		if (matchID.length !== 8) return '[E] 对局 ID 的长度不正确';
-		if (!/^[0-9A-Z]+$/i.test(matchID)) return '[E] 对局 ID 不合法';
-		return undefined;
-	}
-
-	static isMegaWallsKit(name: string) {
-		// const megaWallsKits = [
-		// 	'凤凰'
-		// ];
-		// return megaWallsKits.includes(name);
-		return undefined;
-	}
-};
-
-
 export function codeErrorMessage(statusCode) {
-	let res = `[E] 接口返回: ${statusCode}`;
+	let res = `接口返回: ${statusCode}。`;
 	if (statusCode === 401) {
 		res += '（未找到该用户，请确认用户名及大小写是否正确）';
 	} else if (statusCode == - 404) {
@@ -82,6 +50,7 @@ export default async (ctx: Context, config: Config) => {
 	ctx.command('domcer.user <username>', '查询用户信息')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
+			if (!name) return session.execute('domcer.user --help');
 			const data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 
@@ -98,6 +67,7 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.buhc')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
+			if (!name) return session.execute('domcer.uhc --help');
 			let data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 
@@ -119,6 +89,7 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.bedwars')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
+			if (!name) return session.execute('domcer.bw --help');
 			let data = await getJSON('/player/getByName', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 
@@ -152,6 +123,7 @@ export default async (ctx: Context, config: Config) => {
 		// .check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
+			if (!name) return session.execute('domcer.mw --help');
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
@@ -179,12 +151,16 @@ export default async (ctx: Context, config: Config) => {
 			let sortedRounds = [];
 
 			for (const round of data.data) {
-				if (name.toLowerCase() == 'insanendy') {
-					if (round.totalDamage > 50 && round.totalDamage < 150) {
-						round.totalDamage *= 1.5;
+				if (name.toLowerCase() == 'insanendy' && round.selectedKit == '凤凰') {
+					if (round.totalDamage > 200 && round.totalDamage < 300) {
+						round.totalDamage *= 1.25;
+					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
+						round.totalDamage *= 1.35;
 					}
-					if (round.takenDamage > 50 && round.takenDamage < 150) {
-						round.takenDamage *= 1.5;
+					if (round.takenDamage > 200 && round.takenDamage < 300) {
+						round.takenDamage *= 1.25;
+					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
+						round.totalDamage *= 1.35;
 					}
 				}
 
@@ -273,6 +249,7 @@ export default async (ctx: Context, config: Config) => {
 		.check((_, name) => Checker.isUserName(name))
 		.check(({ options }) => Checker.isNotEmpty(options.page) && Checker.isInteger(options.page))
 		.action(async ({ session, options }, name) => {
+			if (!name) return session.execute('domcer.mwl --help');
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
@@ -315,6 +292,7 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.megawallsRound')
 		.check((_, matchID) => Checker.isMatchID(matchID))
 		.action(async ({ session, options }, matchID) => {
+			if (!matchID) return session.execute('domcer.mwr --help');
 			const plain = await get('/match/megawalls', { id: matchID });
 			if (plain == '') {
 				return '对局不存在';

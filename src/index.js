@@ -1,8 +1,7 @@
 const { App } = require('koishi');
 
 const config = require('./config').default;
-const appConfig = config.adapter;
-const app = new App(appConfig);
+const app = new App(config.options);
 app.options.nickname = config.nickname;
 app.options.prefix = config.prefix;
 
