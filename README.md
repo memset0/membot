@@ -6,7 +6,7 @@
 
 ```
 yarn        # 安装依赖
-npm start   # 启动机器人
+yarn start   # 启动机器人
 ```
 
 ### Dependence
