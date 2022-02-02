@@ -1,8 +1,8 @@
 import { s, Context, Logger } from 'koishi';
 
-export function apply(ctx: Context) {
-	const logger = new Logger('command-bot-sendmsg');
+export const logger = new Logger('command-bot-sendmsg');
 
+export function apply(ctx: Context) {
 	ctx.command('bot.sendmsg <userId:string> <guildId:string> <message:text>', '发送消息', { authority: 4 })
 		.action(({ session }, userId, guildId, message) => {
 			if (userId === '=') {
