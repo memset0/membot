@@ -14,4 +14,5 @@ npm start   # 启动机器人
 * [koishi: 跨平台机器人框架](https://github.com/koishijs/koishi)
 * [go-cqhttp: cqhttp 的 golang 实现，轻量、原生跨平台](https://github.com/Mrs4s/go-cqhttp)
 * [王斌给您对对联 -_-!](https://ai.binwang.me/couplet/)
+* [文学网 - 文言文字典](https://wyw.hwxnet.com/)
 * [DoMCer API](http://api.domcer.com/)
