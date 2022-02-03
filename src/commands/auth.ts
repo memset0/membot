@@ -1,6 +1,19 @@
 import { s, Context, Logger } from 'koishi';
 import config from '../config';
 
+declare module 'koishi' {
+	interface User {
+		authority: number,
+	}
+}
+
+
+export const name = 'auth';
+export const using = ['database'];
+
+export const logger = new Logger('plugin-auth');
+
+
 export function parseUserId(id) {
 	const target = s.parse(id)[0];
 	if (target.type == 'at') {
@@ -10,9 +23,8 @@ export function parseUserId(id) {
 	}
 }
 
-async function pluginAuth(ctx: Context) {
+export async function apply(ctx: Context) {
 	const db = ctx.database;
-	const logger = new Logger('plugin-auth');
 
 	for (const masterPlatform in config.master) {
 		const masterId = config.master[masterPlatform];
@@ -72,6 +84,3 @@ async function pluginAuth(ctx: Context) {
 			}
 		})
 }
-
-pluginAuth.using = ['database'];
-export default pluginAuth;

@@ -38,6 +38,7 @@ export function codeErrorMessage(statusCode) {
 
 export default async (ctx: Context, config: Config) => {
 	const logger = new Logger('command-domcer');
+	logger.info('config', config);
 	initSpider(config.root, config.key);
 
 	ctx.command('domcer', '查询 DoMCer 服务器数据', { hidden: true });

@@ -23,7 +23,7 @@ const scanDir = (dir) => fs.readdirSync(dir).map(subdir => path.join(dir, subdir
 pluginDirs.push.apply(pluginDirs, scanDir(path.join(__dirname, './src/plugins')));
 pluginDirs.push.apply(pluginDirs, scanDir(path.join(__dirname, './src/commands')));
 for (const dir of pluginDirs) {
-	const name = path.basename(dir);
+	const name = path.basename(dir, path.extname(path.basename(dir)));
 	if (name == '_scoped') continue;
 	module.exports.plugins['./' + path.relative(__dirname, dir)] = config.plugins[name];
 }
