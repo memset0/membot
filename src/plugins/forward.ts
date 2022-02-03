@@ -25,7 +25,7 @@ export async function apply(ctx: Context,config:Config) {
 
 	ctx.middleware(middleware(ctx));
 
-	ctx.command('.bot.forward', '消息转发帮助', { authority: 3 })
+	ctx.command('bot.forward', '消息转发帮助', { authority: 3 })
 		.option('list', '-l 查看转发列表')
 		.option('info', '-i 查看本群 id')
 		.action(({ session, options }) => {
