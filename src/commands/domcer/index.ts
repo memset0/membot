@@ -106,17 +106,20 @@ export default async (ctx: Context, config: Config) => {
 
 
 	ctx.command('domcer.mw <username>', '查询超级战墙数据')
-		.usage('（22.1.31更新）超级战墙平均战绩现只统计数据值前 25% 的对局；同时修复数据值翻倍的问题')
 		.alias('domcer.megawall')
 		.alias('domcer.megawalls')
-		.option('allmode', '-a')
-		.option('clonemode', '-c')
-		.option('infinitemode', '-f')
-		.option('kit', '-k [name]')
+		.usage('（2022.2.4更新）平均战绩支持自定义取样比例，默认25%，输出和承伤分别计算\n' +
+			'（2022.1.31更新）平均战绩现只统计数据值前25%的对局；同时修复数据值翻倍的问题')
+		.option('allmode', '-a 筛选器：所有模式')
+		.option('clonemode', '-c 筛选器：克隆大作战')
+		.option('infinitemode', '-f 筛选器：无限火力')
+		.option('kit', '-k [name] 职业筛选器')
+		.option('ratio', '-r <value> 取样比例', { fallback: 0.25 })
 		// .option('minTotalDamage', '-d [value]')
 		// .option('minTakenDamage', '-t [value]')
 		.check((_, name) => Checker.isUserName(name))
 		.check(({ options }) => Checker.isMegaWallsKit(options.kit))
+		.check(({ options }) => Checker.isRatio(options.ratio))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
@@ -125,6 +128,7 @@ export default async (ctx: Context, config: Config) => {
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
 			if (data.status !== 200) return codeErrorMessage(data.status);
 			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
+			// logger.info(name, JSON.stringify(options));
 
 			if ((options.allmode ? 1 : 0) + (options.infinitemode ? 1 : 0) + (options.clonemode ? 1 : 0) > 1) {
 				return '模式筛选器至多启用一个'
@@ -146,7 +150,8 @@ export default async (ctx: Context, config: Config) => {
 				totalDamage: 0,
 				takenDamage: 0,
 			};
-			let sortedRounds = [];
+			let allTotalDamage = [];
+			let allTakenDamage = [];
 
 			for (const round of data.data) {
 				if (name.toLowerCase() == 'insanendy' && round.selectedKit == '凤凰') {
@@ -186,19 +191,24 @@ export default async (ctx: Context, config: Config) => {
 
 				if (round.liveInDeathMatch) {
 					sum.alives += 1;
-					sortedRounds.push([round.totalDamage, round.takenDamage]);
+					allTotalDamage.push(round.totalDamage);
+					allTakenDamage.push(round.takenDamage);
 				}
 			}
 
-			sortedRounds.sort((a, b) => ((b[0] + b[1]) - (a[0] + a[1])));
-			sortedRounds = sortedRounds.slice(0, Math.ceil(sortedRounds.length * 0.25));
+			allTotalDamage.sort((a, b) => (b - a));
+			allTakenDamage.sort((a, b) => (b - a));
+			allTotalDamage = allTotalDamage.slice(0, Math.ceil(allTotalDamage.length * options.ratio));
+			allTakenDamage = allTakenDamage.slice(0, Math.ceil(allTakenDamage.length * options.ratio));
 
-			for (const roundData of sortedRounds) {
-				sum.totalDamage += roundData[0];
-				sum.takenDamage += roundData[1];
+			for (const totalDamage of allTotalDamage) {
+				sum.totalDamage += totalDamage;
 			}
-			average.totalDamage = sum.totalDamage / sortedRounds.length / 2.;
-			average.takenDamage = sum.takenDamage / sortedRounds.length / 2.;
+			for (const takenDamage of allTakenDamage) {
+				sum.takenDamage += takenDamage;
+			}
+			average.totalDamage = sum.totalDamage / allTotalDamage.length / 2.;
+			average.takenDamage = sum.takenDamage / allTakenDamage.length / 2.;
 
 			let commonlyUsed = [];
 			for (const kit in kitCounterMap) {

@@ -20,6 +20,17 @@ export class Checker {
 		return undefined;
 	}
 
+	static isRatio(value) {
+		value = parseFloat(String(value));
+		if (isNaN(value)) {
+			return '取样比例应是一个实数。';
+		}
+		if (value <= 0 || value > 1) {
+			return '取样比例应在(0,1]的范围内。';
+		}
+		return undefined;
+	}
+
 	static isMegaWallsKit(name: string) {
 		// const megaWallsKits = [
 		// 	'凤凰'
