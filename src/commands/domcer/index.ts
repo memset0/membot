@@ -137,7 +137,6 @@ export default async (ctx: Context, config: Config) => {
 			}
 
 			const nowTime = Date.now();
-			let kitCounterMap = new Map<string, number>();
 			const sum = {
 				mvps: 0,
 				games: 0,
@@ -155,21 +154,23 @@ export default async (ctx: Context, config: Config) => {
 			};
 			let allTotalDamage = [];
 			let allTakenDamage = [];
+			let kitCounterMap = new Map<string, number>();
 			let monthlyTotalDamage = [];
 			let monthlyTakenDamage = [];
+			let monthlyKitCounterMap = new Map<string, number>();
 
 			for (const round of data.data) {
 				if (name.toLowerCase() == 'insanendy' && round.selectedKit == '凤凰') {
 					if (round.totalDamage > 100) {
 						round.totalDamage *= 1.4;
-					}else if (round.totalDamage > 200 && round.totalDamage < 300) {
+					} else if (round.totalDamage > 200 && round.totalDamage < 300) {
 						round.totalDamage *= 1.3;
 					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
 						round.totalDamage *= 1.2;
 					}
 					if (round.takenDamage > 100) {
 						round.takenDamage *= 1.3;
-					}else if (round.takenDamage > 200 && round.takenDamage < 300) {
+					} else if (round.takenDamage > 200 && round.takenDamage < 300) {
 						round.takenDamage *= 1.2;
 					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
 						round.totalDamage *= 1.1;
@@ -202,21 +203,36 @@ export default async (ctx: Context, config: Config) => {
 					sum.alives += 1;
 					allTotalDamage.push(round.totalDamage);
 					allTakenDamage.push(round.takenDamage);
-					if (nowTime - round.startTime <= 1000 * 3600 * 24 * 30) {
+				}
+				if (nowTime - round.startTime <= 1000 * 3600 * 24 * 30) {
+					monthlyKitCounterMap[round.selectedKit] = (monthlyKitCounterMap[round.selectedKit] || 0) + 1;
+					if (round.liveInDeathMatch) {
 						monthlyTotalDamage.push(round.totalDamage);
 						monthlyTakenDamage.push(round.takenDamage);
 					}
 				}
 			}
 
-			if (allTotalDamage.length && monthlyTotalDamage.length<5) {
+			if (allTotalDamage.length && monthlyTotalDamage.length < 5) {
 				options.global = true;
 			}
 			if (!options.global) {
 				allTotalDamage = monthlyTotalDamage;
 				allTakenDamage = monthlyTakenDamage;
+				kitCounterMap = monthlyKitCounterMap;
 			}
 
+			const countedGames = allTotalDamage.length;
+			let commonlyUsed = [];
+			for (const kit in kitCounterMap) {
+				commonlyUsed.push(kit);
+			}
+			commonlyUsed.sort((a, b) => (kitCounterMap[b] - kitCounterMap[a]));
+			if (commonlyUsed.length > 3) commonlyUsed = commonlyUsed.slice(0, 3);
+			const kitParser = (kit: string) => {
+				return `${kit}(${Math.floor(kitCounterMap[kit] / countedGames * 100)}%)`;
+			}
+			
 			allTotalDamage.sort((a, b) => (b - a));
 			allTakenDamage.sort((a, b) => (b - a));
 			allTotalDamage = allTotalDamage.slice(0, Math.ceil(allTotalDamage.length * options.ratio));
@@ -230,16 +246,6 @@ export default async (ctx: Context, config: Config) => {
 			}
 			average.totalDamage = sum.totalDamage / allTotalDamage.length;
 			average.takenDamage = sum.takenDamage / allTakenDamage.length;
-
-			let commonlyUsed = [];
-			for (const kit in kitCounterMap) {
-				commonlyUsed.push(kit);
-			}
-			commonlyUsed.sort((a, b) => (kitCounterMap[b] - kitCounterMap[a]));
-			if (commonlyUsed.length > 3) commonlyUsed = commonlyUsed.slice(0, 3);
-			const kitParser = (kit: string) => {
-				return `${kit}(${Math.floor(kitCounterMap[kit] / sum.games * 100)}%)`;
-			}
 
 			let res = `${name} 的超级战墙数据\n`;
 
