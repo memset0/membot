@@ -108,8 +108,10 @@ export default async (ctx: Context, config: Config) => {
 	ctx.command('domcer.mw <username>', '查询超级战墙数据')
 		.alias('domcer.megawall')
 		.alias('domcer.megawalls')
-		.usage('（2022.2.4更新）平均战绩支持自定义取样比例，默认25%，输出和承伤分别计算\n' +
-			'（2022.1.31更新）平均战绩现只统计数据值前25%的对局；同时修复数据值翻倍的问题')
+		.usage('（2022.3.13更新）战绩默认统计近30日内对局，可用-g选项切换' +
+			'（2022.2.4更新）战绩支持自定义取样比例，默认25%，输出和承伤分别计算\n' +
+			'（2022.1.31更新）战绩只统计数据值前25%的对局；同时修复数据值翻倍的问题')
+		.option('global', '-g 筛选器：统计全局战绩')
 		.option('allmode', '-a 筛选器：所有模式')
 		.option('clonemode', '-c 筛选器：克隆大作战')
 		.option('infinitemode', '-f 筛选器：无限火力')
@@ -134,6 +136,7 @@ export default async (ctx: Context, config: Config) => {
 				return '模式筛选器至多启用一个'
 			}
 
+			const nowTime = Date.now();
 			let kitCounterMap = new Map<string, number>();
 			const sum = {
 				mvps: 0,
@@ -152,18 +155,24 @@ export default async (ctx: Context, config: Config) => {
 			};
 			let allTotalDamage = [];
 			let allTakenDamage = [];
+			let monthlyTotalDamage = [];
+			let monthlyTakenDamage = [];
 
 			for (const round of data.data) {
 				if (name.toLowerCase() == 'insanendy' && round.selectedKit == '凤凰') {
-					if (round.totalDamage > 200 && round.totalDamage < 300) {
-						round.totalDamage *= 1.25;
+					if (round.totalDamage > 100) {
+						round.totalDamage *= 1.4;
+					}else if (round.totalDamage > 200 && round.totalDamage < 300) {
+						round.totalDamage *= 1.3;
 					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
-						round.totalDamage *= 1.35;
+						round.totalDamage *= 1.2;
 					}
-					if (round.takenDamage > 200 && round.takenDamage < 300) {
-						round.takenDamage *= 1.25;
+					if (round.takenDamage > 100) {
+						round.takenDamage *= 1.3;
+					}else if (round.takenDamage > 200 && round.takenDamage < 300) {
+						round.takenDamage *= 1.2;
 					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
-						round.totalDamage *= 1.35;
+						round.totalDamage *= 1.1;
 					}
 				}
 
@@ -193,7 +202,19 @@ export default async (ctx: Context, config: Config) => {
 					sum.alives += 1;
 					allTotalDamage.push(round.totalDamage);
 					allTakenDamage.push(round.takenDamage);
+					if (nowTime - round.startTime <= 1000 * 3600 * 24 * 30) {
+						monthlyTotalDamage.push(round.totalDamage);
+						monthlyTakenDamage.push(round.takenDamage);
+					}
 				}
+			}
+
+			if (allTotalDamage.length && monthlyTotalDamage.length<5) {
+				options.global = true;
+			}
+			if (!options.global) {
+				allTotalDamage = monthlyTotalDamage;
+				allTakenDamage = monthlyTakenDamage;
 			}
 
 			allTotalDamage.sort((a, b) => (b - a));
@@ -207,8 +228,8 @@ export default async (ctx: Context, config: Config) => {
 			for (const takenDamage of allTakenDamage) {
 				sum.takenDamage += takenDamage;
 			}
-			average.totalDamage = sum.totalDamage / allTotalDamage.length / 2.;
-			average.takenDamage = sum.takenDamage / allTakenDamage.length / 2.;
+			average.totalDamage = sum.totalDamage / allTotalDamage.length;
+			average.takenDamage = sum.takenDamage / allTakenDamage.length;
 
 			let commonlyUsed = [];
 			for (const kit in kitCounterMap) {
@@ -223,24 +244,27 @@ export default async (ctx: Context, config: Config) => {
 			let res = `${name} 的超级战墙数据\n`;
 
 			if (sum.games) {
-				if (options.allmode || options.clonemode || options.infinitemode || options.kit) {
-					let limits = [];
-					if (options.kit) limits.push(options.kit);
-
-					if (options.allmode) {
-						limits.push('全部模式');
-					} else if (options.clonemode) {
-						limits.push('克隆大作战');
-					} else if (options.infinitemode) {
-						limits.push('无限火力');
-					}
+				let limits = [];
+				if (options.kit) limits.push(options.kit);
+				if (options.global) {
+					limits.push('全局战绩');
+				}
+				if (options.allmode) {
+					limits.push('所有模式');
+				} else if (options.clonemode) {
+					limits.push('克隆大作战');
+				} else if (options.infinitemode) {
+					limits.push('无限火力');
+				}
+				if (limits.length) {
 					res = res.slice(0, -1) + `（筛选器已启用：${limits.join(' / ')}）\n`;
 				}
 
 				res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`;
 				res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.games * 100).toFixed(2)}%\n`;
-				if (sum.alives) res += `【平均输出】${average.totalDamage.toFixed(4)}【平均承伤】${average.takenDamage.toFixed(4)}\n`;
+				if (sum.alives) res += `【场均输出】${average.totalDamage.toFixed(4)}【场均承伤】${average.takenDamage.toFixed(4)}\n`;
 				if (!options.kit) res += `【常用职业】${commonlyUsed.map(kitParser).join(' ')}\n`;
+
 			} else {
 				res += '没有符合条件的对局\n';
 			}
@@ -285,7 +309,7 @@ export default async (ctx: Context, config: Config) => {
 					TeamColorRemap[round.team] + '队',
 					round.team == round.winner ? '胜' : '负',
 					`${round.finalKills}FK${round.finalAssists}FA`,
-					round.liveInDeathMatch ? `${(round.totalDamage / 2).toFixed(2)}输出 / ${(round.takenDamage / 2).toFixed(2)}承伤` : '未参与死亡竞赛',
+					round.liveInDeathMatch ? `${(round.totalDamage).toFixed(2)}输出 / ${(round.takenDamage).toFixed(2)}承伤` : '未参与死亡竞赛',
 				].join(' / '));
 			}
 
@@ -338,8 +362,8 @@ export default async (ctx: Context, config: Config) => {
 							`#${i}. ${player.realName}`,
 							player.selectedKit,
 							`${player.finalKills}FK${player.finalAssists}FA`,
-							`${(player.totalDamage / 2).toFixed(2)}输出`,
-							`${(player.takenDamage / 2).toFixed(2)}承伤`,
+							`${(player.totalDamage).toFixed(2)}输出`,
+							`${(player.takenDamage).toFixed(2)}承伤`,
 						].join(' / '));
 					}
 				}
