@@ -155,6 +155,7 @@ export default async (ctx: Context, config: Config) => {
 			let allTotalDamage = [];
 			let allTakenDamage = [];
 			let kitCounterMap = new Map<string, number>();
+			let monlyGames = 0;
 			let monthlyTotalDamage = [];
 			let monthlyTakenDamage = [];
 			let monthlyKitCounterMap = new Map<string, number>();
@@ -205,6 +206,7 @@ export default async (ctx: Context, config: Config) => {
 					allTakenDamage.push(round.takenDamage);
 				}
 				if (nowTime - round.startTime <= 1000 * 3600 * 24 * 30) {
+					monlyGames += 1;
 					monthlyKitCounterMap[round.selectedKit] = (monthlyKitCounterMap[round.selectedKit] || 0) + 1;
 					if (round.liveInDeathMatch) {
 						monthlyTotalDamage.push(round.totalDamage);
@@ -222,7 +224,7 @@ export default async (ctx: Context, config: Config) => {
 				kitCounterMap = monthlyKitCounterMap;
 			}
 
-			const countedGames = allTotalDamage.length;
+			const countedGames = options.global ? sum.games : monlyGames;
 			let commonlyUsed = [];
 			for (const kit in kitCounterMap) {
 				commonlyUsed.push(kit);
@@ -232,7 +234,7 @@ export default async (ctx: Context, config: Config) => {
 			const kitParser = (kit: string) => {
 				return `${kit}(${Math.floor(kitCounterMap[kit] / countedGames * 100)}%)`;
 			}
-			
+
 			allTotalDamage.sort((a, b) => (b - a));
 			allTakenDamage.sort((a, b) => (b - a));
 			allTotalDamage = allTotalDamage.slice(0, Math.ceil(allTotalDamage.length * options.ratio));
