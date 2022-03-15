@@ -108,9 +108,10 @@ export default async (ctx: Context, config: Config) => {
 	ctx.command('domcer.mw <username>', '查询超级战墙数据')
 		.alias('domcer.megawall')
 		.alias('domcer.megawalls')
-		.usage('（2022.3.13更新）战绩默认统计近30日内对局，可用-g选项切换' +
+		.usage('（2022.3.15更新）修复数据值翻倍的问题\n' +
+			'（2022.3.13更新）战绩默认统计近30日内对局，可用-g选项切换\n' +
 			'（2022.2.4更新）战绩支持自定义取样比例，默认25%，输出和承伤分别计算\n' +
-			'（2022.1.31更新）战绩只统计数据值前25%的对局；同时修复数据值翻倍的问题')
+			'（2022.1.31更新）战绩只统计数据值前25%的对局')
 		.option('global', '-g 筛选器：统计全局战绩')
 		.option('allmode', '-a 筛选器：所有模式')
 		.option('clonemode', '-c 筛选器：克隆大作战')
@@ -246,8 +247,8 @@ export default async (ctx: Context, config: Config) => {
 			for (const takenDamage of allTakenDamage) {
 				sum.takenDamage += takenDamage;
 			}
-			average.totalDamage = sum.totalDamage / allTotalDamage.length;
-			average.takenDamage = sum.takenDamage / allTakenDamage.length;
+			average.totalDamage = sum.totalDamage / allTotalDamage.length / 2.;
+			average.takenDamage = sum.takenDamage / allTakenDamage.length / 2.;
 
 			let res = `${name} 的超级战墙数据\n`;
 
@@ -317,7 +318,7 @@ export default async (ctx: Context, config: Config) => {
 					TeamColorRemap[round.team] + '队',
 					round.team == round.winner ? '胜' : '负',
 					`${round.finalKills}FK${round.finalAssists}FA`,
-					round.liveInDeathMatch ? `${(round.totalDamage).toFixed(2)}输出 / ${(round.takenDamage).toFixed(2)}承伤` : '未参与死亡竞赛',
+					round.liveInDeathMatch ? `${(round.totalDamage / 2).toFixed(2)}输出 / ${(round.takenDamage / 2).toFixed(2)}承伤` : '未参与死亡竞赛',
 				].join(' / '));
 			}
 
@@ -370,8 +371,8 @@ export default async (ctx: Context, config: Config) => {
 							`#${i}. ${player.realName}`,
 							player.selectedKit,
 							`${player.finalKills}FK${player.finalAssists}FA`,
-							`${(player.totalDamage).toFixed(2)}输出`,
-							`${(player.takenDamage).toFixed(2)}承伤`,
+							`${(player.totalDamage / 2).toFixed(2)}输出`,
+							`${(player.takenDamage / 2).toFixed(2)}承伤`,
 						].join(' / '));
 					}
 				}
