@@ -4,6 +4,8 @@ import { initSpider, get, getJSON } from './api';
 import { Checker } from './utils';
 import '../../utils';
 
+export const TeamColorList = ['RED', 'BLUE', 'YELLOW', 'GREEN'];
+
 export const TeamColorRemap = {
 	'BLUE': '蓝',
 	'RED': '红',
@@ -162,20 +164,22 @@ export default async (ctx: Context, config: Config) => {
 			let monthlyKitCounterMap = new Map<string, number>();
 
 			for (const round of data.data) {
-				if (name.toLowerCase() == 'insanendy' && round.selectedKit == '凤凰') {
-					if (round.totalDamage > 100) {
-						round.totalDamage *= 1.4;
-					} else if (round.totalDamage > 200 && round.totalDamage < 300) {
-						round.totalDamage *= 1.3;
-					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
-						round.totalDamage *= 1.2;
-					}
-					if (round.takenDamage > 100) {
-						round.takenDamage *= 1.3;
-					} else if (round.takenDamage > 200 && round.takenDamage < 300) {
-						round.takenDamage *= 1.2;
-					} else if (round.totalDamage > 300 && round.totalDamage < 400) {
-						round.totalDamage *= 1.1;
+				if (name.toLowerCase() == 'insanendy') {
+					if (round.selectedKit == '凤凰' || round.selectedKit == '吸血鬼' || round.selectedKit == '爬行者') {
+						if (round.totalDamage > 100) {
+							round.totalDamage *= 1.35;
+						} else if (round.totalDamage > 200 && round.totalDamage < 300) {
+							round.totalDamage *= 1.2;
+						} else if (round.totalDamage > 300 && round.totalDamage < 400) {
+							round.totalDamage *= 1.15;
+						}
+						if (round.takenDamage > 100) {
+							round.takenDamage *= 1.3;
+						} else if (round.takenDamage > 200 && round.takenDamage < 300) {
+							round.takenDamage *= 1.15;
+						} else if (round.totalDamage > 300 && round.totalDamage < 400) {
+							round.totalDamage *= 1.1;
+						}
 					}
 				}
 
@@ -313,10 +317,10 @@ export default async (ctx: Context, config: Config) => {
 				const round = rounds[i - 1];
 				result.push([
 					`#${i}. ${round.id}`,
-					round.mapName,
+					round.mapName + (round.mode != 'NORMAL' ? '(' + MegaWallsModeRemap[round.mode] + ')' : ''),
 					round.selectedKit,
 					TeamColorRemap[round.team] + '队',
-					round.team == round.winner ? '胜' : '负',
+					TeamColorList.includes(round.winner) ? (round.team == round.winner ? '胜' : '负') : '平局',
 					`${round.finalKills}FK${round.finalAssists}FA`,
 					round.liveInDeathMatch ? `${(round.totalDamage / 2).toFixed(2)}输出 / ${(round.takenDamage / 2).toFixed(2)}承伤` : '未参与死亡竞赛',
 				].join(' / '));
@@ -346,11 +350,16 @@ export default async (ctx: Context, config: Config) => {
 			const result = [];
 			result.push(`超级战墙对局 ${round.id} / ${round.mapName} / ${MegaWallsModeRemap[round.mode]}`);
 			result.push(`【时间】${time.toChineseString()}`);
-			result.push(`【胜利】${TeamColorRemap[round.winner]}队【MVP】${round.mvp}`);
+
+			if (round.winner in TeamColorList) {
+				result.push(`【获胜队伍】${TeamColorRemap[round.winner]}队【MVP】${round.mvp}`);
+			} else {
+				result.push('【获胜队伍】无');
+			}
 
 			const teams = {};
 			teams[round.winner] = [];
-			for (const color of ['RED', 'BLUE', 'YELLOW', 'GREEN']) {
+			for (const color of TeamColorList) {
 				teams[color] = [];
 			}
 
@@ -365,7 +374,7 @@ export default async (ctx: Context, config: Config) => {
 				teamPlayers.sort((a, b) => ((b.totalDamage + b.takenDamage) - (a.totalDamage + a.takenDamage)));
 				if (teamPlayers.length) {
 					result.push(`【${TeamColorRemap[teamColor]}队】`);
-					for (let i = 1; i <= Math.min(teamColor == round.winner ? 5 : 3, teamPlayers.length); i++) {
+					for (let i = 1; i <= Math.min(teamColor == round.winner ? 6 : 4, teamPlayers.length); i++) {
 						const player = teamPlayers[i - 1];
 						result.push([
 							`#${i}. ${player.realName}`,
