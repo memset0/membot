@@ -6,19 +6,19 @@
   "author": "memset0 <34177126+memset0@users.noreply.github.com>",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@koishijs/cli": "^4.1.1",
-    "@koishijs/plugin-adapter-kaiheila": "^2.0.0",
-    "@koishijs/plugin-adapter-onebot": "^4.0.0",
-    "@koishijs/plugin-database-mysql": "^4.1.0",
-    "@koishijs/plugin-puppeteer": "^3.0.0",
-    "@koishijs/utils": "^5.0.0",
-    "@types/cheerio": "^0.22.30",
+    "@koishijs/cli": "^4.6.2",
+    "@koishijs/plugin-adapter-kaiheila": "^2.0.6",
+    "@koishijs/plugin-adapter-onebot": "^4.2.1",
+    "@koishijs/plugin-database-mysql": "^4.3.2",
+    "@koishijs/plugin-puppeteer": "^3.0.6",
+    "@koishijs/utils": "^5.4.2",
+    "@types/cheerio": "^0.22.31",
     "@types/superagent": "^4.1.15",
     "cheerio": "^1.0.0-rc.10",
-    "koishi": "^4.1.1",
+    "koishi": "^4.6.2",
     "qrcode": "^1.5.0",
     "rd": "^2.0.1",
-    "superagent": "^7.1.1",
+    "superagent": "^7.1.3",
     "yaml": "^1.10.2"
   },
   "scripts": {
@@ -26,7 +26,7 @@
     "test": "ts-node src/index.js"
   },
   "devDependencies": {
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.5"
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.4"
   }
 }
