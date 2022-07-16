@@ -22,7 +22,7 @@ module.exports = {
 	plugins: {
 		'database-mysql': config.mysql,
 		'adapter-onebot': { ...config.bots.onebot[0] },
-		// 'adapter-kaiheila': { ...config.options.kaiheila, bots: config.bots.kaiheila },
+		'adapter-kook': { ...config.bots.kaiheila[0] },
 
 		help: { options: false, shortcut: false },
 		console: { open: true },

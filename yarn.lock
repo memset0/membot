@@ -124,6 +124,22 @@
   dependencies:
     "@satorijs/adapter-discord" "^3.0.2"
 
+"@koishijs/plugin-adapter-kaiheila@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.npmmirror.com/@koishijs/plugin-adapter-kaiheila/-/plugin-adapter-kaiheila-2.0.8.tgz#77c8a6140307bc9d7583661f003a719cee16989d"
+  integrity sha512-Ak3a8B0G0+yvDQBtBGJ7Zx9waxSD5z7KR/VM0z9uN86ZFYWuW3R4cS5txkVAgUKqCN40Ba0lT09+C0hRNGixXg==
+  dependencies:
+    axios "^0.24.0"
+    form-data "^4.0.0"
+    ws "^8.6.0"
+
+"@koishijs/plugin-adapter-kook@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.npmmirror.com/@koishijs/plugin-adapter-kook/-/plugin-adapter-kook-3.0.1.tgz#99f38a105920de534115838931f33b209d53cbe7"
+  integrity sha512-synJERc2tTICC9ZRQqBXct65M6ETtz/cTTbGPSih3feB8sZj3WckKTu5nVlv9m7RGORTCYkD9FyFqNup5SKGAQ==
+  dependencies:
+    "@satorijs/adapter-kook" "^3.0.1"
+
 "@koishijs/plugin-adapter-onebot@^5.0.1":
   version "5.0.1"
   resolved "https://registry.npmmirror.com/@koishijs/plugin-adapter-onebot/-/plugin-adapter-onebot-5.0.1.tgz#9345d116b2dbd84a426f81afea0af99471fcf5c1"
@@ -297,6 +313,13 @@
   dependencies:
     es-aggregate-error "^1.0.7"
     file-type "^16.5.3"
+    form-data "^4.0.0"
+
+"@satorijs/adapter-kook@^3.0.1":
+  version "3.0.3"
+  resolved "https://registry.npmmirror.com/@satorijs/adapter-kook/-/adapter-kook-3.0.3.tgz#0ca8295c4af89cf8b6897846d55aa4f5c043da58"
+  integrity sha512-1HTeZ3X7ubvHaE19Z4ULdPuUdafi1Vny/YUk1V+NgI0z2tL60dlzNSAA3aGcT+gO/JBK1xfrfbsiUZ4y6PGsSw==
+  dependencies:
     form-data "^4.0.0"
 
 "@satorijs/adapter-onebot@^5.0.1":
