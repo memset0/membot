@@ -1,4 +1,4 @@
-import { s, Context, Logger } from 'koishi';
+import { segment, Context, Logger } from 'koishi';
 import config from '../config';
 
 declare module 'koishi' {
@@ -15,7 +15,7 @@ export const logger = new Logger('plugin-auth');
 
 
 export function parseUserId(id) {
-	const target = s.parse(id)[0];
+	const target = segment.parse(id)[0];
 	if (target.type == 'at') {
 		return target.data.id;
 	} else if (target.type == 'text') {
@@ -39,11 +39,12 @@ export async function apply(ctx: Context) {
 	ctx.command('auth', '用户权限');
 
 	ctx.command('auth.show <id>', '查看用户权限')
+		.userFields(['authority'])
 		.action(async ({ session }, id) => {
 			if (!id) {
-				return `你的权限为${session.user['authority']}级`;
+				return `你的权限为${session.user.authority}级`;
 			}
-			if (session.user['authority'] < 3) {
+			if (session.user.authority < 3) {
 				return '你的没有查看其他用户权限等级的权限';
 			}
 
@@ -51,14 +52,14 @@ export async function apply(ctx: Context) {
 			const userId = parseUserId(id);
 			const user = await db.getUser(platform, userId);
 
-			const authority = user && Object.keys(user).includes('authority') ? user['authority'] : 1;
-			return `用户${s('at', { id: userId })}的权限为${authority}级`;
+			const authority = user && Object.keys(user).includes('authority') ? user.authority : 1;
+			return `用户${segment('at', { id: userId })}的权限为${authority}级`;
 		});
 
-	ctx.command('auth.ban <id>', '封禁用户')
-		// .userFields(['authority'])
+	ctx.command('auth.ban <id>', '封禁用户', { authority: 4 })
+		.userFields(['authority'])
 		.action(async ({ session }, id) => {
-			if (session.user['authority'] < 4) {
+			if (session.user.authority < 4) {
 				return '你没有封禁用户的权限';
 			}
 
@@ -66,7 +67,7 @@ export async function apply(ctx: Context) {
 		});
 
 	ctx.command('auth.give <level> <id>', '用户授权', { authority: 4 })
-		// .userFields(['authority'])
+		.userFields(['authority'])
 		.before(({ session }, ...args) => {
 			if (args.length < 2) return session.execute('auth.give --help');
 		})
@@ -79,8 +80,8 @@ export async function apply(ctx: Context) {
 			const user = await db.getUser(platform, userId);
 			if (!user) { return '无效的目标用户'; }
 
-			const selfAuthority = session.user['authority'];
-			const targetAuthority = Object.keys(user).includes('authority') ? user['authority'] : 1;
+			const selfAuthority = session.user.authority;
+			const targetAuthority = Object.keys(user).includes('authority') ? user.authority : 1;
 
 			if (session.userId == user[platform]) { return '不能给自己授权'; }
 			if (userId == session.selfId) { return `不能给${config.nickname}自己授权`; }
@@ -88,6 +89,6 @@ export async function apply(ctx: Context) {
 			if (targetAuthority === 0 && selfAuthority < 4) { return '你没有解封用户的权限'; }
 
 			await db.setUser(platform, userId, { authority: level });
-			return `已授予${s('at', { id: userId })}${level}级权限`;
+			return `已授予${segment('at', { id: userId })}${level}级权限`;
 		})
 }

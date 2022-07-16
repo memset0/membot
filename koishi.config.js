@@ -6,6 +6,14 @@ module.exports = {
 	nickname: config.nickname,
 	...config.options,
 
+	// autoAuthorize: (ses) => {
+	// 	console.log('auto auth', ses.userid)
+	// 	if (ses.platform == 'onebot' && ses.userId == config.master.onebot) {
+	// 		return 4;
+	// 	}
+	// 	return ses.groupId ? 1 : 0;
+	// },
+
 	watch: config.watch ? {
 		root: 'src',
 		ignore: [],
@@ -13,8 +21,16 @@ module.exports = {
 
 	plugins: {
 		'database-mysql': config.mysql,
-		'adapter-onebot': { ...config.options.onebot, bots: config.bots.onebot },
-		'adapter-kaiheila': { ...config.options.kaiheila, bots: config.bots.kaiheila },
+		'adapter-onebot': { ...config.bots.onebot[0] },
+		// 'adapter-kaiheila': { ...config.options.kaiheila, bots: config.bots.kaiheila },
+
+		help: { options: false, shortcut: false },
+		console: { open: true },
+		logger: {},
+		suggest: {},
+		manager: {},
+		status: {},
+		sandbox: {},
 	}
 };
 

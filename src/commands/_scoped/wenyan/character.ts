@@ -1,4 +1,4 @@
-import { s, Context, Logger } from 'koishi';
+import { segment, Context, Logger } from 'koishi';
 
 import * as request from 'superagent';
 
@@ -37,7 +37,7 @@ export async function searchByHwxnet(text): Promise<SearchResponse> {
 			.split('</div>', 2)[0];
 
 		let result = html
-			.replace(/^\s+|\s+$/gm, '')
+			.replace(/^\segment+|\segment+$/gm, '')
 			.replace(/\<br \/\>/g, '\n')
 			.replace(/\<span .*?\>/g, '')
 			.replace(/\<\/span\>/g, '');

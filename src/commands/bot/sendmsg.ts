@@ -1,4 +1,4 @@
-import { s, Context, Logger } from 'koishi';
+import { segment, Context, Logger } from 'koishi';
 
 export const logger = new Logger('command-bot-sendmsg');
 
@@ -20,12 +20,12 @@ export function apply(ctx: Context) {
 					if (userId === '0') {
 						session.bot.sendMessage(guildId, message);
 					} else {
-						session.bot.sendMessage(guildId, s('at', { id: userId }) + message);
+						session.bot.sendMessage(guildId, segment('at', { id: userId }) + message);
 					}
 				}
 			} else {
 				if (message) {
-					return s.unescape(message);
+					return segment.unescape(message);
 				}
 			}
 		});
