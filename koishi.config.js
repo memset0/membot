@@ -3,16 +3,10 @@ const path = require('path');
 const config = require('./src/config').default;
 
 module.exports = {
-	nickname: config.nickname,
 	...config.options,
-
-	// autoAuthorize: (ses) => {
-	// 	console.log('auto auth', ses.userid)
-	// 	if (ses.platform == 'onebot' && ses.userId == config.master.onebot) {
-	// 		return 4;
-	// 	}
-	// 	return ses.groupId ? 1 : 0;
-	// },
+	nickname: config.nickname,
+  minSimilarity: 0,
+	autoAuthorize: (ses) => (ses.groupId ? 1 : 0),
 
 	watch: config.watch ? {
 		root: 'src',
@@ -25,7 +19,10 @@ module.exports = {
 		'adapter-kook': { ...config.bots.kaiheila[0] },
 
 		help: { options: false, shortcut: false },
+		'rate-limit': {},
 		console: { open: true },
+		// puppeteer: {},
+		recall: {},
 		logger: {},
 		suggest: {},
 		manager: {},
