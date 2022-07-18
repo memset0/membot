@@ -42,10 +42,10 @@ export async function apply(ctx: Context) {
 		.userFields(['authority'])
 		.action(async ({ session }, id) => {
 			if (!id) {
-				return `你的权限为 ${session.user.authority} 级`;
+				return `你的权限为 ${session.user.authority} 级。`;
 			}
 			if (session.user.authority < 3) {
-				return '你的没有查看其他用户权限等级的权限';
+				return '你没有查看其他用户权限等级的权限。';
 			}
 
 			const platform = session.platform;
@@ -53,14 +53,14 @@ export async function apply(ctx: Context) {
 			const user = await db.getUser(platform, userId);
 
 			const authority = user && Object.keys(user).includes('authority') ? user.authority : 1;
-			return `用户${segment('at', { id: userId })}的权限为 ${authority} 级`;
+			return `用户${segment('at', { id: userId })}的权限为 ${authority} 级。`;
 		});
 
 	ctx.command('auth.ban <id>', '封禁用户', { authority: 4 })
 		.userFields(['authority'])
 		.action(async ({ session }, id) => {
 			if (session.user.authority < 4) {
-				return '你没有封禁用户的权限';
+				return '你没有封禁用户的权限。';
 			}
 
 			return session.execute('auth.give 0 ' + id);
@@ -73,20 +73,22 @@ export async function apply(ctx: Context) {
 		})
 		.action(async ({ session }, levelText, id) => {
 			const level = parseInt(levelText);
-			if (isNaN(level) || level >= 5 || level < 0) { return '无效的用户权限'; }
+			if (isNaN(level) || level >= 5 || level < 0) { return '无效的用户权限。'; }
 
 			const platform = session.platform;
 			const userId = parseUserId(id);
 			const user = await db.getUser(platform, userId);
-			if (!user) { return '无效的目标用户'; }
+			if (!user) { return '无效的目标用户。'; }
 
 			const selfAuthority = session.user.authority;
 			const targetAuthority = Object.keys(user).includes('authority') ? user.authority : 1;
 
-			if (session.userId == user[platform]) { return '不能给自己授权'; }
-			if (userId == session.selfId) { return `不能给 ${config.nickname} 自己授权`; }
-			if (level >= selfAuthority) { return '你只能授予比自己低的权限等级'; }
-			if (targetAuthority === 0 && selfAuthority < 4) { return '你没有解封用户的权限'; }
+			if (session.userId == user[platform]) { return '不能给自己授权。'; }
+			if (userId == session.selfId) { return `不能给 ${config.nickname} 自己授权。`; }
+			if (targetAuthority === 0 && selfAuthority < 4) { return '你没有解封用户的权限。'; }
+			if (level === 0 && selfAuthority < 4) { return '你没有封禁用户的权限。'; }
+			if (level >= selfAuthority) { return '你只能授予比自己低的权限等级。'; }
+			if (selfAuthority !== 4 && level < targetAuthority) { return '你不能降低其他用户的权限等级。'; }
 
 			await db.setUser(platform, userId, { authority: level });
 			if (level) {
