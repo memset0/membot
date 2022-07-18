@@ -1,4 +1,6 @@
-# membot
+<img align="left" width="80" src="http://q.qlogo.cn/headimg_dl?dst_uin=1470738407&spec=100">
+
+<h1>membot</h1>
 
 综合型自用 qq 机器人。
 
