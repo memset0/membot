@@ -18,7 +18,7 @@ export async function apply (ctx: Context) {
 		}
 
 		const user = await ctx.database.getUser(session.platform, session.author.userId);
-		const authority = Object.keys(user).includes('authority') ? user.authority : 1;
+		const authority = user && Object.keys(user).includes('authority') ? user.authority : 1;
 
 		if (authority === 0) {
 			// 说明用户已被封禁
