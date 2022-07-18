@@ -75,7 +75,6 @@ export function apply(ctx: Context) {
 					const tagName = $(line).prop('tagName');
 					if (tagName == 'P') {
 						if (text == '基本字义' || text == '其它字义') { continue; }
-						console.log(text);
 						if (text == '● ' + word) {
 							data.push({ meaning: [] });
 						} else if (data.length && !data[data.length - 1].pronunciation) {
