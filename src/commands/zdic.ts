@@ -97,7 +97,7 @@ export function apply(ctx: Context) {
 						result += '● ';
 					}
 					result += section.pronunciation;
-					if (section.meaning.length > 1 && data.length > 1) { result += '\n'; }
+					if (section.meaning.length > 1 || data.length > 1) { result += '\n'; }
 
 					if (section.meaning.length == 1) {
 						if (data.length > 1) { result += QUAD; }
