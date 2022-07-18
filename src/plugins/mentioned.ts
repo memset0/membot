@@ -24,8 +24,7 @@ export default (ctx: Context) => {
 			if (session.content.indexOf(mentionedKeyString) !== -1 && !session.content.startsWith('[CQ:quote,id=')) {
 				let content = session.content;
 				if (content.replace(mentionedKeyString, '').replace(/\s/g, '') == '') {
-					session.send(`${segment('at', { id: session.author.userId })}欢迎使用机器人的反馈功能，想说什么话请直接在消息中@本机器人哦。` + footer);
-					return;
+					return `${segment('at', { id: session.author.userId })}欢迎使用机器人的反馈功能，想说什么话请直接在消息中@本机器人哦。` + footer;
 				}
 				content = content.replace(mentionedKeyString, '@' + config.nickname);
 				if (!session.guildId) {
@@ -34,10 +33,10 @@ export default (ctx: Context) => {
 					content = `【消息转发】来自 ${session.author.username}(${session.author.userId}) 的群聊 ${session.guildId}\n` + content;
 				}
 				bot.sendPrivateMessage(config.master.onebot, content);
-				session.send(`${segment('at', { id: session.author.userId })}你的反馈已成功转发给主人，想说什么就继续留言哦。` + footer);
+				return `${segment('at', { id: session.author.userId })}你的反馈已成功转发给主人，想说什么就继续留言哦。` + footer;
 			}
 		}
 
 		return next();
-	});
+	}, true);
 };

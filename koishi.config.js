@@ -21,13 +21,14 @@ module.exports = {
 		help: { options: false, shortcut: false },
 		'rate-limit': {},
 		console: { open: true },
-		// puppeteer: {},
 		recall: {},
 		logger: {},
 		suggest: {},
 		manager: {},
 		status: {},
 		sandbox: {},
+		// puppeteer: {},
+		// commands: {},   // not works
 	}
 };
 

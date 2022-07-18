@@ -159,6 +159,13 @@
   dependencies:
     "@satorijs/adapter-telegram" "^3.0.3"
 
+"@koishijs/plugin-commands@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.npmmirror.com/@koishijs/plugin-commands/-/plugin-commands-1.4.1.tgz#845bfb20dd23a823efeac20640302ee17b1be34c"
+  integrity sha512-g+utXrnRHl3nQpxKloEvt86EY5OknJxuj8PYEWfYaQTInTDAm1i6v4bvden5YYaDDxKNIHlejzQlHPlPt3tGaw==
+  dependencies:
+    throttle-debounce "^3.0.1"
+
 "@koishijs/plugin-console@^3.4.4":
   version "3.4.4"
   resolved "https://registry.npmmirror.com/@koishijs/plugin-console/-/plugin-console-3.4.4.tgz#7e7f28c9d59c5718ee86b75cc4bc0995fec08810"
