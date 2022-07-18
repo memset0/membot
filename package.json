@@ -50,7 +50,7 @@
     "yaml": "^2.1.1"
   },
   "scripts": {
-    "start": "yarn koishi start -- -- -r ts-node/register",
-    "test": "ts-node src/index.js"
+    "start": "yarn koishi start -r ts-node/register",
+    "dev": "cross-env NODE_ENV=development yarn koishi start -r ts-node/register --watch"
   }
 }
