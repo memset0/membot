@@ -98,17 +98,17 @@ export function apply(ctx: Context) {
 						result += '● ';
 					}
 					result += section.pronunciation;
+					if (section.meaning.length > 1 && data.length > 1) { result += '\n'; }
 
 					if (section.meaning.length == 1) {
-						result += QUAD + section.meaning[0];
+						if (data.length > 1) { result += QUAD; }
+						result += section.meaning[0];
 					} else if (section.meaning.length > 1) {
-						result += '\n';
 						for (let i = 0; i < section.meaning.length; i++) {
-							result += QUAD + String(i + 1) + ')' + QUAD + section.meaning[i] + '\n';
+							if (data.length > 1) { result += QUAD; }
+							result += String(i + 1) + ')' + QUAD + section.meaning[i] + '\n';
 						}
-						result = result.slice(0, -1);
 					}
-					result += '\n';
 				}
 
 				result = result.slice(0, -1);
