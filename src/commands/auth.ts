@@ -42,7 +42,7 @@ export async function apply(ctx: Context) {
 		.userFields(['authority'])
 		.action(async ({ session }, id) => {
 			if (!id) {
-				return `你的权限为${session.user.authority}级`;
+				return `你的权限为 ${session.user.authority} 级`;
 			}
 			if (session.user.authority < 3) {
 				return '你的没有查看其他用户权限等级的权限';
@@ -53,7 +53,7 @@ export async function apply(ctx: Context) {
 			const user = await db.getUser(platform, userId);
 
 			const authority = user && Object.keys(user).includes('authority') ? user.authority : 1;
-			return `用户${segment('at', { id: userId })}的权限为${authority}级`;
+			return `用户${segment('at', { id: userId })}的权限为 ${authority} 级`;
 		});
 
 	ctx.command('auth.ban <id>', '封禁用户', { authority: 4 })
@@ -84,11 +84,15 @@ export async function apply(ctx: Context) {
 			const targetAuthority = Object.keys(user).includes('authority') ? user.authority : 1;
 
 			if (session.userId == user[platform]) { return '不能给自己授权'; }
-			if (userId == session.selfId) { return `不能给${config.nickname}自己授权`; }
+			if (userId == session.selfId) { return `不能给 ${config.nickname} 自己授权`; }
 			if (level >= selfAuthority) { return '你只能授予比自己低的权限等级'; }
 			if (targetAuthority === 0 && selfAuthority < 4) { return '你没有解封用户的权限'; }
 
 			await db.setUser(platform, userId, { authority: level });
-			return `已授予${segment('at', { id: userId })}${level}级权限`;
+			if (level) {
+				return `已授予${segment('at', { id: userId })} ${level} 级权限`;
+			} else {
+				return `已封禁 ${segment('at', { id: userId })}`;
+			}
 		})
 }

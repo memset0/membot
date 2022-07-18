@@ -49,9 +49,9 @@ export default async (ctx: Context, config: Config) => {
 	ctx.command('domcer.user <username>', '查询用户信息')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
-			if (!name) return session.execute('domcer.user --help');
+			if (!name) { return session.execute('help domcer.user'); }
 			const data = await getJSON('/player/getByName', { name });
-			if (data.status !== 200) return codeErrorMessage(data.status);
+			if (data.status !== 200) { return codeErrorMessage(data.status); }
 
 			session.send([
 				(data.data.rank !== 'DEFAUL' && data.data.rank !== 'default' ? `[${data.data.rank.replace('_PLUS', '+').replace('_PLUS', '+')}] ` : '') + `${data.data.realName}`,
@@ -66,13 +66,13 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.buhc')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
-			if (!name) return session.execute('domcer.uhc --help');
+			if (!name) { return session.execute('help domcer.uhc'); }
 			let data = await getJSON('/player/getByName', { name });
-			if (data.status !== 200) return codeErrorMessage(data.status);
+			if (data.status !== 200) { return codeErrorMessage(data.status); }
 
 			const uuid = data.data.uuid;
 			data = await getJSON('/stats/getStats', { uuid, statsName: 'UHC' });
-			if (data.status !== 200) return codeErrorMessage(data.status);
+			if (data.status !== 200) { return codeErrorMessage(data.status); }
 
 			session.send([
 				`${name} 的 UHC 数据`,
@@ -88,13 +88,13 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.bedwars')
 		.check((_, name) => Checker.isUserName(name))
 		.action(async ({ session }, name) => {
-			if (!name) return session.execute('domcer.bw --help');
+			if (!name) return session.execute('help domcer.bw');
 			let data = await getJSON('/player/getByName', { name });
-			if (data.status !== 200) return codeErrorMessage(data.status);
+			if (data.status !== 200) { return codeErrorMessage(data.status); }
 
 			const uuid = data.data.uuid;
 			data = await getJSON('/stats/getStats', { uuid, statsName: 'BedWars' });
-			if (data.status !== 200) return codeErrorMessage(data.status);
+			if (data.status !== 200) { return codeErrorMessage(data.status); }
 
 			session.send([
 				`${name} 的起床战争数据`,
@@ -128,11 +128,11 @@ export default async (ctx: Context, config: Config) => {
 		// .check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
 		.action(async ({ session, options }, name) => {
-			if (!name) return session.execute('domcer.mw --help');
+			if (!name) { return session.execute('help domcer.mw'); }
 			name = String(name);
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
-			if (data.status !== 200) return codeErrorMessage(data.status);
-			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
+			if (data.status !== 200) { return codeErrorMessage(data.status); }
+			if (data.data.length === 0) { return `该玩家没有超级战墙游玩历史`; }
 			// logger.info(name, JSON.stringify(options));
 
 			if ((options.allmode ? 1 : 0) + (options.infinitemode ? 1 : 0) + (options.clonemode ? 1 : 0) > 1) {
@@ -294,10 +294,10 @@ export default async (ctx: Context, config: Config) => {
 		.check((_, name) => Checker.isUserName(name))
 		.check(({ options }) => Checker.isNotEmpty(options.page) && Checker.isInteger(options.page))
 		.action(async ({ session, options }, name) => {
-			if (!name) return session.execute('domcer.mwl --help');
+			if (!name) { return session.execute('help domcer.mwl'); }
 			const data = await getJSON('/match/getMegaWallsMatchList', { name });
-			if (data.status !== 200) return codeErrorMessage(data.status);
-			if (data.data.length === 0) return `该玩家没有超级战墙游玩历史`;
+			if (data.status !== 200) { return codeErrorMessage(data.status); }
+			if (data.data.length === 0) { return `该玩家没有超级战墙游玩历史`; }
 
 			const result = [];
 			result.push(`${name} 的超级战墙对局列表`);
@@ -309,9 +309,7 @@ export default async (ctx: Context, config: Config) => {
 			const totalPage = Math.ceil(rounds.length / perPage);
 			const currentPage = options.page ? parseInt(options.page) : 1;
 
-			if (currentPage < 1 || currentPage > totalPage) {
-				return `共${totalPage}页，当前页数${currentPage}不在合法范围内`;
-			}
+			if (currentPage < 1 || currentPage > totalPage) { return `共${totalPage}页，当前页数${currentPage}不在合法范围内`; }
 
 			for (let i = 1 + (currentPage - 1) * perPage; i <= currentPage * perPage && i <= rounds.length; i++) {
 				const round = rounds[i - 1];
@@ -337,11 +335,9 @@ export default async (ctx: Context, config: Config) => {
 		.alias('domcer.megawallsRound')
 		.check((_, matchID) => Checker.isMatchID(matchID))
 		.action(async ({ session, options }, matchID) => {
-			if (!matchID) return session.execute('domcer.mwr --help');
+			if (!matchID) { return session.execute('help domcer.mwr'); }
 			const plain = await get('/match/megawalls', { id: matchID });
-			if (plain == '') {
-				return '对局不存在';
-			}
+			if (plain == '') { return '对局不存在'; }
 
 			const data = JSON.parse(plain);
 
@@ -364,9 +360,7 @@ export default async (ctx: Context, config: Config) => {
 			}
 
 			for (const player of data.playerStatistics) {
-				if (player.liveInDeathMatch) {
-					teams[player.team].push(player);
-				}
+				if (player.liveInDeathMatch) { teams[player.team].push(player); }
 			}
 
 			for (const teamColor in teams) {
