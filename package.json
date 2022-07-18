@@ -1,7 +1,7 @@
 {
   "name": "membot",
-  "version": "2.6.2",
-  "main": "src/index.js",
+  "version": "2.6.3",
+  "main": "koishi.config.js",
   "repository": "https://github.com/memset0/membot.git",
   "author": "memset0 <34177126+memset0@users.noreply.github.com>",
   "license": "AGPL-3.0-or-later",
