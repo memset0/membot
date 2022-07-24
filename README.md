@@ -4,11 +4,12 @@
 
 综合型自用 qq 机器人。
 
-### Deploy
+### Usage
 
 ```
-yarn        # 安装依赖
-yarn start   # 启动机器人
+yarn         # 安装依赖
+yarn start   # 启动
+yarn dev     # 调试
 ```
 
 ### Dependence
