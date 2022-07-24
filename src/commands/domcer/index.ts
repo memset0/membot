@@ -39,8 +39,8 @@ export function codeErrorMessage(statusCode) {
 
 
 export default async (ctx: Context, config: Config) => {
-	const logger = new Logger('command-domcer');
-	logger.info('config', config);
+	const logger = new Logger('plugin-domcer');
+	// logger.info('config', config);
 	initSpider(config.root, config.key);
 
 	ctx.command('domcer', '查询 DoMCer 服务器数据', { hidden: true });
@@ -164,37 +164,10 @@ export default async (ctx: Context, config: Config) => {
 			let monthlyKitCounterMap = new Map<string, number>();
 
 			for (const round of data.data) {
-				if (name.toLowerCase() == 'insanendy') {
-					if (round.selectedKit == '凤凰' || round.selectedKit == '吸血鬼' || round.selectedKit == '爬行者') {
-						if (round.totalDamage > 100) {
-							round.totalDamage *= 1.35;
-						} else if (round.totalDamage > 200 && round.totalDamage < 300) {
-							round.totalDamage *= 1.2;
-						} else if (round.totalDamage > 300 && round.totalDamage < 400) {
-							round.totalDamage *= 1.15;
-						}
-						if (round.takenDamage > 100) {
-							round.takenDamage *= 1.3;
-						} else if (round.takenDamage > 200 && round.takenDamage < 300) {
-							round.takenDamage *= 1.15;
-						} else if (round.totalDamage > 300 && round.totalDamage < 400) {
-							round.totalDamage *= 1.1;
-						}
-					}
-				}
-
-				if (round.mode == 'NORMAL' && (options.infinitemode || options.clonemode)) {
-					continue;
-				}
-				if (round.mode == 'CLONE' && !(options.clonemode || options.allmode)) {
-					continue;
-				}
-				if (round.mode == 'INFINITE' && !(options.infinitemode || options.allmode)) {
-					continue;
-				}
-				if (options.kit && round.selectedKit != options.kit) {
-					continue;
-				}
+				if (round.mode == 'NORMAL' && (options.infinitemode || options.clonemode)) { continue; }
+				if (round.mode == 'CLONE' && !(options.clonemode || options.allmode)) { continue; }
+				if (round.mode == 'INFINITE' && !(options.infinitemode || options.allmode)) { continue; }
+				if (options.kit && round.selectedKit != options.kit) { continue; }
 
 				sum.games += 1;
 				sum.finalKills += round.finalKills;
