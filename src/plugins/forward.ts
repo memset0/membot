@@ -1,6 +1,7 @@
 import { Context, Session, Logger, Time, segment } from 'koishi'
 
 import '../utils/date'
+import { QFace } from '../utils/onebot'
 import { isInteger } from '../utils/type'
 
 
@@ -88,8 +89,10 @@ function middleware(ctx: Context) {
 
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardingMeta) => {
+				const kookExtendedImages = []
 				const quote = chain?.[0]
 				let start = 0
+				let transformBase64 = !(target.platform === 'kaiheila')
 
 				if (quote?.type === 'quote') {
 					start++
@@ -110,16 +113,42 @@ function middleware(ctx: Context) {
 				for (const i in chain) {
 					const seg = chain[i]
 
-					if (seg.type === 'image' && seg.data.url?.startsWith('http')) {
+					if ((seg.type === 'image' /* || seg.type === 'face' */) && seg.data.url?.startsWith('http') && transformBase64) {
 						try {
 							const data = await ctx.http.get(seg.data.url, { responseType: 'arraybuffer' })
 							const img = Buffer.from(data).toString('base64')
 							chain[i] = {
 								type: 'image',
-								data: { url: `base64://${img}`, }
+								data: { url: `base64://${img}` }
 							}
 						} catch (e) {
-							logger.info('error while transforming images', e)
+							logger.info(`error while transforming ${seg.type}s`, e)
+						}
+					}
+
+					if (seg.type === 'face' && target.platform !== 'onebot') {
+
+					}
+
+					if (target.platform == 'kaiheila' && target.enhanced) {
+						if (seg.type === 'image' && seg.data.url?.startsWith('http')) {
+							let showPlacer = false;
+							for (let j = parseInt(i) + 1; j < chain.length; j++) {
+								if (chain[j].type !== 'image') {
+									showPlacer = true
+									break
+								}
+							}
+							kookExtendedImages.push(seg.data.url)
+							chain[i] = {
+								type: 'text',
+								data: { content: showPlacer ? `~img:${kookExtendedImages.length}~` : ' ' }
+							}
+						} else if (seg.type === 'face') {
+							chain[i] = {
+								type: 'text',
+								data: { content: `[${QFace.idToDes(seg.data.id)}]` }
+							}
 						}
 					}
 				}
@@ -134,23 +163,35 @@ function middleware(ctx: Context) {
 
 				} else if (target.platform === 'kaiheila') {
 					const content = segment.join(chain)
+						.replace(/\&\#91\;/g, '[')
+						.replace(/\&\#93\;/g, ']')
 					const time = new Date(session.timestamp)
 					const theme = isInteger(session.author.userId) ?
 						KookCardThemes[parseInt(session.author.userId) % (KookCardThemes.length - 1)] :
 						'secondary'
 					const modules: any[] = [{
 						"type": "section",
+						"mode": "left",
 						"text": {
 							"type": "kmarkdown",
 							"content": `**${session.username}** ${time.format('yyyy-MM-dd hh:mm:ss')}\n${content}`
 						},
-						"mode": "left",
-						"accessory": {
-							"type": "image",
-							"src": session.author.avatar,
-							"size": "sm"
-						}
+						"accessory": { "type": "image", "size": "sm", "src": session.author.avatar }
 					}]
+					if (kookExtendedImages.length === 1) {
+						modules.push({
+							"type": "container",
+							"elements": [{
+								"type": "image",
+								"src": kookExtendedImages[0]
+							}]
+						})
+					} else if (kookExtendedImages.length > 1) {
+						modules.push({
+							"type": "image-group",
+							"elements": kookExtendedImages.map((url) => ({ "type": "image", "src": url }))
+						})
+					}
 					if (target.showSource) {
 						modules.push({
 							"type": "context",
@@ -160,6 +201,7 @@ function middleware(ctx: Context) {
 							}],
 						})
 					}
+					// logger.info('modules', modules)
 					chain.splice(0, chain.length)
 					chain.push({
 						type: 'card',

@@ -336,7 +336,7 @@
     file-type "^16.5.3"
     form-data "^4.0.0"
 
-"@satorijs/adapter-kook@3.0.4", "@satorijs/adapter-kook@^3.0.1":
+"@satorijs/adapter-kook@^3.0.1":
   version "3.0.4"
   resolved "https://registry.npmmirror.com/@satorijs/adapter-kook/-/adapter-kook-3.0.4.tgz#253f284a80d91f4b668a913c90835678fadd868a"
   integrity sha512-adRk76agLz5oEVQIeMyaDIUovedP4TECvGxltNel7f2PbnYDI4w4sHo1WEOMWu+pCxG1ajxA7aKG4Y5/RmloGg==

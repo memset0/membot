@@ -44,6 +44,7 @@
     "@types/superagent": "^4.1.15",
     "cheerio": "^1.0.0-rc.12",
     "koishi": "^4.8.0",
+    "qface": "^1.2.0",
     "qrcode": "^1.5.1",
     "rd": "^2.0.1",
     "superagent": "^8.0.0",
