@@ -1,8 +1,9 @@
 import { Context, Session, Logger, Time, segment } from 'koishi'
 
 import '../utils/date'
-import { QFace, getUserName } from '../utils/onebot'
 import { isInteger } from '../utils/type'
+import { sliceWithEllipsis } from '../utils/string'
+import { QFace, getUserName } from '../utils/onebot'
 
 
 interface ForwardingMeta {
@@ -20,7 +21,7 @@ interface Config {
 
 
 const forwardingList: Config = {}
-const messageRecord: Array<[string, string, [string, string], [string, string]]> = []
+const messageRecord: Array<[string, string, [string, string], [string, string], [string, string], string]> = []
 const KookCardThemes = ['primary', 'success', 'danger', 'warning', 'info', 'secondary']
 
 export const name = 'forward'
@@ -88,23 +89,43 @@ function middleware(ctx: Context) {
 
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardingMeta) => {
-				const quote = chain?.[0]
 				let start = 0
 				let transformBase64 = !(target.platform === 'kaiheila')
+				logger.info(chain)
 
-				if (quote?.type === 'quote') {
+				if (chain?.[0]?.type === 'quote') {
+					const quote = chain?.[0]
 					start++
 					const rec = messageRecord.find(([platform1, platform2, [id1], [id2]]) =>
 						platform1 === session.platform && platform2 === target.platform && id1 === quote.data.id ||
 						platform1 === target.platform && platform2 === session.platform && id2 === quote.data.id)
 					const data = rec?.[2][0] === quote.data.id ? rec?.[3] : rec?.[2]
-					if (!data) return
-					chain[0] = {
-						type: 'quote',
-						data: {
-							id: data[0],
-							channelId: data[1],
-						},
+					const author = rec?.[4]
+					const shortcut = rec?.[5]
+					logger.info('quote', data, rec)
+					if (data) {
+						if (target.platform === 'onebot') {
+							chain[0] = {
+								type: 'quote',
+								data: { id: data[0], channelId: data[1] },
+							}
+						} else {
+							chain[0] = {
+								type: 'text',
+								data: { content: `[回复 ${author[1]}: ${shortcut}] ` },
+							}
+						}
+						if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === author[0]) {
+							chain.splice(1, 1)
+							if (chain[0].type == 'text') {
+								chain[0].data.content = chain[0].data.content.trim()
+							}
+						}
+					} else {
+						chain[0] = {
+							type: 'text',
+							data: { content: '[回复消息] ' },
+						}
 					}
 				}
 
@@ -139,6 +160,17 @@ function middleware(ctx: Context) {
 							type: 'text',
 							data: { content: `[${QFace.idToText(seg.data.id)}]` }
 						}
+					}
+				}
+
+				let shortcut: string[] = []
+				for (const seg of chain) {
+					if (seg.type === 'quote') {
+						continue
+					} else if (seg.type === 'text') {
+						shortcut.push(segment.join([seg]).trim())
+					} else {
+						shortcut.push(`[${seg.type}]`)
 					}
 				}
 
@@ -219,7 +251,14 @@ function middleware(ctx: Context) {
 
 				ctx.broadcast([target.to], segment.join(chain))
 					.then(([id]) => {
-						messageRecord.push([session.platform, target.platform, [session.messageId, session.channelId], [id, target.channelId]])
+						messageRecord.push([
+							session.platform,
+							target.platform,
+							[session.messageId, session.channelId],
+							[id, target.channelId],
+							[session.author.userId, session.author.nickname || session.author.username],
+							sliceWithEllipsis(shortcut.join(' '), 15),
+						])
 						if (messageRecord.length > 1000) {
 							messageRecord.shift()
 						}
