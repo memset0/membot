@@ -16,11 +16,16 @@ module.exports = {
 	plugins: {
 		'database-mysql': config.mysql,
 		'adapter-onebot': { ...config.bots.onebot[0] },
-		'adapter-kook': { ...config.bots.kaiheila[0] },
+		'adapter-kook': { ...config.bots.kook[0] },
 
-		help: { options: false, shortcut: false },
+		help: {
+			options: false,
+			shortcut: false,
+		},
 		'rate-limit': {},
-		console: { open: true },
+		console: {
+			// open: true,
+		},
 		recall: {},
 		logger: {},
 		suggest: {},

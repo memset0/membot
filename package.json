@@ -23,7 +23,6 @@
   "dependencies": {
     "@koishijs/cli": "^4.8.0",
     "@koishijs/plugin-adapter-discord": "^3.0.2",
-    "@koishijs/plugin-adapter-kaiheila": "^2.0.8",
     "@koishijs/plugin-adapter-kook": "^3.0.1",
     "@koishijs/plugin-adapter-onebot": "^5.0.1",
     "@koishijs/plugin-adapter-telegram": "^3.0.3",

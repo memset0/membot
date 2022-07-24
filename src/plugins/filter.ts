@@ -1,4 +1,4 @@
-import { Context } from 'koishi';
+import { Context, Logger } from 'koishi';
 
 import config from '../config';
 
@@ -6,10 +6,10 @@ import config from '../config';
 
 export const name = 'filter';
 export const using = ['database'];
+export const logger = new Logger('filter');
 
 
-
-export async function apply (ctx: Context) {
+export async function apply(ctx: Context) {
 	ctx.middleware(async (session, next) => {
 		/**
 		 * 风险控制
@@ -18,6 +18,7 @@ export async function apply (ctx: Context) {
 			// 由于腾讯方面的限制，onebot 平台发送的私聊回话消息应拒绝回复，否则容易导致机器人冻结。
 			return;
 		}
+		// if (session.platform != 'onebot') { logger.info(session); }
 
 		const user = await ctx.database.getUser(session.platform, session.author.userId);
 		const authority = user && Object.keys(user).includes('authority') ? user.authority : 1;
