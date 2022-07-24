@@ -1,0 +1,35 @@
+[
+  {
+    "type": "card",
+    "theme": "secondary",
+    "size": "lg",
+    "modules": [
+      {
+        "type": "section",
+        "text": {
+          "type": "kmarkdown",
+          "content": "**author**  xxxx-xx-xx yy:yy:yy\n没见过这么萌的狗狗吗？"
+        },
+        "mode": "left",
+        "accessory": {
+          "type": "image",
+          "src": "https://memset0.cn/img/favicon.png",
+          "size": "sm"
+        }
+      },
+      {
+        "type": "context",
+        "elements": [
+          {
+            "type": "kmarkdown",
+            "content": "来自xxx群的消息"
+          },
+          {
+            "type": "image",
+            "src": "https://img.kaiheila.cn/assets/2021-01/7kr4FkWpLV0ku0ku.jpeg"
+          }
+        ]
+      }
+    ]
+  }
+]
