@@ -28,9 +28,9 @@ export default (ctx: Context) => {
 				}
 				content = content.replace(mentionedKeyString, '@' + config.nickname);
 				if (!session.guildId) {
-					content = `【消息转发】来自 ${session.author.username}(${session.author.userId}) 的私聊\n` + content;
+					content = `[Feedback] 来自 ${session.author.username}(${session.author.userId}) 的私聊\n` + content;
 				} else {
-					content = `【消息转发】来自 ${session.author.username}(${session.author.userId}) 的群聊 ${session.guildId}\n` + content;
+					content = `[Feedback] 来自 ${session.author.username}(${session.author.userId}) 的群聊 ${session.guildId}\n` + content;
 				}
 				bot.sendPrivateMessage(config.master.onebot, content);
 				return `${segment('at', { id: session.author.userId })}你的反馈已成功转发给主人，想说什么就继续留言哦。` + footer;
