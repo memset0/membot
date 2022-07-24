@@ -44,8 +44,6 @@ export async function apply(ctx: Context, config: Config) {
 			if (!e.prefix) { e.prefix = '' }
 			if (e.platform != 'kaiheila' && e.enhanced) { logger.warn(`platform ${source.split(':')[0]} does't support enhanced mode`) }
 		}
-
-		// logger.info('forwardingList', source, targets)
 	}
 
 	ctx.middleware(middleware(ctx))
@@ -60,7 +58,7 @@ export async function apply(ctx: Context, config: Config) {
 
 			const id = `${session.platform}:${session.channelId}`
 			const forward = forwardingList[id]
-			logger.info(id, forward)
+			// logger.info(id, forward)
 
 			if (options.list) {
 				return JSON.stringify(forward)
@@ -91,7 +89,6 @@ function middleware(ctx: Context) {
 			.forEach(async (target: ForwardingMeta) => {
 				let start = 0
 				let transformBase64 = !(target.platform === 'kaiheila')
-				logger.info(chain)
 
 				if (chain?.[0]?.type === 'quote') {
 					const quote = chain?.[0]
@@ -102,7 +99,6 @@ function middleware(ctx: Context) {
 					const data = rec?.[2][0] === quote.data.id ? rec?.[3] : rec?.[2]
 					const author = rec?.[4]
 					const shortcut = rec?.[5]
-					logger.info('quote', data, rec)
 					if (data) {
 						if (target.platform === 'onebot') {
 							chain[0] = {
@@ -231,7 +227,6 @@ function middleware(ctx: Context) {
 							})
 						}
 					}
-					// logger.info(modules)
 					chain.splice(0, chain.length)
 					for (const i in modules) {
 						chain.push({
@@ -247,7 +242,6 @@ function middleware(ctx: Context) {
 						})
 					}
 				}
-				// logger.info(target.to, chain)
 
 				ctx.broadcast([target.to], segment.join(chain))
 					.then(([id]) => {
