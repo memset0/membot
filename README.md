@@ -13,7 +13,7 @@ yarn start   # 启动机器人
 
 ### Dependence
 
-* [koishi - 跨平台机器人框架](https://github.com/koishijs/koishi)
+* [koishi - Cross-platform chatbot framework made with love](https://github.com/koishijs/koishi)
 * [satori - The Universal Messenger Protocol](https://github.com/satorijs/satori)
 * [go-cqhttp - cqhttp 的 golang 实现，轻量、原生跨平台](https://github.com/Mrs4s/go-cqhttp)
 * [QQ Face ID Table](https://qq-face.vercel.app/)
