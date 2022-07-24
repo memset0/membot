@@ -1,7 +1,7 @@
 import { Context, Session, Logger, Time, segment } from 'koishi'
 
 import '../utils/date'
-import { QFace } from '../utils/onebot'
+import { QFace, getUserName } from '../utils/onebot'
 import { isInteger } from '../utils/type'
 
 
@@ -33,10 +33,9 @@ export async function apply(ctx: Context, config: Config) {
 		const targets = config[source]
 		forwardingList[source] = targets
 		for (const e of forwardingList[source]) {
-			if (e.to && (e.platform || e.channelId)) { logger.warn('mutiple target channel config') }
 			if (e.to) {
-				e.platform = e.to.split(':')[0]
-				e.channelId = e.to.split(':')[1]
+				if (!e.platform) e.platform = e.to.split(':')[0]
+				if (!e.channelId) e.channelId = e.to.split(':')[1]
 			} else if (e.platform && e.channelId) {
 				e.to = `${e.platform}:${e.channelId}`
 			}
@@ -125,10 +124,20 @@ function middleware(ctx: Context) {
 						}
 					}
 
-					if (seg.type === 'face' && target.platform !== 'onebot') {
+					if (seg.type === 'at' && target.platform !== session.platform) {
+						const name = seg.data.name ||
+							(await getUserName(session.platform, seg.data.id, { guildId: session.guildId, session })) ||
+							seg.data.id
 						chain[i] = {
 							type: 'text',
-							data: { content: `[${QFace.idToDes(seg.data.id)}]` }
+							data: { content: `@${name}` }
+						}
+					}
+
+					if (seg.type === 'face' && target.platform !== session.platform) {
+						chain[i] = {
+							type: 'text',
+							data: { content: `[${QFace.idToText(seg.data.id)}]` }
 						}
 					}
 				}
@@ -190,7 +199,7 @@ function middleware(ctx: Context) {
 							})
 						}
 					}
-					logger.info(modules)
+					// logger.info(modules)
 					chain.splice(0, chain.length)
 					for (const i in modules) {
 						chain.push({
