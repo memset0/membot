@@ -15,7 +15,6 @@ export function adaptJavaServerMeta(address: string, meta: JavaEditionServerStat
 	// logger.info('java', meta)
 	let flushString = `服务器: ${address} (Java Edition)`
 	if (meta.favicon) {
-		logger.info(meta.favicon.slice(0, 50))
 		flushString += segment.image('base64://' + meta.favicon.slice('data:image/png;base64,'.length))
 	}
 	if (meta.description) {
