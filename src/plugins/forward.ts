@@ -128,7 +128,7 @@ function middleware(ctx: Context) {
 				for (const i in chain) {
 					const seg = chain[i]
 
-					if ((seg.type === 'json' || seg.type === 'forward') && target.platform !== session.platform) {
+					if ((seg.type === 'card' || seg.type === 'json' || seg.type === 'forward') && target.platform !== session.platform) {
 						chain[i] = { type: 'text', data: { content: '' } }
 					}
 
@@ -146,9 +146,7 @@ function middleware(ctx: Context) {
 					}
 
 					if (seg.type === 'at' && target.platform !== session.platform) {
-						const name = seg.data.name ||
-							(await getUserName(session.platform, seg.data.id, { guildId: session.guildId, session })) ||
-							seg.data.id
+						const name = seg.data.name || (await getUserName(session.platform, seg.data.id, { guildId: session.guildId, session })) || seg.data.id
 						chain[i] = {
 							type: 'text',
 							data: { content: `@${name}` }
@@ -177,9 +175,7 @@ function middleware(ctx: Context) {
 				if (!target.enhanced) {
 					chain.splice(start, 0, {
 						type: 'text',
-						data: {
-							content: (target.prefix || '') + `${session.username}: `,
-						},
+						data: { content: (target.prefix || '') + `${session.username}: `, },
 					})
 
 				} else if (target.platform === 'kaiheila') {
