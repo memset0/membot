@@ -6,7 +6,7 @@ export const name = 'echo';
 export const logger = new Logger('echo');
 
 export function apply(ctx: Context) {
-	ctx.command('echo <message:text>', '复读', { authority: 2 })
+	ctx.command('echo <message:text>', '复读', { authority: 3 })
 		.option('at', '-a [id]')
 		.action(({ session, options }, message) => {
 			if (options.at) {
