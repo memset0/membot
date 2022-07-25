@@ -5,7 +5,7 @@ const config = require('./src/config').default;
 module.exports = {
 	...config.options,
 	nickname: config.nickname,
-  minSimilarity: 0,
+	minSimilarity: 0,
 	autoAuthorize: (ses) => (ses.groupId ? 1 : 0),
 
 	watch: config.watch ? {

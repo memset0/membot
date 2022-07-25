@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 import * as request from 'superagent';
 
 export const name = 'zdic';
-export const logger = new Logger('command-zdic');
+export const logger = new Logger('zdic');
 
 interface DataSection {
 	title?: string,

@@ -10,8 +10,7 @@ declare module 'koishi' {
 
 export const name = 'auth';
 export const using = ['database'];
-
-export const logger = new Logger('plugin-auth');
+export const logger = new Logger('auth');
 
 
 export function parseUserId(id) {

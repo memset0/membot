@@ -3,7 +3,7 @@ import { segment, Context, Logger } from 'koishi';
 
 
 export const name = 'echo';
-export const logger = new Logger('plugin-echo');
+export const logger = new Logger('echo');
 
 export function apply(ctx: Context) {
 	ctx.command('echo <message:text>', '复读', { authority: 2 })
