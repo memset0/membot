@@ -55,16 +55,6 @@ export async function apply(ctx: Context) {
 			return `用户${segment('at', { id: userId })}的权限为 ${authority} 级。`;
 		});
 
-	ctx.command('auth.ban <id>', '封禁用户', { authority: 4 })
-		.userFields(['authority'])
-		.action(async ({ session }, id) => {
-			if (session.user.authority < 4) {
-				return '你没有封禁用户的权限。';
-			}
-
-			return session.execute('auth.give 0 ' + id);
-		});
-
 	ctx.command('auth.give <level> <id>', '用户授权', { authority: 4 })
 		.userFields(['authority'])
 		.before(({ session }, ...args) => {

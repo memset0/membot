@@ -3,27 +3,30 @@ import { segment, Context, Logger } from 'koishi'
 const logger = new Logger('bot-sendmsg')
 
 export default function (ctx: Context) {
-	ctx.command('bot.sendmsg <userId:string> <guildId:string> <message:text>', '发送消息', { authority: 4 })
-		.action(({ session }, userId, guildId, message) => {
-			if (userId === '=') { userId = session.userId }
-			if (guildId === '=') { guildId = session.guildId }
-			if (!userId || !guildId || !message) { return session.execute('help bot.sendmsg') }
-			logger.info({ userId, guildId, message })
+	ctx.command('bot.sendmsg <channelId:string> <message:text>', '发送消息', { authority: 4 })
+		.option('at', '-a <string>')
+		.option('platform', '-p <string>')
+		.action(async ({ session, options }, channelId, message) => {
+			if (!channelId || !message) { return session.execute('help bot.sendmsg') }
+			if (channelId === '.') { channelId = session.channelId }
 
-			if (guildId) {
-				if (!parseInt(guildId)) {
-					session.bot.sendPrivateMessage(userId, message)
-				} else {
-					if (userId === '0') {
-						session.bot.sendMessage(guildId, message)
-					} else {
-						session.bot.sendMessage(guildId, segment('at', { id: userId }) + message)
-					}
+			const platform = options.platform || session.platform
+			// logger.info({ channelId, message, platform, options })
+
+			if (options.at) {
+				let userId = null
+				const target = segment.parse(options.at)[0]
+				if (target.type == 'at') {
+					userId = target.data?.id
+				} else if (target.type == 'text') {
+					userId = target.data?.content
 				}
-			} else {
-				if (message) {
-					return segment.unescape(message)
+				if (userId) {
+					message = segment('at', { id: userId }) + message
 				}
 			}
+
+			// logger.info('broadcast', channelId, message)
+			await ctx.broadcast([`${platform}:${channelId}`], message)
 		})
 }
