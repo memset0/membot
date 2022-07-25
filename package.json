@@ -3,7 +3,7 @@
   "version": "3.1.1",
   "main": "koishi.config.js",
   "repository": "https://github.com/memset0/membot.git",
-  "author": "memset0 <34177126+memset0@users.noreply.github.com>",
+  "author": "memset0 <memset0@outlook.com>",
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@koishijs/client": "^3.4.4",
