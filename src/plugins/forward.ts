@@ -72,7 +72,7 @@ export async function apply(ctx: Context, config: Config) {
 
 
 function ignore(chain: segment.Chain) {
-	if (chain[0].type === 'quote') {
+	if (chain?.[0]?.type === 'quote') {
 		chain = chain.slice(1)
 	}
 	return segment.join(chain).trim().startsWith('//')
