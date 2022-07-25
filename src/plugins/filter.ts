@@ -15,8 +15,12 @@ export async function apply(ctx: Context) {
 		 * 风险控制
 		 */
 		if (session.platform == 'onebot' && session.type == 'message' && (session.subtype == 'private' || !session.guildId || !session.channelId)) {
-			// 由于腾讯方面的限制，onebot 平台发送的私聊回话消息应拒绝回复，否则容易导致机器人冻结。
-			return;
+			const user = await ctx.database.getUser(session.platform, session.author.userId);
+			const authority = user?.authority ? user.authority : 1;
+			if (authority <= 1) {
+				// 由于腾讯方面的限制，onebot 平台发送的私聊回话消息应拒绝回复，否则容易导致机器人冻结。
+				return;
+			}
 		}
 		// if (session.platform != 'onebot') { logger.info(session); }
 
