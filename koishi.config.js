@@ -29,9 +29,9 @@ module.exports = {
 		recall: {},
 		logger: {},
 		suggest: {},
-		manager: {},
 		status: {},
 		sandbox: {},
+		// manager: {},
 		// puppeteer: {},
 		// commands: {},   // not works
 	}
