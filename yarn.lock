@@ -284,6 +284,13 @@
     reggol "^1.0.3"
     schemastery "^3.4.3"
 
+"@l2studio/minecraft-ping@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.npmmirror.com/@l2studio/minecraft-ping/-/minecraft-ping-0.1.1.tgz#2712555e395e8bb13bc48947efe1c1e68d582860"
+  integrity sha512-Mix7kurH4y3n67ihqEvD6auAwXp0qR7MArhhWl+3Jr4Eoxkvc1cuYw8SnaitBTr5PGg5CJUIWoV8yOBm8EVZyg==
+  dependencies:
+    debug "^4.3.1"
+
 "@minatojs/driver-mysql@^1.2.1":
   version "1.2.1"
   resolved "https://registry.npmmirror.com/@minatojs/driver-mysql/-/driver-mysql-1.2.1.tgz#83ff84489428f9630402c85b3d9b9012f289f4e7"
@@ -885,6 +892,11 @@ asynckit@^0.4.0:
   resolved "https://registry.npmmirror.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
+await-timeout@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmmirror.com/await-timeout/-/await-timeout-1.1.1.tgz#d42062ee6bc4eb271fe4d4f851eb658dae7e3906"
+  integrity sha512-gsDXAS6XVc4Jt+7S92MPX6Noq69bdeXUPEaXd8dk3+yVr629LTDLxNt4j1ycBbrU+AStK2PhKIyNIM+xzWMVOQ==
+
 axios@^0.24.0:
   version "0.24.0"
   resolved "https://registry.npmmirror.com/axios/-/axios-0.24.0.tgz#804e6fa1e4b9c5288501dd9dff56a7a0940d20d6"
@@ -1244,7 +1256,7 @@ dayjs@^1.11.3:
   resolved "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.3.tgz#4754eb694a624057b9ad2224b67b15d552589258"
   integrity sha512-xxwlswWOlGhzgQ4TKzASQkUhqERI3egRNqgV4ScR8wlANA/A9tZ7miXa44vTTKEq5l7vWoL5G57bG3zA+Kow0A==
 
-debug@4, debug@4.3.4, debug@^4.1.1, debug@^4.3.2, debug@^4.3.4:
+debug@4, debug@4.3.4, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4:
   version "4.3.4"
   resolved "https://registry.npmmirror.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
   integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
