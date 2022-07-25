@@ -1,4 +1,4 @@
-// import { Context } from '@koishijs/core';
+// import { Context } from 'koishi';
 // import { apply as applyDefault, Config as ConfigDefault } from '@koishijs/plugin-puppeteer';
 
 // export interface Config extends ConfigDefault { };

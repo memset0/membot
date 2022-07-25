@@ -1,4 +1,4 @@
-import { Session } from '@koishijs/core';
+import { Session } from 'koishi';
 
 export async function sendMessageList(session: Session, messageList: Array<String>) {
 	await session.send(messageList.join('\n'));

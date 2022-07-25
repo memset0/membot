@@ -1,4 +1,4 @@
-import { Context, Logger } from '@koishijs/core';
+import { Context, Logger } from 'koishi';
 
 import { initSpider, get, getJSON } from './api';
 import { Checker } from './utils';
