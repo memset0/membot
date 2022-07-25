@@ -4,7 +4,7 @@ import * as qface from 'qface'
 
 export class QFace {
 	public static idToText(id) {
-		return qface.get(id).QDes
+		return qface.get(id)?.QDes || 'QQ表情'
 	}
 	public static idToUrl(id) {
 		return qface.getUrl(id, 'https://qq-face.vercel.app')
