@@ -128,6 +128,10 @@ function middleware(ctx: Context) {
 				for (const i in chain) {
 					const seg = chain[i]
 
+					if ((seg.type === 'json' || seg.type === 'forward') && target.platform !== session.platform) {
+						chain[i] = { type: 'text', data: { content: '' } }
+					}
+
 					if (seg.type === 'image' && seg.data.url?.startsWith('http') && transformBase64) {
 						try {
 							const data = await ctx.http.get(seg.data.url, { responseType: 'arraybuffer' })
