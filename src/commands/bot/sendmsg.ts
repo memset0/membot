@@ -5,6 +5,7 @@ const logger = new Logger('bot-sendmsg')
 export default function (ctx: Context) {
 	ctx.command('bot.sendmsg <channelId:string> <message:text>', '发送消息', { authority: 4 })
 		.option('at', '-a <string>')
+		.option('quote', '-q <string>')
 		.option('platform', '-p <string>')
 		.action(async ({ session, options }, channelId, message) => {
 			if (!channelId || !message) { return session.execute('help bot.sendmsg') }
@@ -24,6 +25,10 @@ export default function (ctx: Context) {
 				if (userId) {
 					message = segment('at', { id: userId }) + message
 				}
+			}
+
+			if (options.quote) {
+				message = segment('quote', { id: options.quote as string, channelId: session.channelId }) + message
 			}
 
 			// logger.info('broadcast', channelId, message)
