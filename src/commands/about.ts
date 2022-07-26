@@ -3,7 +3,7 @@ import { Context, segment } from 'koishi'
 import { deepCopy } from '../utils/type'
 
 
-export const name = 'about';
+export const name = 'about'
 
 
 function adaptOnebot(chain) {

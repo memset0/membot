@@ -5,7 +5,7 @@ import ping from './ping'
 
 export const name = 'minecraft'
 export const using = []
-export const logger = new Logger('minecraft');
+export const logger = new Logger('minecraft')
 
 
 

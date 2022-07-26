@@ -1,5 +1,5 @@
-import { Context, segment } from 'koishi';
-import { toDataURL } from 'qrcode';
+import { Context, segment } from 'koishi'
+import { toDataURL } from 'qrcode'
 
 export default function (ctx: Context) {
 	ctx.command('qrcode <text:text>', '生成二维码')
@@ -9,13 +9,13 @@ export default function (ctx: Context) {
 		.option('dark', '-d <color>  暗部颜色')
 		.option('light', '-l <color>  亮部颜色')
 		.action(async ({ options }, text) => {
-			if (!text) return '请输入源文本。';
-			if (text.includes('[CQ:')) return '禁止输入纯文本以外的内容。';
+			if (!text) return '请输入源文本。'
+			if (text.includes('[CQ:')) return '禁止输入纯文本以外的内容。'
 
-			const { margin, scale, width, dark, light } = options;
-			const dataURL = await toDataURL(text, { margin, scale, width, color: { dark, light } });
+			const { margin, scale, width, dark, light } = options
+			const dataURL = await toDataURL(text, { margin, scale, width, color: { dark, light } })
 
 			// data:image/png;base64,
-			return segment.image('base64://' + dataURL.slice(22));
+			return segment.image('base64://' + dataURL.slice(22))
 		})
 }
