@@ -19,7 +19,7 @@
         "packages/*/src"
       ],
     },
-    "strict": true,
+    "strict": false,
     "strictNullChecks": false,
     "forceConsistentCasingInFileNames": true,
     "target": "es2020",
