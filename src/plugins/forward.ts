@@ -114,10 +114,10 @@ function middleware(ctx: Context) {
 							}
 						}
 						if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === author[0]) {
-							chain.splice(1, 1)
-							if (chain[0].type == 'text') {
-								chain[0].data.content = chain[0].data.content.trim()
+							if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
+								chain[2].data.content = chain[2].data.content.slice(1)
 							}
+							chain.splice(1, 1)
 						}
 					} else {
 						chain[0] = {
