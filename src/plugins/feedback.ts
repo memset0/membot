@@ -1,23 +1,25 @@
 import { segment, Bot, Context, Session } from 'koishi'
 
-import config from '../config'
-
 export const name = 'feedback'
 
-export async function apply(ctx: Context) {
+export interface Config {
+	master: {
+		platform: string
+		userId: string
+	}
+}
+
+
+export async function apply(ctx: Context, config: Config) {
 	// onebot 平台下机器人被 @ 时自动转发给主人の账号
 	let bot: null | Bot = null
-	let botSelfId: null | string = null
-
-	for (const currentBot of ctx.bots)
-		if (currentBot.platform == 'onebot') {
+	for (const currentBot of ctx.bots) {
+		if (currentBot.platform == config.master.platform) {
 			bot = currentBot
-			botSelfId = currentBot.config['selfId']
+			break
 		}
-	if (!bot || !botSelfId) {
-		return
 	}
-	const keyString = '[CQ:at,id=' + botSelfId + ']'
+	const keyString = '[CQ:at,id=' + bot.selfId + ']'
 	const footer = '\n警告：请不要滥用此功能，否则可能导致账号被机器人封禁。'
 
 	ctx.middleware((session: Session, next) => {
@@ -32,13 +34,13 @@ export async function apply(ctx: Context) {
 				const channel = session.channelName ? `${session.channelName}(${session.channelId})` : session.channelId
 				const from = session.guildId === 'private' ? `用户 ${user}` : `群聊 ${channel} 的用户 ${user}`
 
-				content = `[Feedback] 来自 ${from}\n${content.replace(keyString, '@' + config.nickname).trim()}\n`
+				content = `[Feedback] 来自 ${from}\n${content.replace(keyString, '@' + ctx.options.nickname).trim()}\n`
 				content += `封禁：.bot.ban ${session.author.userId}\n`
 				content += session.guildId === 'private' ?
 					`回复：.bot.sendmsg ${session.channelId} -q ${session.messageId} (message)` :
 					`回复：.bot.sendmsg ${session.channelId} -a ${session.author.userId} -q ${session.messageId} (message)`
 
-				bot.sendPrivateMessage(config.master.onebot, content)
+				bot.sendPrivateMessage(config.master.userId, content)
 				return `${segment('at', { id: session.author.userId })}你的反馈已转发给主人，想说什么就继续留言哦。但如果你不文明的话……哼，小心我不理你！` + footer
 			}
 		}

@@ -1,8 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 const YAML = require('yaml')
-const config = require('./src/config').default
 
+const configFile = path.join(__dirname, './config.yml')
+const config = YAML.parse(fs.readFileSync(configFile).toString())
 
 const i18nLocaleFile = path.join(__dirname, './src/i18n-patch.yml')
 const i18nLocale = YAML.parse(fs.readFileSync(i18nLocaleFile).toString())
@@ -16,7 +17,6 @@ config.plugins.locales.i18n = {
 
 module.exports = {
 	...config.options,
-	nickname: config.nickname,
 	minSimilarity: 0,
 	autoAuthorize: (ses) => (ses.groupId ? 1 : 0),
 

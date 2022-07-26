@@ -1,8 +1,5 @@
 import { Context, Logger } from 'koishi';
 
-import config from '../config';
-
-
 
 export const name = 'filter';
 export const using = ['database'];
@@ -10,7 +7,9 @@ export const logger = new Logger('filter');
 
 
 export async function apply(ctx: Context) {
-	ctx.middleware(async (session, next) => {
+		const prefixes = (typeof ctx.options.prefix === 'string' ? [ctx.options.prefix] : ctx.options.prefix) as string[]
+
+ctx.middleware(async (session, next) => {
 		/**
 		 * 风险控制
 		 */
@@ -34,7 +33,7 @@ export async function apply(ctx: Context) {
 			// 说明用户已被封禁
 			let flagAlert = false;
 			if (session.type == 'message' && session.subtype == 'group') {
-				if (config.options.prefix.includes(session.content[0])) {
+				if (prefixes.includes(session.content[0])) {
 					flagAlert = true;
 				}
 			}
@@ -47,14 +46,14 @@ export async function apply(ctx: Context) {
 		/** 
 		 * 指令临时禁用
 		 */
-		if (config.options.prefix.includes(session.content[0])) {
-			const content = session.content.slice(1);
-			if (!(config.master[session.platform] && config.master[session.platform] == session.author.userId)) {
-				if (content.startsWith('recall') || content.startsWith('usage') || content.startsWith('timer')) {
-					return '该指令被暂时禁用。';
-				}
-			}
-		}
+		// if (prefixes.includes(session.content[0])) {
+		// 	const content = session.content.slice(1);
+		// 	if (!(config.master[session.platform] && config.master[session.platform] == session.author.userId)) {
+		// 		if (content.startsWith('recall') || content.startsWith('usage') || content.startsWith('timer')) {
+		// 			return '该指令被暂时禁用。';
+		// 		}
+		// 	}
+		// }
 
 		return next();
 	}, true /* 表示前置中间件 */);
