@@ -6,7 +6,7 @@ import { sliceWithEllipsis } from '../utils/string'
 import { QFace, getUserName } from '../utils/onebot'
 
 
-interface ForwardingMeta {
+interface ForwardTarget {
 	to?: string
 	platform?: string
 	channelId?: string
@@ -14,10 +14,14 @@ interface ForwardingMeta {
 	template?: string
 	enhanced?: boolean
 	showSource?: boolean
+
+	options?: {
+		[key: string]: any
+	}
 }
 
 interface Config {
-	[id: string]: Array<ForwardingMeta>
+	[id: string]: Array<ForwardTarget>
 }
 
 
@@ -44,6 +48,13 @@ export async function apply(ctx: Context, config: Config) {
 			if (!e.template) { e.template = `${e.prefix || ''} <userName>: ` }
 			if (!e.to || !e.platform || !e.channelId) { logger.warn('Missing target channel config.') }
 			if (e.platform != 'kaiheila' && e.enhanced) { logger.warn(`Platform ${source.split(':')[0]} does't support enhanced mode.`) }
+
+			e.options = {
+				record: true,
+				usePrefix: !e.enhanced,
+				transformBase64: !(e.platform === 'kaiheila'),
+				...(e.options || {}),
+			}
 		}
 	}
 
@@ -80,6 +91,74 @@ function ignore(chain: segment.Chain) {
 }
 
 
+function enhancePlatformKook(chain: any[], session: Session, target: ForwardTarget) {
+	if (target.platform === 'kaiheila') {
+		const time = new Date(session.timestamp)
+		const theme = isInteger(session.author.userId) ?
+			KookCardThemes[parseInt(session.author.userId) % (KookCardThemes.length - 1)] :
+			'secondary'
+		const modules: any[] = []
+		for (let l = 0, r = -1, m = -1; l < chain.length; l = r) {
+			m = l
+			while (m < chain.length && chain[m].type !== 'image') { m++ }
+			r = m
+			while (r < chain.length && chain[r].type === 'image') { r++ }
+			let content = segment.join(chain.slice(l, m))
+				.replace(/\&\#91\;/g, '[')
+				.replace(/\&\#93\;/g, ']')
+			if (l > 0) { content = content.replace(/^\s+/, '') }
+			if (r < chain.length) { content = content.replace(/\s+$/, '') }
+			modules.push([{
+				'type': 'section',
+				'mode': 'left',
+				'text': {
+					'type': 'kmarkdown',
+					'content': `**${session.username}** ${time.format('yyyy-MM-dd hh:mm:ss')}\n${content}`
+				},
+				'accessory': { 'type': 'image', 'size': 'sm', 'src': session.author.avatar }
+			}])
+			if (r - m === 1) {
+				modules[modules.length - 1].push({
+					'type': 'container',
+					'elements': [{
+						'type': 'image',
+						'src': chain[m].data.url
+					}]
+				})
+			} else if (r - m > 1) {
+				modules[modules.length - 1].push({
+					'type': 'image-group',
+					'elements': chain.slice(m, r).map((e) => ({ 'type': 'image', 'src': e.data.url }))
+				})
+			}
+			if (target.showSource) {
+				modules[modules.length - 1].push({
+					'type': 'context',
+					'elements': [{
+						'type': 'kmarkdown',
+						'content': `来自 ${session.platform} 平台的消息`
+					}],
+				})
+			}
+		}
+		chain.splice(0, chain.length)
+		for (const i in modules) {
+			chain.push({
+				type: 'card',
+				data: {
+					content: JSON.stringify({
+						'type': 'card',
+						'theme': theme,
+						'size': 'lg',
+						'modules': modules[i]
+					})
+				},
+			})
+		}
+	}
+}
+
+
 function middleware(ctx: Context) {
 	return function (session: Session, next: () => void) {
 		const chain = segment.parse(session.content)
@@ -88,9 +167,8 @@ function middleware(ctx: Context) {
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
 
 		forwardingList[`${session.platform}:${session.channelId}`]
-			.forEach(async (target: ForwardingMeta) => {
+			.forEach(async (target: ForwardTarget) => {
 				let start = 0
-				let transformBase64 = !(target.platform === 'kaiheila')
 
 				if (chain?.[0]?.type === 'quote') {
 					const quote = chain?.[0]
@@ -134,7 +212,7 @@ function middleware(ctx: Context) {
 						chain[i] = { type: 'text', data: { content: '' } }
 					}
 
-					if (seg.type === 'image' && seg.data.url?.startsWith('http') && transformBase64) {
+					if (seg.type === 'image' && seg.data.url?.startsWith('http') && target.options.transformBase64) {
 						try {
 							const data = await ctx.http.get(seg.data.url, { responseType: 'arraybuffer' })
 							const img = Buffer.from(data).toString('base64')
@@ -174,7 +252,7 @@ function middleware(ctx: Context) {
 					}
 				}
 
-				if (!target.enhanced) {
+				if (target.options.usePrefix) {
 					chain.splice(start, 0, {
 						type: 'text',
 						data: {
@@ -184,88 +262,35 @@ function middleware(ctx: Context) {
 								.replace(/<userName>/g, session.author.username)
 						},
 					})
-
-				} else if (target.platform === 'kaiheila') {
-					const time = new Date(session.timestamp)
-					const theme = isInteger(session.author.userId) ?
-						KookCardThemes[parseInt(session.author.userId) % (KookCardThemes.length - 1)] :
-						'secondary'
-					const modules: any[] = []
-					for (let l = 0, r = -1, m = -1; l < chain.length; l = r) {
-						m = l
-						while (m < chain.length && chain[m].type !== 'image') { m++ }
-						r = m
-						while (r < chain.length && chain[r].type === 'image') { r++ }
-						let content = segment.join(chain.slice(l, m))
-							.replace(/\&\#91\;/g, '[')
-							.replace(/\&\#93\;/g, ']')
-						if (l > 0) { content = content.replace(/^\s+/, '') }
-						if (r < chain.length) { content = content.replace(/\s+$/, '') }
-						modules.push([{
-							'type': 'section',
-							'mode': 'left',
-							'text': {
-								'type': 'kmarkdown',
-								'content': `**${session.username}** ${time.format('yyyy-MM-dd hh:mm:ss')}\n${content}`
-							},
-							'accessory': { 'type': 'image', 'size': 'sm', 'src': session.author.avatar }
-						}])
-						if (r - m === 1) {
-							modules[modules.length - 1].push({
-								'type': 'container',
-								'elements': [{
-									'type': 'image',
-									'src': chain[m].data.url
-								}]
-							})
-						} else if (r - m > 1) {
-							modules[modules.length - 1].push({
-								'type': 'image-group',
-								'elements': chain.slice(m, r).map((e) => ({ 'type': 'image', 'src': e.data.url }))
-							})
-						}
-						if (target.showSource) {
-							modules[modules.length - 1].push({
-								'type': 'context',
-								'elements': [{
-									'type': 'kmarkdown',
-									'content': `来自 ${session.platform} 平台的消息`
-								}],
-							})
-						}
-					}
-					chain.splice(0, chain.length)
-					for (const i in modules) {
-						chain.push({
-							type: 'card',
-							data: {
-								content: JSON.stringify({
-									'type': 'card',
-									'theme': theme,
-									'size': 'lg',
-									'modules': modules[i]
-								})
-							},
-						})
-					}
 				}
+
+				if (target.enhanced) {
+					switch (target.platform) {
+						case "kaiheila": {
+							enhancePlatformKook(chain, session, target)
+							break
+						}
+				}
+			}
 
 				ctx.broadcast([target.to], segment.join(chain))
 					.then(([id]) => {
-						messageRecord.push([
-							session.platform,
-							target.platform,
-							[session.messageId, session.channelId],
-							[id, target.channelId],
-							[session.author.userId, session.author.nickname || session.author.username],
-							sliceWithEllipsis(shortcut.join(' '), 15),
-						])
+						if (target.options.record) {
+							messageRecord.push([
+								session.platform,
+								target.platform,
+								[session.messageId, session.channelId],
+								[id, target.channelId],
+								[session.author.userId, session.author.nickname || session.author.username],
+								sliceWithEllipsis(shortcut.join(' '), 15),
+							])
+						}
 						if (messageRecord.length > 1000) {
 							messageRecord.shift()
 						}
 					})
 			})
 
-		return next()
-	}
+	return next()
+}
 }
