@@ -38,7 +38,7 @@ ctx.middleware(async (session, next) => {
 				}
 			}
 			if (flagAlert) {
-				return '你已被封禁，无法调用指令，更多信息请联系机器人作者。'
+				return '你已被封禁，无法调用指令，更多信息请联系机器人作者'
 			}
 			return;
 		}
