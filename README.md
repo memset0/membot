@@ -2,7 +2,7 @@
 
 <h1>membot</h1>
 
-综合型自用 qq 机器人。
+综合向自用 qq 机器人，欢迎来抄功能 / 找锅锅！
 
 ### Usage
 
@@ -17,8 +17,9 @@ yarn dev     # 调试
 * [koishi - Cross-platform chatbot framework made with love](https://github.com/koishijs/koishi)
 * [satori - The Universal Messenger Protocol](https://github.com/satorijs/satori)
 * [go-cqhttp - cqhttp 的 golang 实现，轻量、原生跨平台](https://github.com/Mrs4s/go-cqhttp)
-* [QQ Face ID Table](https://qq-face.vercel.app/)
+* [OneBot 12 标准草案](https://12.onebot.dev/)
 * [KOOK 开发者平台 文档](https://developer.kookapp.cn/doc/intro)
+* [QQ Face ID Table](https://qq-face.vercel.app/)
 * [漢典 - 漢語字典, 漢語詞典, 康熙字典, 說文解字, 音韻方言, 字源字形, 異體字](https://www.zdic.net)
 * [DoMCer API](http://api.domcer.com/)
 <!-- * [王斌给您对对联 -_-!](https://ai.binwang.me/couplet/) -->
