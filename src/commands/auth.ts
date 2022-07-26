@@ -13,7 +13,7 @@ export const using = ['database'];
 export const logger = new Logger('auth');
 
 
-export function parseUserId(id) {
+export function parseUserId(id: string) {
 	const target = segment.parse(id)[0];
 	if (target.type == 'at') {
 		return target.data.id;

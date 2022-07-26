@@ -29,12 +29,13 @@ export function apply(ctx: Context) {
 			const url = apiRoot + encodeURIComponent(word);
 			const footer = '\n来源：' + url;
 
-			let text = null, $ = null;
+			let text: string | null = null
+			let $: cheerio.Root | null = null;
 			try {
 				text = (await request.get(url)).text;
 				$ = cheerio.load(text);
 			} catch (error) {
-				if (error.mesasage) {
+				if (error.message) {
 					return '请求错误：' + error.message;
 				} else {
 					return '请求错误';
@@ -65,7 +66,7 @@ export function apply(ctx: Context) {
 			return result + footer;
 
 
-			function HanziSolve(section: Element): string {
+			function HanziSolve(section: cheerio.Element): string {
 				let result = '';
 				result += '【汉典·汉字释义】' + word + '\n';
 
