@@ -11,6 +11,7 @@ interface ForwardingMeta {
 	platform?: string
 	channelId?: string
 	prefix?: string
+	template?: string
 	enhanced?: boolean
 	showSource?: boolean
 }
@@ -40,9 +41,9 @@ export async function apply(ctx: Context, config: Config) {
 			} else if (e.platform && e.channelId) {
 				e.to = `${e.platform}:${e.channelId}`
 			}
-			if (!e.to || !e.platform || !e.channelId) { logger.warn('missing target channel config') }
-			if (!e.prefix) { e.prefix = '' }
-			if (e.platform != 'kaiheila' && e.enhanced) { logger.warn(`platform ${source.split(':')[0]} does't support enhanced mode`) }
+			if (!e.template) { e.template = `${e.prefix || ''} <userName>: ` }
+			if (!e.to || !e.platform || !e.channelId) { logger.warn('Missing target channel config.') }
+			if (e.platform != 'kaiheila' && e.enhanced) { logger.warn(`Platform ${source.split(':')[0]} does't support enhanced mode.`) }
 		}
 	}
 
@@ -83,6 +84,7 @@ function middleware(ctx: Context) {
 	return function (session: Session, next: () => void) {
 		const chain = segment.parse(session.content)
 		if (!session.channelId || ignore(chain)) { return next() }
+		if (session.author.userId === session.bot.selfId) { return next() }
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
 
 		forwardingList[`${session.platform}:${session.channelId}`]
@@ -175,7 +177,12 @@ function middleware(ctx: Context) {
 				if (!target.enhanced) {
 					chain.splice(start, 0, {
 						type: 'text',
-						data: { content: (target.prefix || '') + `${session.username}: `, },
+						data: {
+							content: target.template
+								.replace(/\\n/g, '\n')
+								.replace(/<userId>/g, session.author.userId)
+								.replace(/<userName>/g, session.author.username)
+						},
 					})
 
 				} else if (target.platform === 'kaiheila') {
@@ -183,7 +190,7 @@ function middleware(ctx: Context) {
 					const theme = isInteger(session.author.userId) ?
 						KookCardThemes[parseInt(session.author.userId) % (KookCardThemes.length - 1)] :
 						'secondary'
-					const modules = []
+					const modules: any[] = []
 					for (let l = 0, r = -1, m = -1; l < chain.length; l = r) {
 						m = l
 						while (m < chain.length && chain[m].type !== 'image') { m++ }
