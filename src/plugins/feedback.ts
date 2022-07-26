@@ -1,4 +1,4 @@
-import { segment, Bot, Context, Session } from 'koishi'
+import { Bot, Context, Session, segment } from 'koishi'
 
 export const name = 'feedback'
 
@@ -19,11 +19,12 @@ export async function apply(ctx: Context, config: Config) {
 			break
 		}
 	}
-	const keyString = '[CQ:at,id=' + bot.selfId + ']'
 	const footer = '\n警告：请不要滥用此功能，否则可能导致账号被机器人封禁。'
 
 	ctx.middleware((session: Session, next) => {
 		if (session.platform == 'onebot') {
+			const keyString = segment('at', { id: session.bot.selfId })
+
 			if (session.content.indexOf(keyString) !== -1 && !session.content.startsWith('[CQ:quote,id=')) {
 				let content = session.content
 				if (content.replace(keyString, '').replace(/\s/g, '') == '') {
