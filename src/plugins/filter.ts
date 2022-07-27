@@ -7,13 +7,13 @@ export const logger = new Logger('filter')
 
 
 export async function apply(ctx: Context) {
-		const prefixes = (typeof ctx.options.prefix === 'string' ? [ctx.options.prefix] : ctx.options.prefix) as string[]
+	const prefixes = (typeof ctx.options.prefix === 'string' ? [ctx.options.prefix] : ctx.options.prefix) as string[]
 
-ctx.middleware(async (session, next) => {
+	ctx.middleware(async (session, next) => {
 		/**
 		 * 风险控制
 		 */
-		if (session.platform == 'onebot' && session.type == 'message' && (session.subtype == 'private' || !session.guildId || !session.channelId)) {
+		if (session.platform === 'onebot' && session.type === 'message' && (session.subtype === 'private' || !session.guildId || !session.channelId)) {
 			const user = await ctx.database.getUser(session.platform, session.author.userId)
 			const authority = user?.authority ? user.authority : 1
 			if (authority <= 1) {
@@ -21,7 +21,10 @@ ctx.middleware(async (session, next) => {
 				return
 			}
 		}
-		// if (session.platform != 'onebot') { logger.info(session) }
+		if (session.platform === 'telegram' && session.author?.isBot) {
+			// 不处理其他 Telegram Bot 发送的消息
+			return
+		}
 
 		const user = await ctx.database.getUser(session.platform, session.author.userId)
 		const authority = user && Object.keys(user).includes('authority') ? user.authority : 1
