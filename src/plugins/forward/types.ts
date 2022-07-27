@@ -25,20 +25,32 @@ export interface ForwardTarget {
 }
 
 export type MessageRecord = [
-	string,
-	string,
-	[string, string],
-	[string, string],
-	[string, string],
-	string
+	string,   // session.platform
+	string,   // target.platform
+	[string, string],   // session.messageId&channelId
+	[string, string],   // id & target.channelId
+	[string, string],   // session.author.userId&nickname
+	string,   // message shortcut
 ]
+
+export interface MessageRecordMeta {
+	messageId: string
+	channelId: string
+	platform: string
+	author: {
+		userId: string
+		username: string
+	}
+	shortcut: string
+}
+
 
 export const Type2Text: TypeDictionary = {
 	image: '<图片>',
 	file: '<文件>',
 	card: '<卡片>',
 	record: '<录音>',
-	json:'<小程序>',
+	json: '<小程序>',
 	forward: '<转发的消息>',
 	audio: '<音频>',
 	photo: '<照片>',

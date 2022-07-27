@@ -5,9 +5,9 @@ import { sliceWithEllipsis } from '../../utils/string'
 import { QFace, getUserName } from '../../utils/onebot'
 import { webp2jpg, webm2jpg, mp42jpg } from '../../utils/file-type'
 
-import { ForwardTarget, MessageRecord, Type2Text } from './types'
 import adaptPlatformKook from './platform/kook'
 import adaptPlatformTelegram from './platform/telegram'
+import { ForwardTarget, MessageRecord, Type2Text, MessageRecordMeta } from './types'
 
 
 export interface Config {
@@ -15,6 +15,7 @@ export interface Config {
 }
 
 const forwardingList: Config = {}
+const revForwardingList: Config = {}
 const messageRecord: Array<MessageRecord> = []
 
 
@@ -24,8 +25,7 @@ export async function apply(ctx: Context, config: Config) {
 	const logger = ctx.logger(name)
 
 	for (const source in config) {
-		const targets = config[source]
-		forwardingList[source] = targets
+		forwardingList[source] = config[source]
 		for (const e of forwardingList[source]) {
 			if (e.to) {
 				if (!e.platform) e.platform = e.to.split(':')[0]
@@ -52,6 +52,22 @@ export async function apply(ctx: Context, config: Config) {
 		}
 	}
 
+	for (const source in forwardingList) {
+		for (const e of forwardingList[source]) {
+			const target = e.to
+			const copied = JSON.parse(JSON.stringify(e))
+			copied.to = source
+			copied.platform = source.split(':')[0]
+			copied.channelId = source.split(':')[1]
+
+			if (!Object.keys(revForwardingList).includes(target)) {
+				revForwardingList[target] = []
+			}
+			revForwardingList[target].push(copied)
+		}
+	}
+
+
 	ctx.command('bot.forward', '消息转发帮助', { authority: 3 })
 		.option('list', '-l 查看转发列表')
 		.option('info', '-i 查看本群 id')
@@ -74,6 +90,62 @@ export async function apply(ctx: Context, config: Config) {
 		})
 
 	ctx.middleware(middleware(ctx))
+	ctx.on('message-deleted', onMessageDeleted)
+}
+
+
+function findMessage(messageId: string | undefined, sessionPlatform: string, targetPlatform: string): MessageRecordMeta | undefined {
+	/* export type MessageRecord = [
+		string,   // session.platform
+		string,   // target.platform
+		[string, string],   // session.messageId&channelId
+		[string, string],   // target.messageId&channelId
+		[string, string],   // session.author.userId&nickname
+		string,   // message shortcut
+	] */
+	for (const record of messageRecord) {
+		if (record[0] === sessionPlatform && record[1] === targetPlatform && record[2][0] === messageId) {
+			return {
+				messageId: record[3][0],
+				channelId: record[3][1],
+				platform: record[1],
+				author: {
+					userId: record[4][0],
+					username: record[4][1],
+				},
+				shortcut: record[5],
+			} as MessageRecordMeta
+		}
+		if (record[1] === sessionPlatform && record[0] === targetPlatform && record[3][0] === messageId) {
+			return {
+				messageId: record[2][0],
+				channelId: record[2][1],
+				platform: record[0],
+				author: {
+					userId: record[4][0],
+					username: record[4][1],
+				},
+				shortcut: record[5],
+			} as MessageRecordMeta
+		}
+	}
+}
+
+
+function onMessageDeleted(session: Session) {
+	if (!session.channelId) { return }
+	if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return }
+
+	const logger = session.app.logger(name + '(msgdel)')
+	logger.info(session)
+
+	forwardingList[`${session.platform}:${session.channelId}`]
+		.forEach(async (target: ForwardTarget) => {
+			const record = target.cache.use && findMessage(session.messageId, session.platform, target.platform)
+			if (!record) { return }
+
+			session.bot.deleteMessage(record.channelId, record.messageId)
+		})
 }
 
 
@@ -106,39 +178,32 @@ function middleware(ctx: Context) {
 				let start = 0
 
 				if (chain?.[0]?.type === 'quote') {
-					let flag = false
-
-					if (target.cache.use) {
-						const rec = messageRecord.find(r =>
-							r[0] === session.platform && r[1] === target.platform && r[2][0] === chain[0].data.id ||
-							r[0] === target.platform && r[1] === session.platform && r[3][0] === chain[0].data.id)
-						const data = rec?.[2][0] === chain[0].data.id ? rec?.[3] : rec?.[2]
-						if (data) {
-							const author = rec?.[4]
-							const shortcut = rec?.[5]
-							flag = true
-							if (target.platform === 'onebot' || target.platform === 'telegram') {
-								start++
-								chain[0] = {
-									type: 'quote',
-									data: { id: data[0], channelId: data[1] },
-								}
-							} else {
-								chain[0] = {
-									type: 'text',
-									data: { content: `[回复 ${author[1]}: ${shortcut}] ` },
-								}
+					const record = target.cache.use && findMessage(chain[0].data?.id, session.platform, target.platform)
+					if (record) {
+						if (target.platform === 'onebot' || target.platform === 'telegram') {
+							start++
+							chain[0] = {
+								type: 'quote',
+								data: {
+									id: record.messageId,
+									channelId: record.channelId
+								},
 							}
-							if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === author[0]) {
-								if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
-									chain[2].data.content = chain[2].data.content.slice(1)
-								}
-								chain.splice(1, 1)
+						} else {
+							chain[0] = {
+								type: 'text',
+								data: {
+									content: `[回复 ${record.author.username}: ${record.shortcut}] `
+								},
 							}
 						}
-					}
-
-					if (!flag) {
+						if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === record.author.userId) {
+							if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
+								chain[2].data.content = chain[2].data.content.slice(1)
+							}
+							chain.splice(1, 1)
+						}
+					} else {
 						chain[0] = {
 							type: 'text',
 							data: { content: '[回复消息] ' },
