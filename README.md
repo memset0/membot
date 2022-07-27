@@ -12,6 +12,11 @@ yarn start   # 启动
 yarn dev     # 调试
 ```
 
+### Features
+
+* [Message Forward](./src/plugins/forward)
+* ...
+
 ### Dependence
 
 * [koishi - Cross-platform Chatbot Framework Made with Love](https://github.com/koishijs/koishi)
