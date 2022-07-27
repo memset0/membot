@@ -3,6 +3,7 @@ import { Context, Session, Logger, segment } from 'koishi'
 import '../../utils/date'
 import { sliceWithEllipsis } from '../../utils/string'
 import { QFace, getUserName } from '../../utils/onebot'
+import { webp2jpg, webm2jpg, mp42jpg } from '../../utils/file-type'
 
 import { ForwardTarget, MessageRecord, Type2Text } from './types'
 import adaptPlatformKook from './platform/kook'
@@ -186,6 +187,24 @@ function middleware(ctx: Context) {
 								} catch (e) {
 									logger.info(`error while transforming ${seg.type}s`, e)
 								}
+
+							} else if (target.platform !== session.platform && session.platform === 'telegram') {
+								if (seg.data.url?.startsWith('base64://UklGR')) {
+									// metadata=webp  <=>  static stickers
+									const buffer = new Buffer(seg.data.url.slice(9), 'base64')
+									seg.data.url = 'base64://' + (await webp2jpg(buffer)).toString('base64')
+								}
+								if (seg.data.url?.startsWith('base64://GkXfo')) {
+									// metadata=webm  <=>  animated stickers
+									const buffer = new Buffer(seg.data.url.slice(9), 'base64')
+									seg.data.url = 'base64://' + (await webm2jpg(buffer)).toString('base64')
+									logger.info(seg.data.url)
+								}
+								if (seg.data.url?.startsWith('base64://AAAA')) {
+									// metadata=mp4  <=>  video, though Telegram call this 'gif'
+									const buffer = new Buffer(seg.data.url.slice(9), 'base64')
+									seg.data.url = 'base64://' + (await mp42jpg(buffer)).toString('base64')
+								}
 							}
 							break
 						}
@@ -275,7 +294,9 @@ function logBeautifyChain(node: any) {
 	if (typeof node === 'object') {
 		const res = {}
 		for (const i in node) {
-			res[i] = logBeautifyChain(node[i])
+			if (i !== 'capture') {
+				res[i] = logBeautifyChain(node[i])
+			}
 		}
 		return res
 	} else {
