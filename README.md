@@ -2,11 +2,11 @@
 
 <h1>membot</h1>
 
-Yet Another Open Source & Cross-platform Chatbot Powered by koishi
+Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
 ### Usage
 
-This project is dependent on *ffmpeg* to handle media files, make sure you have it installed on your system.
+> This project is dependent on `ffmpeg` to handle media files, make sure you have it installed on your system.
 
 ```shell
 yarn
