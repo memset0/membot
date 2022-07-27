@@ -190,13 +190,6 @@ function middleware(ctx: Context) {
 							break
 						}
 
-						case 'json': {
-							if (target.platform !== session.platform) {
-								chain[i] = { type: 'text', data: { content: '' } }
-							}
-							break
-						}
-
 						default: {
 							if (Object.keys(Type2Text).includes(seg.type)) {
 								chain[i] = { type: 'text', data: { content: target.options.type2text[seg.type] } }

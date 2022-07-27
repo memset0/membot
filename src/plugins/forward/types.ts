@@ -38,6 +38,7 @@ export const Type2Text: TypeDictionary = {
 	file: '<文件>',
 	card: '<卡片>',
 	record: '<录音>',
+	json:'<小程序>',
 	forward: '<转发的消息>',
 	audio: '<音频>',
 	photo: '<照片>',
