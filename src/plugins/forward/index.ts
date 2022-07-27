@@ -117,7 +117,7 @@ function middleware(ctx: Context) {
 							const author = rec?.[4]
 							const shortcut = rec?.[5]
 							flag = true
-							if (target.platform === 'onebot') {
+							if (target.platform === 'onebot' || target.platform === 'telegram') {
 								start++
 								chain[0] = {
 									type: 'quote',
