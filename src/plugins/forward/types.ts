@@ -27,10 +27,10 @@ export interface ForwardTarget {
 export type MessageRecord = [
 	string,   // session.platform
 	string,   // target.platform
-	[string, string],   // session.messageId&channelId
-	[string, string],   // id & target.channelId
-	[string, string],   // session.author.userId&nickname
-	string,   // message shortcut
+	[string, string],   // session.messageId & channelId
+	[string, string],   // target.messageId & channelId
+	[string, string],   // session.author.userId & nickname
+	string,   // shortcut
 ]
 
 export interface MessageRecordMeta {

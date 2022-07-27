@@ -95,14 +95,6 @@ export async function apply(ctx: Context, config: Config) {
 
 
 function findMessage(messageId: string | undefined, sessionPlatform: string, targetPlatform: string): MessageRecordMeta | undefined {
-	/* export type MessageRecord = [
-		string,   // session.platform
-		string,   // target.platform
-		[string, string],   // session.messageId&channelId
-		[string, string],   // target.messageId&channelId
-		[string, string],   // session.author.userId&nickname
-		string,   // message shortcut
-	] */
 	for (const record of messageRecord) {
 		if (record[0] === sessionPlatform && record[1] === targetPlatform && record[2][0] === messageId) {
 			return {
