@@ -150,6 +150,7 @@ function middleware(ctx: Context) {
 					const seg = chain[i]
 
 					switch (seg.type) {
+						case 'quote':
 						case 'text': {
 							break
 						}
