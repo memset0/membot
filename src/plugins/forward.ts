@@ -12,7 +12,6 @@ interface ForwardTarget {
 	channelId?: string
 	prefix?: string
 	template?: string
-	enhanced?: boolean
 	showSource?: boolean
 
 	options?: {
@@ -47,11 +46,10 @@ export async function apply(ctx: Context, config: Config) {
 			}
 			if (!e.template) { e.template = `${e.prefix || ''} <userName>: ` }
 			if (!e.to || !e.platform || !e.channelId) { logger.warn('Missing target channel config.') }
-			if (e.platform != 'kaiheila' && e.enhanced) { logger.warn(`Platform ${source.split(':')[0]} does't support enhanced mode.`) }
 
 			e.options = {
 				record: true,
-				usePrefix: !e.enhanced,
+				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
 				...(e.options || {}),
 			}
@@ -83,81 +81,14 @@ export async function apply(ctx: Context, config: Config) {
 }
 
 
-function ignore(chain: segment.Chain) {
-	if (chain?.[0]?.type === 'quote') {
-		chain = chain.slice(1)
-	}
-	return segment.join(chain).trim().startsWith('//')
-}
-
-
-function enhancePlatformKook(chain: any[], session: Session, target: ForwardTarget) {
-	const time = new Date(session.timestamp)
-	const theme = isInteger(session.author.userId) ?
-		KookCardThemes[parseInt(session.author.userId) % (KookCardThemes.length - 1)] :
-		'secondary'
-	const modules: any[] = []
-	for (let l = 0, r = -1, m = -1; l < chain.length; l = r) {
-		m = l
-		while (m < chain.length && chain[m].type !== 'image') { m++ }
-		r = m
-		while (r < chain.length && chain[r].type === 'image') { r++ }
-		let content = segment.join(chain.slice(l, m))
-			.replace(/\&\#91\;/g, '[')
-			.replace(/\&\#93\;/g, ']')
-		if (l > 0) { content = content.replace(/^\s+/, '') }
-		if (r < chain.length) { content = content.replace(/\s+$/, '') }
-		modules.push([{
-			'type': 'section',
-			'mode': 'left',
-			'text': {
-				'type': 'kmarkdown',
-				'content': `**${session.username}** ${time.format('yyyy-MM-dd hh:mm:ss')}\n${content}`
-			},
-			'accessory': { 'type': 'image', 'size': 'sm', 'src': session.author.avatar }
-		}])
-		if (r - m === 1) {
-			modules[modules.length - 1].push({
-				'type': 'container',
-				'elements': [{
-					'type': 'image',
-					'src': chain[m].data.url
-				}]
-			})
-		} else if (r - m > 1) {
-			modules[modules.length - 1].push({
-				'type': 'image-group',
-				'elements': chain.slice(m, r).map((e) => ({ 'type': 'image', 'src': e.data.url }))
-			})
-		}
-		if (target.showSource) {
-			modules[modules.length - 1].push({
-				'type': 'context',
-				'elements': [{
-					'type': 'kmarkdown',
-					'content': `来自 ${session.platform} 平台的消息`
-				}],
-			})
-		}
-	}
-	chain.splice(0, chain.length)
-	for (const i in modules) {
-		chain.push({
-			type: 'card',
-			data: {
-				content: JSON.stringify({
-					'type': 'card',
-					'theme': theme,
-					'size': 'lg',
-					'modules': modules[i]
-				})
-			},
-		})
-	}
-}
-
-
 function middleware(ctx: Context) {
+	function ignore(chain: segment.Chain) {
+		if (chain?.[0]?.type === 'quote') {
+			chain = chain.slice(1)
+		}
+		return segment.join(chain).trim().startsWith('//')
+	}
+
 	return function (session: Session, next: () => void) {
 		const chain = segment.parse(session.content)
 		if (!session.channelId || ignore(chain)) { return next() }
@@ -262,13 +193,15 @@ function middleware(ctx: Context) {
 					})
 				}
 
-				if (target.enhanced) {
-					switch (target.platform) {
-						case "kaiheila": {
-							enhancePlatformKook(chain, session, target)
-							break
-						}
+				switch (target.platform) {
+					case "kaiheila": {
+						adaptPlatformKook(chain, session, target)
+						break
 					}
+					// case "telegram": {
+					// 	adaptPlatformTelegram(chain, session, target)
+					// 	break
+					// }
 				}
 
 				ctx.broadcast([target.to], segment.join(chain))
@@ -290,5 +223,73 @@ function middleware(ctx: Context) {
 			})
 
 		return next()
+	}
+}
+
+
+function adaptPlatformKook(chain: any[], session: Session, target: ForwardTarget) {
+	if (target.options.useCard) {
+		const time = new Date(session.timestamp)
+		const theme = isInteger(session.author.userId) ?
+			KookCardThemes[parseInt(session.author.userId) % (KookCardThemes.length - 1)] :
+			'secondary'
+		const modules: any[] = []
+		for (let l = 0, r = -1, m = -1; l < chain.length; l = r) {
+			m = l
+			while (m < chain.length && chain[m].type !== 'image') { m++ }
+			r = m
+			while (r < chain.length && chain[r].type === 'image') { r++ }
+			let content = segment.join(chain.slice(l, m))
+				.replace(/\&\#91\;/g, '[')
+				.replace(/\&\#93\;/g, ']')
+			if (l > 0) { content = content.replace(/^\s+/, '') }
+			if (r < chain.length) { content = content.replace(/\s+$/, '') }
+			modules.push([{
+				'type': 'section',
+				'mode': 'left',
+				'text': {
+					'type': 'kmarkdown',
+					'content': `**${session.username}** ${time.format('yyyy-MM-dd hh:mm:ss')}\n${content}`
+				},
+				'accessory': { 'type': 'image', 'size': 'sm', 'src': session.author.avatar }
+			}])
+			if (r - m === 1) {
+				modules[modules.length - 1].push({
+					'type': 'container',
+					'elements': [{
+						'type': 'image',
+						'src': chain[m].data.url
+					}]
+				})
+			} else if (r - m > 1) {
+				modules[modules.length - 1].push({
+					'type': 'image-group',
+					'elements': chain.slice(m, r).map((e) => ({ 'type': 'image', 'src': e.data.url }))
+				})
+			}
+			if (target.showSource) {
+				modules[modules.length - 1].push({
+					'type': 'context',
+					'elements': [{
+						'type': 'kmarkdown',
+						'content': `来自 ${session.platform} 平台的消息`
+					}],
+				})
+			}
+		}
+		chain.splice(0, chain.length)
+		for (const i in modules) {
+			chain.push({
+				type: 'card',
+				data: {
+					content: JSON.stringify({
+						'type': 'card',
+						'theme': theme,
+						'size': 'lg',
+						'modules': modules[i]
+					})
+				},
+			})
+		}
 	}
 }
