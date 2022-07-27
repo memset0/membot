@@ -81,6 +81,12 @@ function middleware(ctx: Context) {
 		if (chain?.[0]?.type === 'quote') {
 			chain = chain.slice(1)
 		}
+		if (chain?.[0]?.type === 'at') {
+			chain = chain.slice(1)
+			if (chain?.[0]?.type === 'text' && chain[0].data?.content?.startsWith(' ')) {
+				chain[0].data.content = chain[0].data.content.slice(1)
+			}
+		}
 		return segment.join(chain).trim().startsWith('//')
 	}
 
