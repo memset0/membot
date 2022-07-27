@@ -150,6 +150,11 @@
   dependencies:
     "@satorijs/adapter-telegram" "^3.1.1"
 
+"@koishijs/plugin-chat@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.npmmirror.com/@koishijs/plugin-chat/-/plugin-chat-3.0.0.tgz#5fea158de5fd1e3ef2363e6315b272feb22078dc"
+  integrity sha512-iASbUb2SlHIq42Glbtn8u3bnXHvEGZxz0lZS4SSkY1KIOGzR4gliTsfScfYLed6pe0pBVVW7NuQNZmV94ijScg==
+
 "@koishijs/plugin-commands@^1.4.1":
   version "1.4.1"
   resolved "https://registry.npmmirror.com/@koishijs/plugin-commands/-/plugin-commands-1.4.1.tgz#845bfb20dd23a823efeac20640302ee17b1be34c"

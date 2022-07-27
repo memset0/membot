@@ -26,6 +26,7 @@
     "@koishijs/plugin-adapter-kook": "^3.0.1",
     "@koishijs/plugin-adapter-onebot": "^5.0.1",
     "@koishijs/plugin-adapter-telegram": "^3.0.3",
+    "@koishijs/plugin-chat": "^3.0.0",
     "@koishijs/plugin-commands": "^1.4.1",
     "@koishijs/plugin-console": "^3.4.4",
     "@koishijs/plugin-database-mysql": "^4.5.1",
