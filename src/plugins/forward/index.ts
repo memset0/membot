@@ -96,6 +96,8 @@ function middleware(ctx: Context) {
 		if (!session.channelId || session.author.userId === session.bot.selfId) { return next() }
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
 
+		logger.info('receive', session.platform, logBeautifyChain(segment.parse(session.content)))
+
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardTarget) => {
 				const chain = segment.parse(session.content)
@@ -226,7 +228,7 @@ function middleware(ctx: Context) {
 							content: target.template
 								.replace(/\\n/g, '\n')
 								.replace(/<userId>/g, session.author.userId)
-								.replace(/<userName>/g, session.author.username)
+								.replace(/<userName>/g, session.author.nickname || session.author.username)
 						},
 					})
 
