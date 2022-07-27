@@ -22,6 +22,7 @@ interface ForwardTarget {
 	options?: {
 		useCard?: boolean
 		usePrefix?: boolean
+		boldedPrefix?: boolean   // not supported
 		transformBase64?: boolean
 	}
 }
@@ -63,6 +64,7 @@ export async function apply(ctx: Context, config: Config) {
 			e.options = {
 				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
+				// boldedPrefix: e.platform === 'telegram',
 				...(e.options || {}),
 			}
 		}
@@ -209,6 +211,13 @@ function middleware(ctx: Context) {
 								.replace(/<userName>/g, session.author.username)
 						},
 					})
+
+					if (target.options.boldedPrefix) {
+						chain[start].data.content = chain[start].data.content
+							.split('\n')
+							.map(s => ('**' + s + '**'))
+							.join('\n')
+					}
 				}
 
 				switch (target.platform) {
