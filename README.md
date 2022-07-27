@@ -2,19 +2,20 @@
 
 <h1>membot</h1>
 
-综合向自用 qq 机器人，欢迎来抄功能 / 找锅锅！
+Yet Another Open Source & Cross-platform Chatbot Powered by koishi
 
 ### Usage
 
-```
-yarn         # 安装依赖
-yarn start   # 启动
-yarn dev     # 调试
+This project is dependent on *ffmpeg* to handle media files, make sure you have it installed on your system.
+
+```shell
+yarn
+yarn start
 ```
 
 ### Features
 
-* [Message Forward](./src/plugins/forward)
+* [Plugin: Enhanced Message Forward](./src/plugins/forward)
 * ...
 
 ### Dependence
