@@ -5,19 +5,17 @@ const YAML = require('yaml')
 /**
  * 引入配置文件
  */
-const configFile = path.join(__dirname, './config.yml')
-const config = YAML.parse(fs.readFileSync(configFile).toString())
+const config = require('./config')
 
 /**
  * 引入本地化补丁文件
  */
-const i18nLocaleFile = path.join(__dirname, './src/i18n-patch.yml')
-const i18nLocale = YAML.parse(fs.readFileSync(i18nLocaleFile).toString())
-config.plugins ||= {}
-config.plugins.locales ||= {}
-config.plugins.locales.i18n = {
-	...i18nLocale,
-	...(config.plugins.locales.i18n || {}),
+config.plugins.locales = {
+	...(config.plugins?.locales || {}),
+	i18n: {
+		...require('./src/i18n-patch'),
+		...(config.plugins?.locales?.i18n || {}),
+	}
 }
 
 /**
