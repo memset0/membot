@@ -42,10 +42,12 @@ export async function videoExtractFrame(videoPath: string, imagePath: string, op
 export async function video2jpg(buffer: Buffer, videoFormat: string): Promise<Buffer> {
 	const video = await createTempFile({ postfix: `.${videoFormat}` })
 	const image = await createTempFile({ postfix: '.jpg' })
-	console.log(video, image)
 	await fs.promises.writeFile(video.path, buffer, 'binary')
 	await videoExtractFrame(video.path, image.path, { videoFormat })
-	return await fs.promises.readFile(image.path)
+	const result = await fs.promises.readFile(image.path)
+	video.callback()
+	image.callback()
+	return result
 }
 
 
