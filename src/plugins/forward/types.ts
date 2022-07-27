@@ -19,7 +19,7 @@ export interface ForwardTarget {
 	}
 }
 
-export interface MessageRecord =[
+export type MessageRecord = [
 	string,
 	string,
 	[string, string],

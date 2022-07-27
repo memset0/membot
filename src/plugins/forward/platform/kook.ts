@@ -1,4 +1,4 @@
-import { Session, segment } from 'koishi'
+import { Context, Session, segment } from 'koishi'
 
 import { ForwardTarget } from '../types'
 import { isInteger } from '../../../utils/type'
@@ -7,7 +7,7 @@ import { isInteger } from '../../../utils/type'
 export const CARD_THEMES = ['primary', 'success', 'danger', 'warning', 'info', 'secondary']
 
 
-export default function adaptPlatformKook(chain: any[], session: Session, target: ForwardTarget) {
+export default function adaptPlatformKook(chain: any[], ctx: Context, session: Session, target: ForwardTarget) {
 	if (target.options.useCard) {
 		const time = new Date(session.timestamp)
 		const theme = isInteger(session.author.userId) ?
@@ -72,4 +72,6 @@ export default function adaptPlatformKook(chain: any[], session: Session, target
 			})
 		}
 	}
+
+	return [segment.join(chain)]
 }

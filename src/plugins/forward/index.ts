@@ -6,6 +6,7 @@ import { QFace, getUserName } from '../../utils/onebot'
 
 import { ForwardTarget, MessageRecord } from './types'
 import adaptPlatformKook from './platform/kook'
+import adaptPlatformTelegram from './platform/telegram'
 
 
 export interface Config {
@@ -100,9 +101,10 @@ function middleware(ctx: Context) {
 				if (ignore(chain)) { return next() }
 				let start = 0
 
+				if (session.platform === 'telegram') logger.info(chain)
+
 				if (chain?.[0]?.type === 'quote') {
 					let flag = false
-					start++
 
 					if (target.cache.use) {
 						const rec = messageRecord.find(r =>
@@ -114,6 +116,7 @@ function middleware(ctx: Context) {
 							const shortcut = rec?.[5]
 							flag = true
 							if (target.platform === 'onebot') {
+								start++
 								chain[0] = {
 									type: 'quote',
 									data: { id: data[0], channelId: data[1] },
@@ -207,33 +210,39 @@ function middleware(ctx: Context) {
 					}
 				}
 
+				let messages = null
 				switch (target.platform) {
 					case "kaiheila": {
-						adaptPlatformKook(chain, session, target)
+						messages = adaptPlatformKook(chain, ctx, session, target)
 						break
 					}
-					// case "telegram": {
-					// 	adaptPlatformTelegram(chain, session, target)
-					// 	break
-					// }
+					case "telegram": {
+						messages = adaptPlatformTelegram(chain, ctx, session, target, start)
+						break
+					}
+					default: {
+						messages = [segment.join(chain)]
+					}
 				}
 
-				ctx.broadcast([target.to], segment.join(chain))
-					.then(([id]) => {
-						if (target.cache.use) {
-							messageRecord.push([
-								session.platform,
-								target.platform,
-								[session.messageId, session.channelId],
-								[id, target.channelId],
-								[session.author.userId, session.author.nickname || session.author.username],
-								sliceWithEllipsis(shortcut.join(' '), 15),
-							])
-						}
-						if (messageRecord.length > 1000) {
-							messageRecord.shift()
-						}
-					})
+				for (const message of messages) {
+					await ctx.broadcast([target.to], message)
+						.then(([id]) => {
+							if (target.cache.use) {
+								messageRecord.push([
+									session.platform,
+									target.platform,
+									[session.messageId, session.channelId],
+									[id, target.channelId],
+									[session.author.userId, session.author.nickname || session.author.username],
+									sliceWithEllipsis(shortcut.join(' '), 15),
+								])
+							}
+							if (messageRecord.length > 1000) {
+								messageRecord.shift()
+							}
+						})
+				}
 			})
 
 		return next()
