@@ -14,8 +14,15 @@ interface ForwardTarget {
 	template?: string
 	showSource?: boolean
 
+	cache?: {
+		use?: boolean
+		limit?: number   // not supported
+	}
+
 	options?: {
-		[key: string]: any
+		useCard?: boolean
+		usePrefix?: boolean
+		transformBase64?: boolean
 	}
 }
 
@@ -47,8 +54,13 @@ export async function apply(ctx: Context, config: Config) {
 			if (!e.template) { e.template = `${e.prefix || ''} <userName>: ` }
 			if (!e.to || !e.platform || !e.channelId) { logger.warn('Missing target channel config.') }
 
+			e.cache = {
+				use: false,
+				limit: 1000,
+				...(e.cache || {}),
+			}
+
 			e.options = {
-				record: true,
 				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
 				...(e.options || {}),
@@ -100,33 +112,39 @@ function middleware(ctx: Context) {
 				let start = 0
 
 				if (chain?.[0]?.type === 'quote') {
-					const quote = chain?.[0]
+					let flag = false
 					start++
-					const rec = messageRecord.find(([platform1, platform2, [id1], [id2]]) =>
-						platform1 === session.platform && platform2 === target.platform && id1 === quote.data.id ||
-						platform1 === target.platform && platform2 === session.platform && id2 === quote.data.id)
-					const data = rec?.[2][0] === quote.data.id ? rec?.[3] : rec?.[2]
-					const author = rec?.[4]
-					const shortcut = rec?.[5]
-					if (data) {
-						if (target.platform === 'onebot') {
-							chain[0] = {
-								type: 'quote',
-								data: { id: data[0], channelId: data[1] },
+
+					if (target.cache.use) {
+						const rec = messageRecord.find(([platform1, platform2, [id1], [id2]]) =>
+							platform1 === session.platform && platform2 === target.platform && id1 === chain[0].data.id ||
+							platform1 === target.platform && platform2 === session.platform && id2 === chain[0].data.id)
+						const data = rec?.[2][0] === chain[0].data.id ? rec?.[3] : rec?.[2]
+						const author = rec?.[4]
+						const shortcut = rec?.[5]
+						if (data) {
+							flag = true
+							if (target.platform === 'onebot') {
+								chain[0] = {
+									type: 'quote',
+									data: { id: data[0], channelId: data[1] },
+								}
+							} else {
+								chain[0] = {
+									type: 'text',
+									data: { content: `[回复 ${author[1]}: ${shortcut}] ` },
+								}
 							}
-						} else {
-							chain[0] = {
-								type: 'text',
-								data: { content: `[回复 ${author[1]}: ${shortcut}] ` },
+							if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === author[0]) {
+								if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
+									chain[2].data.content = chain[2].data.content.slice(1)
+								}
+								chain.splice(1, 1)
 							}
 						}
-						if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === author[0]) {
-							if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
-								chain[2].data.content = chain[2].data.content.slice(1)
-							}
-							chain.splice(1, 1)
-						}
-					} else {
+					}
+
+					if (!flag) {
 						chain[0] = {
 							type: 'text',
 							data: { content: '[回复消息] ' },
@@ -206,7 +224,7 @@ function middleware(ctx: Context) {
 
 				ctx.broadcast([target.to], segment.join(chain))
 					.then(([id]) => {
-						if (target.options.record) {
+						if (target.cache.use) {
 							messageRecord.push([
 								session.platform,
 								target.platform,
