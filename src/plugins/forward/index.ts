@@ -190,19 +190,17 @@ function middleware(ctx: Context) {
 
 							} else if (target.platform !== session.platform && session.platform === 'telegram') {
 								if (seg.data.url?.startsWith('base64://UklGR')) {
-									// metadata=webp  <=>  static stickers
-									const buffer = new Buffer(seg.data.url.slice(9), 'base64')
+									// webp  <=>  static stickers
+									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
 									seg.data.url = 'base64://' + (await webp2jpg(buffer)).toString('base64')
-								}
-								if (seg.data.url?.startsWith('base64://GkXfo')) {
-									// metadata=webm  <=>  animated stickers
-									const buffer = new Buffer(seg.data.url.slice(9), 'base64')
+								} else if (seg.data.url?.startsWith('base64://GkXfo')) {
+									// webm  <=>  animated stickers
+									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
 									seg.data.url = 'base64://' + (await webm2jpg(buffer)).toString('base64')
 									logger.info(seg.data.url)
-								}
-								if (seg.data.url?.startsWith('base64://AAAA')) {
-									// metadata=mp4  <=>  video, though Telegram call this 'gif'
-									const buffer = new Buffer(seg.data.url.slice(9), 'base64')
+								} else if (seg.data.url?.startsWith('base64://AAAA')) {
+									// mp4  <=>  video, though Telegram call this 'gif'
+									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
 									seg.data.url = 'base64://' + (await mp42jpg(buffer)).toString('base64')
 								}
 							}

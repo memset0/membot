@@ -51,6 +51,7 @@ export async function video2jpg(buffer: Buffer, videoFormat: string): Promise<Bu
 
 export async function webp2jpg(buffer: Buffer): Promise<Buffer> {
 	return await sharp(buffer)
+		.flatten({ background: { r: 255, g: 255, b: 255 } })
 		.jpeg()
 		.toBuffer()
 }
