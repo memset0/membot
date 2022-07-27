@@ -1,47 +1,26 @@
-import { Context, Session, Logger, Time, segment } from 'koishi'
+import { Context, Session, Logger, segment } from 'koishi'
 
-import '../utils/date'
-import { isInteger } from '../utils/type'
-import { sliceWithEllipsis } from '../utils/string'
-import { QFace, getUserName } from '../utils/onebot'
+import '../../utils/date'
+import { sliceWithEllipsis } from '../../utils/string'
+import { QFace, getUserName } from '../../utils/onebot'
+
+import { ForwardTarget, MessageRecord } from './types'
+import adaptPlatformKook from './platform/kook'
 
 
-interface ForwardTarget {
-	to?: string
-	platform?: string
-	channelId?: string
-	prefix?: string
-	template?: string
-	showSource?: boolean
-
-	cache?: {
-		use?: boolean
-		limit?: number   // not supported
-	}
-
-	options?: {
-		useCard?: boolean
-		usePrefix?: boolean
-		boldedPrefix?: boolean   // not supported
-		transformBase64?: boolean
-	}
-}
-
-interface Config {
+export interface Config {
 	[id: string]: Array<ForwardTarget>
 }
 
-
 const forwardingList: Config = {}
-const messageRecord: Array<[string, string, [string, string], [string, string], [string, string], string]> = []
-const KookCardThemes = ['primary', 'success', 'danger', 'warning', 'info', 'secondary']
+const messageRecord: Array<MessageRecord> = []
+
 
 export const name = 'forward'
-export const using = ['database']
-export const logger = new Logger('forward')
-
 
 export async function apply(ctx: Context, config: Config) {
+	const logger = ctx.logger(name)
+
 	for (const source in config) {
 		const targets = config[source]
 		forwardingList[source] = targets
@@ -96,6 +75,8 @@ export async function apply(ctx: Context, config: Config) {
 
 
 function middleware(ctx: Context) {
+	const logger = ctx.logger(name)
+
 	function ignore(chain: segment.Chain) {
 		if (chain?.[0]?.type === 'quote') {
 			chain = chain.slice(1)
@@ -118,13 +99,13 @@ function middleware(ctx: Context) {
 					start++
 
 					if (target.cache.use) {
-						const rec = messageRecord.find(([platform1, platform2, [id1], [id2]]) =>
-							platform1 === session.platform && platform2 === target.platform && id1 === chain[0].data.id ||
-							platform1 === target.platform && platform2 === session.platform && id2 === chain[0].data.id)
+						const rec = messageRecord.find(r =>
+							r[0] === session.platform && r[1] === target.platform && r[2][0] === chain[0].data.id ||
+							r[0] === target.platform && r[1] === session.platform && r[3][0] === chain[0].data.id)
 						const data = rec?.[2][0] === chain[0].data.id ? rec?.[3] : rec?.[2]
-						const author = rec?.[4]
-						const shortcut = rec?.[5]
 						if (data) {
+							const author = rec?.[4]
+							const shortcut = rec?.[5]
 							flag = true
 							if (target.platform === 'onebot') {
 								chain[0] = {
@@ -250,73 +231,5 @@ function middleware(ctx: Context) {
 			})
 
 		return next()
-	}
-}
-
-
-function adaptPlatformKook(chain: any[], session: Session, target: ForwardTarget) {
-	if (target.options.useCard) {
-		const time = new Date(session.timestamp)
-		const theme = isInteger(session.author.userId) ?
-			KookCardThemes[parseInt(session.author.userId) % (KookCardThemes.length - 1)] :
-			'secondary'
-		const modules: any[] = []
-		for (let l = 0, r = -1, m = -1; l < chain.length; l = r) {
-			m = l
-			while (m < chain.length && chain[m].type !== 'image') { m++ }
-			r = m
-			while (r < chain.length && chain[r].type === 'image') { r++ }
-			let content = segment.join(chain.slice(l, m))
-				.replace(/\&\#91\;/g, '[')
-				.replace(/\&\#93\;/g, ']')
-			if (l > 0) { content = content.replace(/^\s+/, '') }
-			if (r < chain.length) { content = content.replace(/\s+$/, '') }
-			modules.push([{
-				'type': 'section',
-				'mode': 'left',
-				'text': {
-					'type': 'kmarkdown',
-					'content': `**${session.username}** ${time.format('yyyy-MM-dd hh:mm:ss')}\n${content}`
-				},
-				'accessory': { 'type': 'image', 'size': 'sm', 'src': session.author.avatar }
-			}])
-			if (r - m === 1) {
-				modules[modules.length - 1].push({
-					'type': 'container',
-					'elements': [{
-						'type': 'image',
-						'src': chain[m].data.url
-					}]
-				})
-			} else if (r - m > 1) {
-				modules[modules.length - 1].push({
-					'type': 'image-group',
-					'elements': chain.slice(m, r).map((e) => ({ 'type': 'image', 'src': e.data.url }))
-				})
-			}
-			if (target.showSource) {
-				modules[modules.length - 1].push({
-					'type': 'context',
-					'elements': [{
-						'type': 'kmarkdown',
-						'content': `来自 ${session.platform} 平台的消息`
-					}],
-				})
-			}
-		}
-		chain.splice(0, chain.length)
-		for (const i in modules) {
-			chain.push({
-				type: 'card',
-				data: {
-					content: JSON.stringify({
-						'type': 'card',
-						'theme': theme,
-						'size': 'lg',
-						'modules': modules[i]
-					})
-				},
-			})
-		}
 	}
 }
