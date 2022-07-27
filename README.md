@@ -14,10 +14,11 @@ yarn dev     # 调试
 
 ### Dependence
 
-* [koishi - Cross-platform chatbot framework made with love](https://github.com/koishijs/koishi)
+* [koishi - Cross-platform Chatbot Framework Made with Love](https://github.com/koishijs/koishi)
 * [satori - The Universal Messenger Protocol](https://github.com/satorijs/satori)
 * [go-cqhttp - cqhttp 的 golang 实现，轻量、原生跨平台](https://github.com/Mrs4s/go-cqhttp)
 * [OneBot 12 标准草案](https://12.onebot.dev/)
+* [Telegram Bots - An introduction for developers](https://core.telegram.org/bots)
 * [KOOK 开发者平台 文档](https://developer.kookapp.cn/doc/intro)
 * [QQ Face ID Table](https://qq-face.vercel.app/)
 * [漢典 - 漢語字典, 漢語詞典, 康熙字典, 說文解字, 音韻方言, 字源字形, 異體字](https://www.zdic.net)
