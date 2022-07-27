@@ -2,20 +2,18 @@ import { Context, Session, segment } from 'koishi'
 
 import { ForwardTarget } from '../types'
 
+export const name = 'forward-telegram'
 
 export default function adaptPlatformTelegram(chain: any[], ctx: Context, session: Session, target: ForwardTarget, prefixPosition: number) {
-	const logger = ctx.logger('forward-telegram-send')
-
 	const prefix = target.options.usePrefix ? segment.join([chain[prefixPosition]]) : null
 	const chains = []
 	let imageCount = 0
 	for (const i in chain) { imageCount += chain[i].type === 'image' ? 1 : 0 }
 
-	logger.info(imageCount)
-
 	if (imageCount === 0) {
 		// 没图片，不需要特殊处理
 		chains.push(chain)
+
 	} else if (imageCount === 1) {
 		// 只有一张图片，为了美观删去两侧文字多余空格
 		for (const i in chains) {
@@ -29,11 +27,17 @@ export default function adaptPlatformTelegram(chain: any[], ctx: Context, sessio
 					chain[r].data.content = chain[r].data.content.replace(/^\s+/, '')
 				}
 				chain.push(chain[i])
-				chain[i] = { type: 'text', data: { content: l >= 0 && r < chain.length ? ' <图片> ' : '' } }
+				chain[i] = {
+					type: 'text',
+					data: {
+						content: l >= 0 && r < chain.length ? ` ${target.options.type2text['image']} ` : ''
+					}
+				}
 				break
 			}
 		}
 		chains.push(chain)
+
 	} else {
 		// 多张图片，分成多条消息发送
 		for (let l = 0, r = -1; l < chain.length; l = r) {
@@ -53,7 +57,6 @@ export default function adaptPlatformTelegram(chain: any[], ctx: Context, sessio
 					chain[rr].data.content = chain[rr].data.content.replace(/^\s+/, '')
 				}
 			}
-			logger.info(l, r)
 			chains.push(chain.slice(l, r))
 		}
 	}
@@ -71,7 +74,7 @@ export default function adaptPlatformTelegram(chain: any[], ctx: Context, sessio
 		}
 	}
 
-	logger.info(chains.map(str => str.slice(0, 100)))
+	// ctx.logger(name).info(chains.map(str => str.slice(0, 100)))
 
 	return chains
 }

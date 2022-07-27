@@ -4,7 +4,7 @@ import '../../utils/date'
 import { sliceWithEllipsis } from '../../utils/string'
 import { QFace, getUserName } from '../../utils/onebot'
 
-import { ForwardTarget, MessageRecord } from './types'
+import { ForwardTarget, MessageRecord, Type2Text } from './types'
 import adaptPlatformKook from './platform/kook'
 import adaptPlatformTelegram from './platform/telegram'
 
@@ -44,13 +44,12 @@ export async function apply(ctx: Context, config: Config) {
 			e.options = {
 				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
+				type2text: Type2Text,
 				// boldedPrefix: e.platform === 'telegram',
 				...(e.options || {}),
 			}
 		}
 	}
-
-	ctx.middleware(middleware(ctx))
 
 	ctx.command('bot.forward', '消息转发帮助', { authority: 3 })
 		.option('list', '-l 查看转发列表')
@@ -72,6 +71,8 @@ export async function apply(ctx: Context, config: Config) {
 				return session.execute('help bot.forward')
 			}
 		})
+
+	ctx.middleware(middleware(ctx))
 }
 
 
@@ -147,35 +148,62 @@ function middleware(ctx: Context) {
 				for (const i in chain) {
 					const seg = chain[i]
 
-					if ((seg.type === 'card' || seg.type === 'json' || seg.type === 'forward') && target.platform !== session.platform) {
-						chain[i] = { type: 'text', data: { content: '' } }
-					}
+					switch (seg.type) {
+						case 'text': {
+							break
+						}
 
-					if (seg.type === 'image' && seg.data.url?.startsWith('http') && target.options.transformBase64) {
-						try {
-							const data = await ctx.http.get(seg.data.url, { responseType: 'arraybuffer' })
-							const img = Buffer.from(data).toString('base64')
-							chain[i] = {
-								type: 'image',
-								data: { url: `base64://${img}` }
+						case 'at': {
+							if (target.platform !== session.platform) {
+								const name = seg.data.name || (await getUserName(session.platform, seg.data.id, { guildId: session.guildId, session })) || seg.data.id
+								chain[i] = {
+									type: 'text',
+									data: { content: `@${name}` }
+								}
 							}
-						} catch (e) {
-							logger.info(`error while transforming ${seg.type}s`, e)
+							break
 						}
-					}
 
-					if (seg.type === 'at' && target.platform !== session.platform) {
-						const name = seg.data.name || (await getUserName(session.platform, seg.data.id, { guildId: session.guildId, session })) || seg.data.id
-						chain[i] = {
-							type: 'text',
-							data: { content: `@${name}` }
+						case 'face': {
+							if (target.platform !== session.platform) {
+								chain[i] = {
+									type: 'text',
+									data: { content: `[${QFace.idToText(seg.data.id)}]` }
+								}
+							}
+							break
 						}
-					}
 
-					if (seg.type === 'face' && target.platform !== session.platform) {
-						chain[i] = {
-							type: 'text',
-							data: { content: `[${QFace.idToText(seg.data.id)}]` }
+						case 'image': {
+							if (target.options.transformBase64 && seg.data.url?.startsWith('http')) {
+								try {
+									const data = await ctx.http.get(seg.data.url, { responseType: 'arraybuffer' })
+									const img = Buffer.from(data).toString('base64')
+									chain[i] = {
+										type: 'image',
+										data: { url: `base64://${img}` }
+									}
+								} catch (e) {
+									logger.info(`error while transforming ${seg.type}s`, e)
+								}
+							}
+							break
+						}
+
+						case 'json': {
+							if (target.platform !== session.platform) {
+								chain[i] = { type: 'text', data: { content: '' } }
+							}
+							break
+						}
+
+						default: {
+							if (Object.keys(Type2Text).includes(seg.type)) {
+								chain[i] = { type: 'text', data: { content: target.options.type2text[seg.type] } }
+							} else {
+								chain[i] = { type: 'text', data: { content: target.options.type2text['*unknown'] } }
+							}
+							break
 						}
 					}
 				}
