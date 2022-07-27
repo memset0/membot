@@ -23,8 +23,6 @@ config.plugins.locales = {
  */
 const koishi = {
 	...config.options,
-	minSimilarity: 0,
-	autoAuthorize: (ses) => (ses.groupId ? 1 : 0),
 
 	watch: config.watch ? {
 		root: 'src',
@@ -35,6 +33,7 @@ const koishi = {
 		'database-mysql': config.mysql,
 		'adapter-onebot': { ...config.bots.onebot[0] },
 		'adapter-kook': { ...config.bots.kook[0] },
+		'adapter-telegram': { ...config.bots.telegram[0] },
 
 		help: {
 			options: false,
@@ -44,6 +43,7 @@ const koishi = {
 		console: {
 			// open: true,
 		},
+		// chat: {},
 		recall: {},
 		logger: {},
 		suggest: {},

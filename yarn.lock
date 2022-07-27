@@ -151,9 +151,9 @@
     "@satorijs/adapter-telegram" "^3.1.1"
 
 "@koishijs/plugin-chat@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.npmmirror.com/@koishijs/plugin-chat/-/plugin-chat-3.0.0.tgz#5fea158de5fd1e3ef2363e6315b272feb22078dc"
-  integrity sha512-iASbUb2SlHIq42Glbtn8u3bnXHvEGZxz0lZS4SSkY1KIOGzR4gliTsfScfYLed6pe0pBVVW7NuQNZmV94ijScg==
+  version "3.0.1"
+  resolved "https://registry.npmmirror.com/@koishijs/plugin-chat/-/plugin-chat-3.0.1.tgz#82c7ae3d43de987082eebca1c7a3499d04c58c36"
+  integrity sha512-+Pc9PMdR6i6VYWD7qsvLhcSo9DQ+FrIsxGneLvOmjBYTyxW4K7CydpJpggsBolYRrsiuL7JudZ+alq+xFYkJhw==
 
 "@koishijs/plugin-commands@^1.4.1":
   version "1.4.1"
@@ -1086,9 +1086,9 @@ cli-cursor@^3.1.0:
     restore-cursor "^3.1.0"
 
 cli-spinners@^2.5.0:
-  version "2.6.1"
-  resolved "https://registry.npmmirror.com/cli-spinners/-/cli-spinners-2.6.1.tgz#adc954ebe281c37a6319bfa401e6dd2488ffb70d"
-  integrity sha512-x/5fWmGMnbKQAaNwN+UZlV79qBLM9JFnJuJ03gIi5whrob0xV0ofNVHy9DhwGdsMJQc2OKv0oGmLzvaqvAVv+g==
+  version "2.7.0"
+  resolved "https://registry.npmmirror.com/cli-spinners/-/cli-spinners-2.7.0.tgz#f815fd30b5f9eaac02db604c7a231ed7cb2f797a"
+  integrity sha512-qu3pN8Y3qHNgE2AFweciB1IfMnmZ/fsNTEE+NOFjmGB2F/7rLhnhzppvpCnN4FovtP26k8lHyy9ptEbNwWFLzw==
 
 cliui@^6.0.0:
   version "6.0.0"
@@ -3871,17 +3871,17 @@ yakumo-upgrade@^0.2.3:
     semver "^7.3.7"
 
 yakumo-version@^0.2.5:
-  version "0.2.5"
-  resolved "https://registry.npmmirror.com/yakumo-version/-/yakumo-version-0.2.5.tgz#ae4e818855a52e7f13ab8db1acddc8baabead757"
-  integrity sha512-NCtJJJAnJ52SqDOvVs7eg7MIoPuhtKNyO8/nQmBMH62PcgB+f5XhChXTY4pjF9W6/O9a/e6vRoOsFU9kqBf3Ww==
+  version "0.2.6"
+  resolved "https://registry.npmmirror.com/yakumo-version/-/yakumo-version-0.2.6.tgz#1d228a5c46e7145f06efc2d3a313771f8933c6df"
+  integrity sha512-s8+GWHfbSYlzdPXItQUB9jdKbXwMw2fMbjojTCv4RYl0CpJ5qWSQbQWE9LJ6P1iHPuWVSYhoXrwYjSlFjkwJkw==
   dependencies:
     kleur "^4.1.4"
     semver "^7.3.7"
 
 yakumo@^0.2.8:
-  version "0.2.8"
-  resolved "https://registry.npmmirror.com/yakumo/-/yakumo-0.2.8.tgz#aba3d26da8c8a94047c4d93482b4aa7061d77a18"
-  integrity sha512-x0P2piv92lX0U8/znfTxAf07yMDDe7wCOXtGUgNR1CHRMxYEWCwOQUagSCu0Q2j6YzBOkl+nj4tsqERiY2zW6A==
+  version "0.2.9"
+  resolved "https://registry.npmmirror.com/yakumo/-/yakumo-0.2.9.tgz#5892b2f13eaeb79189a1054927ba8a676f3b3da0"
+  integrity sha512-2d4iQ6f18mqObhJPL8bpW+14lAg5sGvMAX37gqN+MBJ5kK0ntAFL741XoFpUnhn1ou+Q+B7oS8EYlrb+pvfWoA==
   dependencies:
     cosmokit "^1.2.1"
     cross-spawn "^7.0.3"
