@@ -96,15 +96,13 @@ function middleware(ctx: Context) {
 		if (!session.channelId || session.author.userId === session.bot.selfId) { return next() }
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
 
-		logger.info('receive', session.platform, logBeautifyChain(segment.parse(session.content)))
+		// logger.info('receive', session.platform, logBeautifyChain(segment.parse(session.content)))
 
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardTarget) => {
 				const chain = segment.parse(session.content)
 				if (ignore(chain)) { return next() }
 				let start = 0
-
-				if (session.platform === 'telegram') logger.info(chain)
 
 				if (chain?.[0]?.type === 'quote') {
 					let flag = false
@@ -276,5 +274,19 @@ function middleware(ctx: Context) {
 			})
 
 		return next()
+	}
+}
+
+
+function logBeautifyChain(node: any) {
+	if (typeof node === 'object') {
+		const res = {}
+		for (const i in node) {
+			res[i] = logBeautifyChain(node[i])
+		}
+		return res
+	} else {
+		if (typeof node === 'string') { return node.slice(0, 30) }
+		return node
 	}
 }
