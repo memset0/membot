@@ -102,13 +102,13 @@ function middleware(ctx: Context) {
 	}
 
 	return function (session: Session, next: () => void) {
-		const chain = segment.parse(session.content)
-		if (!session.channelId || ignore(chain)) { return next() }
-		if (session.author.userId === session.bot.selfId) { return next() }
+		if (!session.channelId || session.author.userId === session.bot.selfId) { return next() }
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
 
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardTarget) => {
+				const chain = segment.parse(session.content)
+				if (ignore(chain)) { return next() }
 				let start = 0
 
 				if (chain?.[0]?.type === 'quote') {
