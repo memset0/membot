@@ -47,7 +47,7 @@ const koishi = {
 		// chat: {},
 		recall: {},
 		logger: {},
-		suggest: {},
+		// suggest: {},
 		status: {},
 		sandbox: {},
 		// manager: {},
@@ -63,6 +63,7 @@ const scan = (dir) => fs.readdirSync(dir).map(subdir => path.join(dir, subdir))
 for (const dir of [
 	...scan(path.join(__dirname, './src/plugins')),
 	...scan(path.join(__dirname, './src/commands')),
+	...scan(path.join(__dirname, './src/scripts')),
 ]) {
 	const name = path.basename(dir, path.extname(path.basename(dir)))
 	if (name == '_deprecated') {
