@@ -45,9 +45,7 @@ export async function apply(ctx: Context, config: Config) {
 			e.options = {
 				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
-				reverseHook: false,
 				type2text: Type2Text,
-				// boldedPrefix: e.platform === 'telegram',
 				...(e.options || {}),
 			}
 		}
@@ -298,6 +296,16 @@ function middleware(ctx: Context) {
 					}
 				}
 
+				if (target.options.useHTML) {
+					start++
+					chain.unshift({ type: 'html', data: {} })
+				}
+
+				if (target.options.useMarkdown) {
+					start++
+					chain.unshift({ type: 'markdown', data: {} })
+				}
+
 				if (target.options.usePrefix) {
 					const date = new Date(session.timestamp)
 					chain.splice(start, 0, {
@@ -311,13 +319,6 @@ function middleware(ctx: Context) {
 								.replace(/<time>/g, date.format('hh:mm:ss'))
 						},
 					})
-
-					if (target.options.boldedPrefix) {
-						chain[start].data.content = chain[start].data.content
-							.split('\n')
-							.map(s => ('**' + s + '**'))
-							.join('\n')
-					}
 				}
 
 				let messages = null
