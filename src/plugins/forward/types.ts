@@ -16,11 +16,14 @@ export interface ForwardTarget {
 	}
 
 	options?: {
-		useCard?: boolean
 		usePrefix?: boolean
+		reverseHook?: boolean
 		boldedPrefix?: boolean   // not supported
 		transformBase64?: boolean
 		type2text?: TypeDictionary
+
+		// Platform Kook Only
+		useCard?: boolean
 	}
 }
 

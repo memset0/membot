@@ -45,6 +45,7 @@ export async function apply(ctx: Context, config: Config) {
 			e.options = {
 				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
+				reverseHook: false,
 				type2text: Type2Text,
 				// boldedPrefix: e.platform === 'telegram',
 				...(e.options || {}),
@@ -91,10 +92,11 @@ export async function apply(ctx: Context, config: Config) {
 
 	ctx.middleware(middleware(ctx))
 	ctx.on('message-deleted', onMessageDeleted)
+	// ctx.on('message-updated', onMessageUpdated)
 }
 
 
-function findMessage(messageId: string | undefined, sessionPlatform: string, targetPlatform: string): MessageRecordMeta | undefined {
+function findMessage(messageId: string | undefined, sessionPlatform: string, targetPlatform: string, reverse: boolean = false): MessageRecordMeta | null {
 	for (const record of messageRecord) {
 		if (record[0] === sessionPlatform && record[1] === targetPlatform && record[2][0] === messageId) {
 			return {
@@ -108,6 +110,9 @@ function findMessage(messageId: string | undefined, sessionPlatform: string, tar
 				shortcut: record[5],
 			} as MessageRecordMeta
 		}
+	}
+	if (!reverse) { return null }
+	for (const record of messageRecord) {
 		if (record[1] === sessionPlatform && record[0] === targetPlatform && record[3][0] === messageId) {
 			return {
 				messageId: record[2][0],
@@ -121,6 +126,7 @@ function findMessage(messageId: string | undefined, sessionPlatform: string, tar
 			} as MessageRecordMeta
 		}
 	}
+	return null
 }
 
 
@@ -133,10 +139,15 @@ function onMessageDeleted(session: Session) {
 
 	forwardingList[`${session.platform}:${session.channelId}`]
 		.forEach(async (target: ForwardTarget) => {
-			const record = target.cache.use && findMessage(session.messageId, session.platform, target.platform)
+			const record = target.cache.use && findMessage(session.messageId, session.platform, target.platform, target.options.reverseHook)
 			if (!record) { return }
 
-			session.bot.deleteMessage(record.channelId, record.messageId)
+			for (const bot of session.app.bots) {
+				if (bot.platform === record.platform) {
+					console.log(record)
+					bot.deleteMessage(record.channelId, record.messageId)
+				}
+			}
 		})
 }
 
@@ -170,7 +181,7 @@ function middleware(ctx: Context) {
 				let start = 0
 
 				if (chain?.[0]?.type === 'quote') {
-					const record = target.cache.use && findMessage(chain[0].data?.id, session.platform, target.platform)
+					const record = target.cache.use && findMessage(chain[0].data?.id, session.platform, target.platform, true)
 					if (record) {
 						if (target.platform === 'onebot' || target.platform === 'telegram') {
 							start++
