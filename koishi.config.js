@@ -65,7 +65,7 @@ for (const dir of [
 	...scan(path.join(__dirname, './src/commands')),
 ]) {
 	const name = path.basename(dir, path.extname(path.basename(dir)))
-	if (name == '_scoped') {
+	if (name == '_deprecated') {
 		continue
 	}
 	const pluginPath = './' + path.relative(__dirname, dir).replace(/\\/g, '/')

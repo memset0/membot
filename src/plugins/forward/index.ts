@@ -142,7 +142,7 @@ function onMessageDeleted(session: Session) {
 
 			for (const bot of session.app.bots) {
 				if (bot.platform === record.platform) {
-					console.log(record)
+					// console.log(record)
 					bot.deleteMessage(record.channelId, record.messageId)
 				}
 			}
