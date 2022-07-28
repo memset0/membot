@@ -9,7 +9,7 @@ import { TelegramBot } from './bot'
 
 const logger = new Logger('telegram')
 
-const prefixTypes = ['quote', 'card', 'anonymous', 'markdown']
+const prefixTypes = ['quote', 'card', 'anonymous', 'markdown', 'html']
 
 type AssetType =
   | 'photo'
