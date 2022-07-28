@@ -1,6 +1,5 @@
 import sharp from 'sharp'
-import * as fs from 'fs'
-import * as tmp from 'tmp'
+import fs from 'fs'
 import ffmpeg from 'fluent-ffmpeg'
 
 import { createTempFile, createTempFolder } from './tmp'

@@ -1,4 +1,4 @@
-import * as tmp from 'tmp'
+import tmp from 'tmp'
 
 
 export interface TempFile {
