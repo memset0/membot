@@ -26,7 +26,6 @@ export async function videoExtractFrame(videoPath: string, imagePath: string, op
 			'-vframes', 1,
 			'-q:v', quality,
 		]
-		console.log({ inputOptions, outputOptions })
 		cmd.inputOptions(inputOptions)
 			.outputOptions(outputOptions)
 			.output(imagePath)
