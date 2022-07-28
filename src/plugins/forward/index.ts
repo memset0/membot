@@ -91,8 +91,8 @@ export async function apply(ctx: Context, config: Config) {
 		})
 
 	ctx.middleware(middleware(ctx))
-	ctx.on('message-deleted', onMessageDeleted)
 	// ctx.on('message-updated', onMessageUpdated)
+	ctx.on('message-deleted', onMessageDeleted)
 }
 
 
@@ -134,8 +134,8 @@ function onMessageDeleted(session: Session) {
 	if (!session.channelId) { return }
 	if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return }
 
-	const logger = session.app.logger(name + '(msgdel)')
-	logger.info(session)
+	// const logger = session.app.logger(name + '(msgdel)')
+	// logger.info(session)
 
 	forwardingList[`${session.platform}:${session.channelId}`]
 		.forEach(async (target: ForwardTarget) => {
@@ -299,6 +299,7 @@ function middleware(ctx: Context) {
 				}
 
 				if (target.options.usePrefix) {
+					const date = new Date(session.timestamp)
 					chain.splice(start, 0, {
 						type: 'text',
 						data: {
@@ -306,6 +307,8 @@ function middleware(ctx: Context) {
 								.replace(/\\n/g, '\n')
 								.replace(/<userId>/g, session.author.userId)
 								.replace(/<userName>/g, session.author.nickname || session.author.username)
+								.replace(/<date>/g, date.format('yyyy-MM-dd'))
+								.replace(/<time>/g, date.format('hh:mm:ss'))
 						},
 					})
 
