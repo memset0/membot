@@ -33,8 +33,8 @@ export async function apply(ctx: Context, config: Config) {
 			} else if (e.platform && e.channelId) {
 				e.to = `${e.platform}:${e.channelId}`
 			}
-			if (!e.template) { e.template = `${e.prefix || ''} <userName>: ` }
-			if (!e.to || !e.platform || !e.channelId) { logger.warn('Missing target channel config.') }
+			if (!e.template) { e.template = `${e.prefix || ''} {userNick}: ` }
+			if (!e.to || !e.platform || !e.channelId) { throw new Error('[plugin-forward] Missing target channel config.') }
 
 			e.cache = {
 				use: false,
