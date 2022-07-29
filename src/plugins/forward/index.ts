@@ -2,7 +2,7 @@ import { Context, Session, Logger, segment } from 'koishi'
 
 import { sliceWithEllipsis } from '../../utils/string'
 import { QFace, getUserName } from '../../utils/onebot'
-import { webp2jpg, webm2jpg, mp42jpg } from '../../utils/file-type'
+import { BufferConverter } from '../../utils/file-type'
 
 import adaptPlatformKook from './platform/kook'
 import adaptPlatformTelegram from './platform/telegram'
@@ -262,16 +262,15 @@ function middleware(ctx: Context) {
 								if (seg.data.url?.startsWith('base64://UklGR')) {
 									// mime webp  <=>  static stickers
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
-									seg.data.url = 'base64://' + (await webp2jpg(buffer)).toString('base64')
+									seg.data.url = 'base64://' + (await BufferConverter.webp2jpg(buffer)).toString('base64')
 								} else if (seg.data.url?.startsWith('base64://GkXfo')) {
 									// mime webm  <=>  animated stickers
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
-									seg.data.url = 'base64://' + (await webm2jpg(buffer)).toString('base64')
-									logger.info(seg.data.url)
+									seg.data.url = 'base64://' + (await BufferConverter.webm2gif(buffer)).toString('base64')
 								} else if (seg.data.url?.startsWith('base64://AAAA')) {
 									// mime mp4  <=>  video, though Telegram call this 'gif'
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
-									seg.data.url = 'base64://' + (await mp42jpg(buffer)).toString('base64')
+									seg.data.url = 'base64://' + (await BufferConverter.mp42gif(buffer)).toString('base64')
 								}
 								break
 							}

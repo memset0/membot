@@ -1,7 +1,7 @@
 import { Context, Session, segment } from 'koishi'
 
 import { ForwardTarget } from '../types'
-import { gif2jpg } from '../../../utils/file-type'
+import { BufferConverter } from '../../../utils/file-type'
 
 export const name = 'forward-telegram'
 
@@ -42,7 +42,7 @@ export default async function adaptPlatformTelegram(chain: any[], ctx: Context, 
 				const buffer = Buffer.from(chain[i].data.url.slice(9), 'base64')
 				// uploading gif with `sendAnimation` method is borken now
 				// this is a temporary fallback
-				chain[i].data.url = 'base64://' + (await gif2jpg(buffer)).toString('base64')
+				chain[i].data.url = 'base64://' + (await BufferConverter.gif2jpg(buffer)).toString('base64')
 			}
 		}
 	}
