@@ -37,14 +37,12 @@ export default async function adaptPlatformTelegram(chain: any[], ctx: Context, 
 
 	for (const i in chain) {
 		if (chain[i].type === 'image') {
-			console.log(chain[i].data.url.slice(0, 30))
 			if (chain[i].data.url.startsWith('base64://R0lGOD')) {
 				// mime gif
 				const buffer = Buffer.from(chain[i].data.url.slice(9), 'base64')
 				// uploading gif with `sendAnimation` method is borken now
 				// this is a temporary fallback
 				chain[i].data.url = 'base64://' + (await gif2jpg(buffer)).toString('base64')
-				console.log(chain[i].data.url.slice(0, 30), '!!!')
 			}
 		}
 	}
