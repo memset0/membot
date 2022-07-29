@@ -191,6 +191,12 @@ function middleware(ctx: Context) {
 									channelId: record.channelId
 								},
 							}
+							if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === record.author.userId) {
+								if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
+									chain[2].data.content = chain[2].data.content.slice(1)
+								}
+								chain.splice(1, 1)
+							}
 						} else {
 							chain[0] = {
 								type: 'text',
@@ -198,12 +204,6 @@ function middleware(ctx: Context) {
 									content: `[回复 ${record.author.username}: ${record.shortcut}] `
 								},
 							}
-						}
-						if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === record.author.userId) {
-							if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
-								chain[2].data.content = chain[2].data.content.slice(1)
-							}
-							chain.splice(1, 1)
 						}
 					} else {
 						chain[0] = {
