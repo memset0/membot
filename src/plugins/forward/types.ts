@@ -1,14 +1,9 @@
-export interface TypeDictionary {
-	[type: string]: string
-}
-
 export interface ForwardTarget {
 	to?: string
 	platform?: string
 	channelId?: string
 	prefix?: string
 	template?: string
-	showSource?: boolean
 
 	cache?: {
 		use?: boolean
@@ -23,12 +18,14 @@ export interface ForwardTarget {
 		
 		// Platform Kook Only
 		useCard?: boolean
+		showSource?: boolean
 
 		// Platform Telegram Only
 		useHTML?: boolean
 		useMarkdown?: boolean
 	}
 }
+
 
 export type MessageRecord = [
 	string,   // session.platform
@@ -50,6 +47,10 @@ export interface MessageRecordMeta {
 	shortcut: string
 }
 
+
+export interface TypeDictionary {
+	[type: string]: string
+}
 
 export const Type2Text: TypeDictionary = {
 	image: '<图片>',

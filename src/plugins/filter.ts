@@ -3,10 +3,11 @@ import { Context, Logger } from 'koishi'
 
 export const name = 'filter'
 export const using = ['database']
-export const logger = new Logger('filter')
 
 
 export async function apply(ctx: Context) {
+	const logger = ctx.logger('filter')
+
 	const prefixes = (typeof ctx.options.prefix === 'string' ? [ctx.options.prefix] : ctx.options.prefix) as string[]
 
 	ctx.middleware(async (session, next) => {
@@ -22,7 +23,7 @@ export async function apply(ctx: Context) {
 			}
 		}
 		if (session.platform === 'telegram' && session.author?.isBot) {
-			// 不处理其他 Telegram Bot 发送的消息
+			// 不处理其他 Telegram Bot 发送的消息，虽然本来就收不到（x）
 			return
 		}
 

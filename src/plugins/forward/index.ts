@@ -1,12 +1,12 @@
 import { Context, Session, Logger, segment } from 'koishi'
 
-import '../../utils/date'
 import { sliceWithEllipsis } from '../../utils/string'
 import { QFace, getUserName } from '../../utils/onebot'
 import { webp2jpg, webm2jpg, mp42jpg } from '../../utils/file-type'
 
 import adaptPlatformKook from './platform/kook'
 import adaptPlatformTelegram from './platform/telegram'
+import { templateArgvFactory } from './template'
 import { ForwardTarget, MessageRecord, Type2Text, MessageRecordMeta } from './types'
 
 
@@ -151,6 +151,7 @@ function onMessageDeleted(session: Session) {
 
 
 function middleware(ctx: Context) {
+	const templateArgv = templateArgvFactory(ctx)
 	const logger = ctx.logger(name)
 
 	function ignore(chain: segment.Chain) {
@@ -254,8 +255,10 @@ function middleware(ctx: Context) {
 								} catch (e) {
 									logger.info(`error while transforming ${seg.type}s`, e)
 								}
+								break;
+							}
 
-							} else if (target.platform !== session.platform && session.platform === 'telegram') {
+							if (target.platform !== session.platform && session.platform === 'telegram') {
 								if (seg.data.url?.startsWith('base64://UklGR')) {
 									// webp  <=>  static stickers
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
@@ -270,6 +273,7 @@ function middleware(ctx: Context) {
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
 									seg.data.url = 'base64://' + (await mp42jpg(buffer)).toString('base64')
 								}
+								break
 							}
 							break
 						}
@@ -307,18 +311,13 @@ function middleware(ctx: Context) {
 				}
 
 				if (target.options.usePrefix) {
-					const date = new Date(session.timestamp)
-					chain.splice(start, 0, {
-						type: 'text',
-						data: {
-							content: target.template
-								.replace(/\\n/g, '\n')
-								.replace(/<userId>/g, session.author.userId)
-								.replace(/<userName>/g, session.author.nickname || session.author.username)
-								.replace(/<date>/g, date.format('yyyy-MM-dd'))
-								.replace(/<time>/g, date.format('hh:mm:ss'))
-						},
-					})
+					let content = target.template.replace(/\\n/g, '\n')
+					for (const argv in templateArgv) {
+						if (content.match(argv)) {
+							content = content.replace(new RegExp(argv, 'g'), templateArgv[argv](session))
+						}
+					}
+					chain.splice(start, 0, { type: 'text', data: { content: content } })
 				}
 
 				let messages = null

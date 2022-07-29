@@ -47,7 +47,7 @@ export default function adaptPlatformKook(chain: any[], ctx: Context, session: S
 					'elements': chain.slice(m, r).map((e) => ({ 'type': 'image', 'src': e.data.url }))
 				})
 			}
-			if (target.showSource) {
+			if (target.options.showSource) {
 				modules[modules.length - 1].push({
 					'type': 'context',
 					'elements': [{
