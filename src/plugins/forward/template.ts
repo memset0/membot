@@ -10,28 +10,27 @@ export function templateArgvFactory(ctx: Context) {
 		},
 
 		'{userName}': (session: Session) => {
-			if (session.platform === 'telegram') {
-				return session.author.nickname || session.author.username
-			} else {
-				return session.author.username
-			}
+			return session.author.username || session.author.nickname
 		},
 
-		'{userCard}': (session: Session) => {
-			if (session.platform === 'onebot') {
-				return session.author.nickname
-			}
-			return functions['{userName}'](session)
+		'{userNick}': (session: Session) => {
+			return session.author.nickname || session.author.username
 		},
 
-		'{userCardOnly}': (session: Session) => {
-			if (session.platform === 'onebot') {
-				return session.author.nickname
-			}
-			return ''
+		'{userNameAdditional}': (session: Session) => {
+			return session.author.username && session.author.nickname && session.author.username !== session.author.nickname ?
+				session.author.nickname :
+				''
+		},
+
+		'{userNickAdditional}': (session: Session) => {
+			return session.author.username && session.author.nickname && session.author.username !== session.author.nickname ?
+				session.author.username :
+				''
 		},
 
 		'{userTag}': (session: Session) => {
+			// not supported yet
 			return ''
 		},
 
