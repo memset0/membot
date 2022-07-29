@@ -86,6 +86,7 @@ export class Sender {
   sendAsset = async () => {
     const [field, content, filename] = await maybeFile(this.payload, this.currAssetType)
     const payload = new FormData()
+    // console.log("sendAsset", this.currAssetType, field, content, filename, payload.getHeaders())
     for (const key in this.payload) {
       payload.append(key, this.payload[key].toString())
     }
@@ -148,9 +149,13 @@ export class Sender {
             logger.warn('asset segment with no url')
             break
           }
-          if (seg.type === 'image') this.currAssetType = await isGif(assetUrl) ? 'animation' : 'photo'
-          else if (seg.type === 'file') this.currAssetType = 'document'
-          else this.currAssetType = seg.type
+          if (seg.type === 'image') {
+            this.currAssetType = await isGif(assetUrl) ? 'animation' : 'photo'
+          } else if (seg.type === 'file') {
+            this.currAssetType = 'document'
+          } else {
+            this.currAssetType = seg.type
+          }
           this.payload[this.currAssetType] = assetUrl
           break
         }
