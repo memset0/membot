@@ -29,13 +29,18 @@ export class HttpPolling extends Adapter.Client<TelegramBot> {
           return bot.offline()
         }
 
-        const updates = await bot.internal.getUpdates({
-          offset: this.offset + 1,
-          timeout: bot.config.pollingTimeout,
-        })
-        for (const e of updates) {
-          this.offset = Math.max(this.offset, e.update_id)
-          handleUpdate(e, bot)
+        try {
+          const updates = await bot.internal.getUpdates({
+            offset: this.offset + 1,
+            timeout: bot.config.pollingTimeout,
+          })
+          for (const e of updates) {
+            this.offset = Math.max(this.offset, e.update_id)
+            handleUpdate(e, bot)
+          }
+        } catch (err) {
+          bot.offline()
+          throw Error(err)
         }
         setTimeout(polling, 0)
       }
@@ -44,7 +49,7 @@ export class HttpPolling extends Adapter.Client<TelegramBot> {
     })
   }
 
-  async stop() {}
+  async stop() { }
 }
 
 export namespace HttpPolling {
