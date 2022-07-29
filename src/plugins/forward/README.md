@@ -8,11 +8,11 @@
 
 | Status | Meaning |
 | :-: | :-: |
-| √ | supported and tested |
-| × | not developed yet |
-| o | developing |
-| - | the platform doesn't contain this type |
-| (empty) | not tested, might be supported |
+| √ | This feature is supported and tested |
+| × | This feature has not developed yet |
+| o | This feature is under development |
+| - | The platform doesn't support this feature |
+
 
 | Platform    | Text | RichMsg | At   | Quote | Image | Video | File | Reply* | Recall* |
 | ----------- | ---- | ------- | ---- | ----- | ----- | ----- | ---- | ------ | ------- |
