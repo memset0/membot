@@ -1,12 +1,13 @@
 import { Context, Session, segment } from 'koishi'
 
 import { ForwardTarget } from '../types'
+import { gif2jpg } from '../../../utils/file-type'
 
 export const name = 'forward-telegram'
 
 export const TelegramMarkdownV2CharactersNeedEscape = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
 
-export default function adaptPlatformTelegram(chain: any[], ctx: Context, session: Session, target: ForwardTarget, metaLength: number) {
+export default async function adaptPlatformTelegram(chain: any[], ctx: Context, session: Session, target: ForwardTarget, metaLength: number) {
 	const prefixLength = metaLength + (target.options.usePrefix ? 1 : 0)
 	const prefix = target.options.usePrefix ? segment.join(chain.slice(0, prefixLength)) : null
 	const chains = []
@@ -30,6 +31,20 @@ export default function adaptPlatformTelegram(chain: any[], ctx: Context, sessio
 					.replace(/\&/g, '&amp;')
 					.replace(/\</g, '&lt;')
 					.replace(/\>/g, '&gt;')
+			}
+		}
+	}
+
+	for (const i in chain) {
+		if (chain[i].type === 'image') {
+			console.log(chain[i].data.url.slice(0, 30))
+			if (chain[i].data.url.startsWith('base64://R0lGOD')) {
+				// mime gif
+				const buffer = Buffer.from(chain[i].data.url.slice(9), 'base64')
+				// uploading gif with `sendAnimation` method is borken now
+				// this is a temporary fallback
+				chain[i].data.url = 'base64://' + (await gif2jpg(buffer)).toString('base64')
+				console.log(chain[i].data.url.slice(0, 30), '!!!')
 			}
 		}
 	}

@@ -260,16 +260,16 @@ function middleware(ctx: Context) {
 
 							if (target.platform !== session.platform && session.platform === 'telegram') {
 								if (seg.data.url?.startsWith('base64://UklGR')) {
-									// webp  <=>  static stickers
+									// mime webp  <=>  static stickers
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
 									seg.data.url = 'base64://' + (await webp2jpg(buffer)).toString('base64')
 								} else if (seg.data.url?.startsWith('base64://GkXfo')) {
-									// webm  <=>  animated stickers
+									// mime webm  <=>  animated stickers
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
 									seg.data.url = 'base64://' + (await webm2jpg(buffer)).toString('base64')
 									logger.info(seg.data.url)
 								} else if (seg.data.url?.startsWith('base64://AAAA')) {
-									// mp4  <=>  video, though Telegram call this 'gif'
+									// mime mp4  <=>  video, though Telegram call this 'gif'
 									const buffer = Buffer.from(seg.data.url.slice(9), 'base64')
 									seg.data.url = 'base64://' + (await mp42jpg(buffer)).toString('base64')
 								}
@@ -323,11 +323,11 @@ function middleware(ctx: Context) {
 				let messages = null
 				switch (target.platform) {
 					case "kaiheila": {
-						messages = adaptPlatformKook(chain, ctx, session, target)
+						messages = await adaptPlatformKook(chain, ctx, session, target)
 						break
 					}
 					case "telegram": {
-						messages = adaptPlatformTelegram(chain, ctx, session, target, start)
+						messages = await adaptPlatformTelegram(chain, ctx, session, target, start)
 						break
 					}
 					default: {

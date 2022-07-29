@@ -37,9 +37,9 @@ export async function videoExtractFrame(videoPath: string, imagePath: string, op
 }
 
 
-export async function video2jpg(buffer: Buffer, videoFormat: string): Promise<Buffer> {
+export async function takeVideoShortcut(buffer: Buffer, videoFormat: string = 'mp4', imageFormat: string = 'jpg'): Promise<Buffer> {
 	const video = await createTempFile({ postfix: `.${videoFormat}` })
-	const image = await createTempFile({ postfix: '.jpg' })
+	const image = await createTempFile({ postfix: `.${imageFormat}` })
 	await fs.promises.writeFile(video.path, buffer, 'binary')
 	await videoExtractFrame(video.path, image.path, { videoFormat })
 	const result = await fs.promises.readFile(image.path)
@@ -57,9 +57,13 @@ export async function webp2jpg(buffer: Buffer): Promise<Buffer> {
 }
 
 export async function webm2jpg(buffer: Buffer): Promise<Buffer> {
-	return video2jpg(buffer, 'webm')
+	return takeVideoShortcut(buffer, 'webm')
 }
 
 export async function mp42jpg(buffer: Buffer): Promise<Buffer> {
-	return video2jpg(buffer, 'mp4')
+	return takeVideoShortcut(buffer, 'mp4')
+}
+
+export async function gif2jpg(buffer: Buffer): Promise<Buffer> {
+	return takeVideoShortcut(buffer, 'gif')
 }
