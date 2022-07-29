@@ -4,9 +4,36 @@ import { ForwardTarget } from '../types'
 
 export const name = 'forward-telegram'
 
-export default function adaptPlatformTelegram(chain: any[], ctx: Context, session: Session, target: ForwardTarget, prefixPosition: number) {
-	const prefix = target.options.usePrefix ? segment.join([chain[prefixPosition]]) : null
+export const TelegramMarkdownV2CharactersNeedEscape = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+
+export default function adaptPlatformTelegram(chain: any[], ctx: Context, session: Session, target: ForwardTarget, metaLength: number) {
+	const prefixLength = metaLength + (target.options.usePrefix ? 1 : 0)
+	const prefix = target.options.usePrefix ? segment.join(chain.slice(0, prefixLength)) : null
 	const chains = []
+
+	if (target.options.useMarkdown) {
+		for (let i = prefixLength; i < chain.length; i++) {
+			if (chain[i].type === 'text') {
+				// https://core.telegram.org/bots/api#markdownv2-style
+				for (const c of TelegramMarkdownV2CharactersNeedEscape) {
+					chain[i].data.content = chain[i].data.content.replace(new RegExp('\\' + c, 'g'), '\\' + c)
+				}
+			}
+		}
+	}
+
+	if (target.options.useHTML) {
+		for (let i = prefixLength; i < chain.length; i++) {
+			if (chain[i].type === 'text') {
+				// https://core.telegram.org/bots/api#html-style
+				chain[i].data.content = chain[i].data.content
+					.replace(/\&/g, '&amp;')
+					.replace(/\</g, '&lt;')
+					.replace(/\>/g, '&gt;')
+			}
+		}
+	}
+
 	let imageCount = 0
 	for (const i in chain) { imageCount += chain[i].type === 'image' ? 1 : 0 }
 
