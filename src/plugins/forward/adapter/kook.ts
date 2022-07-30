@@ -7,7 +7,7 @@ import { isInteger } from '../../../utils/type'
 export const CARD_THEMES = ['primary', 'success', 'danger', 'warning', 'info', 'secondary']
 
 
-export default function adaptPlatformKook(chain: any[], ctx: Context, session: Session, target: ForwardTarget) {
+export default function adaptKook(chain: any[], ctx: Context, session: Session, target: ForwardTarget) {
 	if (target.options.useCard) {
 		const time = new Date(session.timestamp)
 		const theme = isInteger(session.author.userId) ?

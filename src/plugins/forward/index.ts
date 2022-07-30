@@ -4,8 +4,8 @@ import { sliceWithEllipsis } from '../../utils/string'
 import { QFace, getUserName } from '../../utils/onebot'
 import { BufferConverter } from '../../utils/file-type'
 
-import adaptPlatformKook from './platform/kook'
-import adaptPlatformTelegram from './platform/telegram'
+import adaptKook from './adapter/kook'
+import adaptTelegram from './adapter/telegram'
 import { templateArgvFactory } from './template'
 import { ForwardTarget, MessageRecord, Type2Text, MessageRecordMeta } from './types'
 
@@ -340,11 +340,11 @@ function middleware(ctx: Context) {
 				let messages = null
 				switch (target.platform) {
 					case "kaiheila": {
-						messages = await adaptPlatformKook(chain, ctx, session, target)
+						messages = await adaptKook(chain, ctx, session, target)
 						break
 					}
 					case "telegram": {
-						messages = await adaptPlatformTelegram(chain, ctx, session, target, start)
+						messages = await adaptTelegram(chain, ctx, session, target, start)
 						break
 					}
 					default: {

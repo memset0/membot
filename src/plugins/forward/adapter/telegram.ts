@@ -7,7 +7,7 @@ export const name = 'forward-telegram'
 
 export const TelegramMarkdownV2CharactersNeedEscape = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
 
-export default async function adaptPlatformTelegram(chain: any[], ctx: Context, session: Session, target: ForwardTarget, metaLength: number) {
+export default async function adaptTelegram(chain: any[], ctx: Context, session: Session, target: ForwardTarget, metaLength: number) {
 	const prefixLength = metaLength + (target.options.usePrefix ? 1 : 0)
 	const prefix = target.options.usePrefix ? segment.join(chain.slice(0, prefixLength)) : null
 	const chains = []
