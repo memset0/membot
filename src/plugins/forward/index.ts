@@ -25,6 +25,10 @@ export async function apply(ctx: Context, config: Config) {
 	const logger = ctx.logger(name)
 
 	for (const source in config) {
+		const s = {
+			platform: source.split(':')[0],
+			channelId: source.split(':')[0],
+		}
 		forwardingList[source] = config[source]
 		for (const e of forwardingList[source]) {
 			if (e.to) {
@@ -43,6 +47,7 @@ export async function apply(ctx: Context, config: Config) {
 			}
 
 			e.options = {
+				sendGif: s.platform === e.platform ? true : false,
 				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
 				type2text: Type2Text,
@@ -296,6 +301,19 @@ function middleware(ctx: Context) {
 						shortcut.push(segment.join([seg]).trim())
 					} else {
 						shortcut.push(`[${seg.type}]`)
+					}
+				}
+
+				if (!target.options.sendGif) {
+					// this is a temporary fallback
+					for (const i in chain) {
+						if (chain[i].type === 'image') {
+							if (chain[i].data.url.startsWith('base64://R0lGOD')) {
+								// mime gif
+								const buffer = Buffer.from(chain[i].data.url.slice(9), 'base64')
+								chain[i].data.url = 'base64://' + (await BufferConverter.gif2jpg(buffer)).toString('base64')
+							}
+						}
 					}
 				}
 

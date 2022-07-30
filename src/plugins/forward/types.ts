@@ -11,6 +11,7 @@ export interface ForwardTarget {
 	}
 
 	options?: {
+		sendGif?: boolean
 		usePrefix?: boolean
 		reverseHook?: boolean
 		transformBase64?: boolean
