@@ -39,8 +39,8 @@ export class HttpPolling extends Adapter.Client<TelegramBot> {
             handleUpdate(e, bot)
           }
         } catch (err) {
-          bot.offline()
-          throw Error(err)
+          logger.warn('poll error', err)
+          return bot.offline()
         }
         setTimeout(polling, 0)
       }
