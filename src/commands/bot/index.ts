@@ -1,6 +1,7 @@
 import { Context } from 'koishi'
 
-import applySendmsg from './sendmsg'
+import * as commandSendmsg from './sendmsg'
+import * as commandStatus from './status'
 
 export const name = 'bot'
 
@@ -17,5 +18,6 @@ export function apply(ctx: Context) {
 			return session.execute('auth.give 1 ' + id)
 		})
 
-	applySendmsg(ctx)
+	commandStatus.apply(ctx)
+	commandSendmsg.apply(ctx)
 }

@@ -1,8 +1,10 @@
-import { segment, Context, Logger } from 'koishi'
+import { segment, Context } from 'koishi'
 
-const logger = new Logger('bot-sendmsg')
+export const name = 'bot-sendmsg'
 
-export default function (ctx: Context) {
+export function apply(ctx: Context) {
+	const logger = ctx.logger(name)
+
 	ctx.command('bot.sendmsg <channelId:string> <message:text>', '发送消息', { authority: 4 })
 		.option('at', '-a <string>')
 		.option('quote', '-q <string>')
