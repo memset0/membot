@@ -1,8 +1,13 @@
-import sharp from 'sharp'
+import { Logger} from 'koishi'
 import fs from 'fs'
+import sharp from 'sharp'
 import ffmpeg from 'fluent-ffmpeg'
 
 import { createTempFile } from './tmp'
+
+
+const logger = new Logger('utils-file-type')
+
 
 export namespace FileConverter {
 	export async function takeVideoShortcut(videoPath: string, imagePath: string, options: any = {}): Promise<void> {
@@ -39,7 +44,6 @@ export namespace FileConverter {
 		return new Promise((resolve, reject) => {
 			ffmpeg(sourcePath)
 				.save(targetPath)
-				.format('avi')
 				.on('end', () => resolve())
 				.on('error', (err: Error) => reject(err))
 				.run()
@@ -56,6 +60,7 @@ export namespace BufferConverter {
 		await fs.promises.writeFile(video.path, buffer, 'binary')
 		await FileConverter.takeVideoShortcut(video.path, image.path, { videoFormat })
 		const result = await fs.promises.readFile(image.path)
+		// logger.debug('buffer shortcut', { s: video.path, e: image.path, sb: buffer.toString('base64').slice(0, 30), eb: result.toString('base64').slice(0, 30) })
 		video.callback()
 		image.callback()
 		return result
@@ -68,7 +73,8 @@ export namespace BufferConverter {
 		await fs.promises.writeFile(sourceVideo.path, buffer, 'binary')
 		await FileConverter.convertVideo(sourceVideo.path, targetVideo.path)
 		const result = await fs.promises.readFile(targetVideo.path)
-		sourceVideo.callback()
+		// logger.debug('buffer video convert', { s: sourceVideo.path, e: targetVideo.path, sb: buffer.toString('base64').slice(0, 30), eb: result.toString('base64').slice(0, 30) })
+		sourceVideo.callback() 
 		targetVideo.callback()
 		return result
 	}

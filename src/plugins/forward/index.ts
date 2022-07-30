@@ -47,7 +47,7 @@ export async function apply(ctx: Context, config: Config) {
 			}
 
 			e.options = {
-				sendGif: s.platform === e.platform ? true : false,
+				sendGif: e.platform !== 'telegram',
 				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
 				transformBase64: !(e.platform === 'kaiheila'),
 				type2text: Type2Text,
@@ -293,17 +293,6 @@ function middleware(ctx: Context) {
 					}
 				}
 
-				let shortcut: string[] = []
-				for (const seg of chain) {
-					if (seg.type === 'quote') {
-						continue
-					} else if (seg.type === 'text') {
-						shortcut.push(segment.join([seg]).trim())
-					} else {
-						shortcut.push(`[${seg.type}]`)
-					}
-				}
-
 				if (!target.options.sendGif) {
 					// this is a temporary fallback
 					for (const i in chain) {
@@ -314,6 +303,17 @@ function middleware(ctx: Context) {
 								chain[i].data.url = 'base64://' + (await BufferConverter.gif2jpg(buffer)).toString('base64')
 							}
 						}
+					}
+				}
+
+				let shortcut: string[] = []
+				for (const seg of chain) {
+					if (seg.type === 'quote') {
+						continue
+					} else if (seg.type === 'text') {
+						shortcut.push(segment.join([seg]).trim())
+					} else {
+						shortcut.push(`[${seg.type}]`)
 					}
 				}
 
