@@ -176,7 +176,7 @@ function middleware(ctx: Context) {
 		if (!session.channelId || session.author.userId === session.bot.selfId) { return next() }
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
 
-		logger.info('receive', `${session.platform}:${session.channelId}`, [loggerToText(session.content)])
+		// logger.info('receive', `${session.platform}:${session.channelId}`, [loggerToText(session.content)])
 
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardTarget) => {
@@ -353,7 +353,7 @@ function middleware(ctx: Context) {
 				}
 
 				for (const message of messages) {
-					logger.info('send', target.to, [loggerToText(message)])
+					// logger.info('send', target.to, [loggerToText(message)])
 
 					await ctx.broadcast([target.to], message)
 						.then(([id]) => {
