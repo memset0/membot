@@ -40,7 +40,7 @@ export class HttpPolling extends Adapter.Client<TelegramBot> {
           }
         } catch (err) {
           logger.warn('poll error', err.message)
-          setTimeout(polling, 0)
+          return setTimeout(polling, 3000)
         }
         setTimeout(polling, 0)
       }
