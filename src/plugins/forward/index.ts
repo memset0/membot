@@ -176,7 +176,7 @@ function middleware(ctx: Context) {
 		if (!session.channelId || session.author.userId === session.bot.selfId) { return next() }
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
 
-		// logger.info('receive', session.platform, logBeautifyChain(segment.parse(session.content)))
+		logger.info('receive', `${session.platform}:${session.channelId}`, [loggerToText(session.content)])
 
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardTarget) => {
@@ -353,6 +353,8 @@ function middleware(ctx: Context) {
 				}
 
 				for (const message of messages) {
+					logger.info('send', target.to, [loggerToText(message)])
+
 					await ctx.broadcast([target.to], message)
 						.then(([id]) => {
 							if (target.cache.use) {
@@ -377,12 +379,12 @@ function middleware(ctx: Context) {
 }
 
 
-function logBeautifyChain(node: any) {
+function loggerBeautify(node: any) {
 	if (typeof node === 'object') {
 		const res = {}
 		for (const i in node) {
 			if (i !== 'capture') {
-				res[i] = logBeautifyChain(node[i])
+				res[i] = loggerBeautify(node[i])
 			}
 		}
 		return res
@@ -390,4 +392,27 @@ function logBeautifyChain(node: any) {
 		if (typeof node === 'string') { return node.slice(0, 30) }
 		return node
 	}
+}
+
+function loggerToText(plain: string): string {
+	const chain = segment.parse(plain)
+	for (const seg of chain) {
+		switch (seg.type) {
+			case 'text': {
+				break
+			}
+			case 'image': {
+				if (seg.data?.url && seg.data.url.startsWith('base64://')) {
+					seg.data = {
+						url: seg.data.url.slice(0, 30)
+					}
+					break
+				}
+			}
+			default: {
+				seg.data = {}
+			}
+		}
+	}
+	return segment.join(chain)
 }
