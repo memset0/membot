@@ -6,7 +6,7 @@ import { convert as htmlToText } from 'html-to-text'
 import RssFeedEmitter from 'rss-feed-emitter'
 
 import { Config, Feed, UrlHook, FeedItem } from './types'
-import { Boardcast } from '../../templates/broadcast'
+import { Broadcast } from '../../templates/broadcast'
 
 export async function fetchTitle(url: string): Promise<string> {
 	return 'untitled'
@@ -137,7 +137,7 @@ export class RSSCore {
 	receive(feed: Feed, payload: FeedItem) {
 		this.logger.info('receive', feed, payload)
 
-		const boardcast = new Boardcast({
+		const boardcast = new Broadcast({
 			type: 'RSS',
 			title: payload.title,
 			link: payload.link,
