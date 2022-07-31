@@ -56,7 +56,6 @@ export class Broadcast extends Template {
 
 		if (this.link || this.links?.length) {
 			for (const link of this.link ? [this.link] : this.links) {
-				if (this.links) { buffer += '· ' }
 				buffer += link + '\n'
 			}
 		}

@@ -37,8 +37,8 @@ export async function apply(ctx: Context, config: Config) {
 				title: '来自 ' + (session.guildId === 'private' ? `用户 ${user}` : `群聊 ${channel} 的用户 ${user}`),
 				content: content.replace(keyString, '@' + ctx.options.nickname).trim(),
 				operation: [
-					['封禁', `.bot.ban ${session.author.userId}`],
-						['回复', replyCommand],
+					['封禁', `.bot.ban ${session.author.userId} -p ${session.platform}`],
+					['回复', replyCommand],
 				],
 			})
 
