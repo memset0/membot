@@ -1,6 +1,8 @@
 import { segment } from 'koishi'
+import structuredClone from '@ungap/structured-clone';
 
 import { Template } from './template'
+import { escapeTelegramHTML } from '../utils/string'
 
 
 export interface Broadcast {
@@ -20,40 +22,44 @@ export interface Broadcast {
 }
 
 export class Broadcast extends Template {
-	toString(platform?: string): string {
+	static render(data: Broadcast, platform?: string): string {
+		if (platform === 'telegram') {
+			data = this.applyFilter(structuredClone(data), escapeTelegramHTML)
+		}
+
 		let buffer = ''
 
-		if (this.image || this.images?.length) {
-			for (const image of this.image ? [this.image] : this.images) {
-				buffer += segment('image', { url: image })
+		if (data.image || data.images?.length) {
+			for (const image of data.image ? [data.image] : data.images) {
+				buffer += segment.image(image)
 				if (platform !== 'telegram') { buffer += '\n' }
 			}
 		}
 
-		this.title = this.title || ''
+		data.title = data.title || ''
 		if (platform === 'telegram') {
-			buffer += `<strong><u>#${this.type}</u> ${this.title}</strong>\n`
+			buffer += `<strong><u>#${data.type}</u> ${data.title}</strong>\n`
 		} else {
-			buffer += `[${this.type}] ${this.title}\n`
+			buffer += `[${data.type}] ${data.title}\n`
 		}
 
-		if (this.link) {
+		if (data.link) {
 			if (platform === 'telegram') {
-				buffer += `<a href="${this.link}">${this.linkname || this.link}</a>\n`
+				buffer += `<a href="${data.link}">${data.linkname || data.link}</a>\n`
 			} else {
-				if (this.linkname) { buffer += `${this.linkname} ` }
-				buffer += `${this.link}\n`
+				if (data.linkname) { buffer += `${data.linkname} ` }
+				buffer += `${data.link}\n`
 			}
 		}
 
-		if (this.content) {
-			buffer += this.content
-			if (!this.content.endsWith('\n')) buffer += '\n'
+		if (data.content) {
+			buffer += data.content
+			if (!data.content.endsWith('\n')) buffer += '\n'
 		}
 
-		if (this.operation?.length) {
-			for (const [name, command] of this.operation) {
-				if (this.operation.length > 1) {
+		if (data.operation?.length) {
+			for (const [name, command] of data.operation) {
+				if (data.operation.length > 1) {
 					buffer += '· '
 				}
 				if (platform === 'telegram') {
@@ -64,8 +70,8 @@ export class Broadcast extends Template {
 			}
 		}
 
-		if (this.tag?.length) {
-			for (const tag of this.tag) {
+		if (data.tag?.length) {
+			for (const tag of data.tag) {
 				buffer += `#${tag} `
 			}
 			buffer += '\n'
@@ -76,6 +82,10 @@ export class Broadcast extends Template {
 		}
 
 		return buffer.replace(/\s+$/, '')
+	}
+
+	toString(platform?: string): string {
+		return Broadcast.render(this, platform)
 	}
 
 	constructor(data: Broadcast) {

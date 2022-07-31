@@ -48,10 +48,10 @@ export interface FeedItem {
   author?: string
   guid?: string
   comments?: string
-  image?: Object
+  image?: any
   categories?: string
-  enclosures?: Object
-  meta?: Object
+  enclosures?: any
+  meta?: any
   [key: string]: any
 }
 

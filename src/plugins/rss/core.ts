@@ -3,12 +3,18 @@ import xss from 'xss'
 import md5 from 'md5'
 import axios from 'axios'
 import deepmerge from 'deepmerge'
+import RssFeedEmitter from 'rss-feed-emitter'
 import { friendlyAttrValue } from 'xss'
 import { convert as htmlToText } from 'html-to-text'
-import RssFeedEmitter from 'rss-feed-emitter'
 
 import { Config, Feed, UrlHook, FeedItem } from './types'
 import { Broadcast } from '../../templates/broadcast'
+
+
+export const apiImageUrlFilter = [
+	'https://www.zhihu.com/equation'
+]
+
 
 export async function fetchTitle(url: string): Promise<string> {
 	const res = await axios.get(url)
@@ -53,10 +59,14 @@ export class RSSCore {
 	database: Database
 
 	genFeeder(): RssFeedEmitter {
-		return new RssFeedEmitter({
+		const feeder = new RssFeedEmitter({
 			skipFirstLoad: true,
 			userAgent: this.config.userAgent
 		})
+		feeder.on('error', (error) => {
+			this.ctx.logger('feeder').warn('error', error)
+		})
+		return feeder
 	}
 
 	addFeed(feed: Feed): boolean {
@@ -65,12 +75,13 @@ export class RSSCore {
 			this.hook[url] = []
 			this.feeder.add({
 				url,
-				refresh: feed.refresh
+				refresh: feed.refresh,
+				eventName: md5(url),
 			})
 			this.feeder.on(md5(url), (payload: FeedItem) => {
 				this.logger.info('receive', url)
 				for (const feed of this.hook[url]) {
-					this.receive(feed, payload)
+					this.receive(feed, payload, true)
 				}
 			})
 		}
@@ -139,11 +150,11 @@ export class RSSCore {
 		await this.initialize()
 	}
 
-	receive(feed: Feed, payload: FeedItem) {
-		this.logger.info('receive', feed, payload)
+	receive(feed: Feed, payload: FeedItem, isNew = false) {
+		if (isNew) { this.logger.info('receive new', feed, payload) }
 		feed.options = deepmerge(this.config.defaults, feed.options)
 
-		const boardcast = new Broadcast({
+		const broadcast = new Broadcast({
 			type: 'RSS',
 			title: feed.options.title || `${(new URL(feed.url)).hostname} 的订阅`,
 			link: payload.link,
@@ -154,30 +165,42 @@ export class RSSCore {
 		})
 
 		if (feed.options.feature?.summary) {
-			boardcast.content = htmlToText((payload.summary || payload.description), {
+			broadcast.content = htmlToText((payload.description || payload.summary), {
 				wordwrap: 1 << 30,
 				selectors: [
 					{ selector: 'a', options: { ignoreHref: true } },
 					{ selector: 'img', format: 'skip' }
 				]
-			})
-			const limit = 250
-			if (boardcast.content.length > limit) {
-				boardcast.content = boardcast.content.slice(0, limit - 3) + '...'
+			}).replace(/\n\s*\n/g, '\n')
+				.replace(/\n/g, '  ')
+			const limit = 150
+			if (broadcast.content.length > limit) {
+				broadcast.content = broadcast.content.slice(0, limit - 3) + '...'
 			}
 		}
 
 		if (feed.options.feature?.image) {
-			xss(payload.description, {
+			xss(payload.description || payload.summary, {
 				onTagAttr: (tag, name, value) => {
-					if (tag === "img" && name === "src") {
-						boardcast.image = boardcast.image || friendlyAttrValue(value);
+					if (tag === "img" && name === "src" && !broadcast.image) {
+						let flag = true
+						for (const prefix of apiImageUrlFilter) {
+							if (value.startsWith(prefix)) {
+								flag = false
+								break
+							}
+						}
+						if (flag) {
+							broadcast.image = friendlyAttrValue(value)
+						}
 					}
 				},
 			})
 		}
 
-		this.ctx.broadcast([feed.channel], boardcast.toString(feed.channel.split(':', 1)[0]))
+		// this.logger.info('broadcast', broadcast)
+
+		this.ctx.broadcast([feed.channel], broadcast.toString(feed.channel.split(':', 1)[0]))
 	}
 
 	constructor(ctx: Context, config: Config) {

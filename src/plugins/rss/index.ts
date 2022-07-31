@@ -1,4 +1,5 @@
 import { Context, Logger, segment } from 'koishi'
+import axios from 'axios'
 
 import { RSSCore, fetchTitle, fetchRSS } from './core'
 import { Config, Feed, FeedItem, RSSOptions } from './types'
@@ -18,7 +19,6 @@ declare module 'koishi' {
 export const name = 'rss'
 export const using = ['database'] as const
 
-
 export function apply(ctx: Context, config: Config) {
   const logger = ctx.logger('rss')
 
@@ -35,7 +35,7 @@ export function apply(ctx: Context, config: Config) {
 
   config = {
     timeout: 3000,
-    refresh: 1000 * 60 * 10,
+    refresh: 1000 * 60 * 60 * 12,
     userAgent: '',
     defaults: {},
     ...config,
@@ -44,6 +44,8 @@ export function apply(ctx: Context, config: Config) {
   const core = new RSSCore(ctx, config)
   ctx.on('ready', async () => { await core.initialize() })
   ctx.on('dispose', () => { core.destroy() })
+
+  ctx.command('rss', 'RSS 订阅')
 
   ctx.command('rss.sub <url:text>', '订阅 RSS', { authority: 3 })
     .option('title', '-t 设置标题')
@@ -59,7 +61,7 @@ export function apply(ctx: Context, config: Config) {
         payload = (await fetchRSS(url, config.timeout, config.userAgent))[0]
       } catch (error) {
         logger.warn('err', error)
-        return `无法订阅此链接`
+        return `无法订阅链接：${url}`
       }
 
       const feed = await core.subscribe({
@@ -68,7 +70,7 @@ export function apply(ctx: Context, config: Config) {
         refresh: options.refresh || config.refresh,
         last_update: new Date(),
         options: {
-          title: options.title || (await fetchTitle(url)) || '',
+          title: options.title || payload.meta?.title || (await fetchTitle(url)) || '',
         } as RSSOptions
       } as Feed)
       await session.send(`#${feed.id} 订阅成功！`)
@@ -92,7 +94,7 @@ export function apply(ctx: Context, config: Config) {
     })
 
   ctx.command('rss.update <id:number>', '更新 RSS 订阅', { authority: 3 })
-    .action(async ({ session, options }, id: number) => {
+    .action(async ({ session }, id: number) => {
       if (!id) {
         return session.execute('help rss.update')
       }
@@ -102,8 +104,16 @@ export function apply(ctx: Context, config: Config) {
       await core.receive(feed, payload)
     })
 
+  ctx.command('rss.list', '列出 RSS 订阅', { authority: 3 })
+    .action(async ({ session }) => {
+      const channel = `${session.platform}:${session.channelId}`
+      const feeds = await ctx.database.remove('rssfeed', { channel })
+
+    })
+
   ctx.command('rss.import <json:text>', '导入 RSS 订阅', { authority: 4 })
     .option('confirmed', '-y 确认')
+    .option('remote', '-r 使用远端 JSON 文件')
     .action(async ({ session, options }, json: string) => {
       if (!json) {
         return session.execute('help rss.import')
@@ -111,24 +121,34 @@ export function apply(ctx: Context, config: Config) {
       if (!options.confirmed) {
         return '真的要导入 RSS 订阅吗？将会覆盖本频道现有订阅。带 -y 参数执行以确认操作。'
       }
-
       const channel = `${session.platform}:${session.channelId}`
-      const data = JSON.parse(json)
+
+      let data: any
+      if (options.remote) {
+        const url = json
+        data = (await axios.get(url)).data
+      } else {
+        json = json.replace(/&#91;/g, '[').replace(/&#93;/g, ']')
+        data = JSON.parse(json)
+      }
       await ctx.database.remove('rssfeed', { channel })
       await core.reload()
 
+      let message = ''
       try {
         for (const feed of data) {
           if (feed.id) { delete feed.id }
           feed.channel = channel
-          await session.send(`导入 ${feed.title}（${feed.url}）`)
-          await fetchRSS(feed.url, config.timeout, config.userAgent)
-          await core.subscribe(feed)
+          feed.last_update = new Date(feed.last_update)
+          message += `导入 ${feed.url}`
+          const newFeed = await core.subscribe(feed)
+          message += ` » #${newFeed.id}\n`
+          // await fetchRSS(feed.url, config.timeout, config.userAgent)
         }
-        return '导出成功'
+        return message + '导入完成'
       } catch (error) {
         logger.warn(error)
-        return '导入失败'
+        return message + '，失败'
       }
     })
 
@@ -145,13 +165,15 @@ export function apply(ctx: Context, config: Config) {
         if (feed.id) { delete feed.id }
         if (feed.channel) { delete feed.channel }
       }
-      const json = JSON.stringify(data, null, 2)
+      const json = JSON.stringify(data)
       if (session.platform === 'telegram') {
-        return segment('html') +
-          `频道 ${channel} 的所有订阅数据\n` +
-          '<pre><code class="language-json">' +
-          escapeTelegramHTML(json) +
-          '</code></pre>'
+        for (let i = 0; i < json.length; i += 3000) {
+          await session.send(segment('html') +
+            (i ? '' : `频道 ${channel} 的所有订阅数据\n`) +
+            '<code>' +
+            escapeTelegramHTML(json.slice(i, i + 3000)) +
+            '</code>')
+        }
       } else {
         return `频道 ${channel} 的所有订阅数据\n${json}`
       }
