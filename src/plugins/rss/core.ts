@@ -1,6 +1,8 @@
 import { Context, Logger, Database } from 'koishi'
 import xss from 'xss'
 import md5 from 'md5'
+import axios from 'axios'
+import deepmerge from 'deepmerge'
 import { friendlyAttrValue } from 'xss'
 import { convert as htmlToText } from 'html-to-text'
 import RssFeedEmitter from 'rss-feed-emitter'
@@ -9,7 +11,10 @@ import { Config, Feed, UrlHook, FeedItem } from './types'
 import { Broadcast } from '../../templates/broadcast'
 
 export async function fetchTitle(url: string): Promise<string> {
-	return 'untitled'
+	const res = await axios.get(url)
+	const html = res.data
+	const regexp = /\<title\>(.+)\<\/title\>/
+	return html.match(regexp)?.[1] || ''
 }
 
 export async function fetchRSS(url: string, timeout: number, userAgent: string = '') {
@@ -136,11 +141,13 @@ export class RSSCore {
 
 	receive(feed: Feed, payload: FeedItem) {
 		this.logger.info('receive', feed, payload)
+		feed.options = deepmerge(this.config.defaults, feed.options)
 
 		const boardcast = new Broadcast({
 			type: 'RSS',
-			title: payload.title,
+			title: feed.options.title || `${(new URL(feed.url)).hostname} 的订阅`,
 			link: payload.link,
+			linkname: payload.title,
 			content: '',
 			image: '',
 			tag: feed.options.tag || [],

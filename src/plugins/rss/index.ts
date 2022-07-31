@@ -69,7 +69,6 @@ export function apply(ctx: Context, config: Config) {
         last_update: new Date(),
         options: {
           title: options.title || (await fetchTitle(url)) || '',
-          ...config.defaults
         } as RSSOptions
       } as Feed)
       await session.send(`#${feed.id} 订阅成功！`)
@@ -94,6 +93,10 @@ export function apply(ctx: Context, config: Config) {
 
   ctx.command('rss.update <id:number>', '更新 RSS 订阅', { authority: 3 })
     .action(async ({ session, options }, id: number) => {
+      if (!id) {
+        return session.execute('help rss.update')
+      }
+
       const feed = (await ctx.database.get('rssfeed', [id]))[0] as Feed
       const payload = (await fetchRSS(feed.url, config.timeout, config.userAgent))[0]
       await core.receive(feed, payload)
@@ -116,8 +119,10 @@ export function apply(ctx: Context, config: Config) {
 
       try {
         for (const feed of data) {
+          if (feed.id) { delete feed.id }
+          feed.channel = channel
           await session.send(`导入 ${feed.title}（${feed.url}）`)
-          const payload = (await fetchRSS(feed.url, config.timeout, config.userAgent))[0]
+          await fetchRSS(feed.url, config.timeout, config.userAgent)
           await core.subscribe(feed)
         }
         return '导出成功'
@@ -135,7 +140,11 @@ export function apply(ctx: Context, config: Config) {
       }
 
       const channel = `${session.platform}:${session.channelId}`
-      const data = await ctx.database.get('rssfeed', { channel })
+      const data: Feed[] = await ctx.database.get('rssfeed', { channel })
+      for (const feed of data) {
+        if (feed.id) { delete feed.id }
+        if (feed.channel) { delete feed.channel }
+      }
       const json = JSON.stringify(data, null, 2)
       if (session.platform === 'telegram') {
         return segment('html') +

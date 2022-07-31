@@ -8,10 +8,10 @@ export interface Broadcast {
 	images?: string[]
 
 	type: string
-	title: string
+	title?: string
 
 	link?: string
-	links?: string[]
+	linkname?: string
 
 	content?: string
 
@@ -30,10 +30,20 @@ export class Broadcast extends Template {
 			}
 		}
 
+		this.title = this.title || ''
 		if (platform === 'telegram') {
 			buffer += `<strong><u>#${this.type}</u> ${this.title}</strong>\n`
 		} else {
 			buffer += `[${this.type}] ${this.title}\n`
+		}
+
+		if (this.link) {
+			if (platform === 'telegram') {
+				buffer += `<a href="${this.link}">${this.linkname || this.link}</a>\n`
+			} else {
+				if (this.linkname) { buffer += `${this.linkname} ` }
+				buffer += `${this.link}\n`
+			}
 		}
 
 		if (this.content) {
@@ -51,12 +61,6 @@ export class Broadcast extends Template {
 				} else {
 					buffer += `${name}:  ${command}\n`
 				}
-			}
-		}
-
-		if (this.link || this.links?.length) {
-			for (const link of this.link ? [this.link] : this.links) {
-				buffer += link + '\n'
 			}
 		}
 
