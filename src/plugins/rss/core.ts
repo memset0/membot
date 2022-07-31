@@ -1,5 +1,7 @@
 import { Context, Logger, Database } from 'koishi'
+import xss from 'xss'
 import md5 from 'md5'
+import { friendlyAttrValue } from 'xss'
 import RssFeedEmitter from 'rss-feed-emitter'
 
 import { Config, Feed, UrlHook, FeedItem } from './types'
@@ -30,7 +32,7 @@ export async function fetchRSS(url: string, timeout: number, userAgent: string =
 				resolve(res.reverse())
 			}
 		}, timeout)
-	})	.finally(() => {
+	}).finally(() => {
 		feeder.destroy()
 		clearTimeout(timer)
 	})
@@ -94,7 +96,7 @@ export class RSSCore {
 	}
 
 	async initialize() {
-		const feeds = (await this.database.get('rssfeed', 1)) as Feed[]
+		const feeds = (await this.database.get('rssfeed', { id: { $gt: 0 } })) as Feed[]
 		for (const feed of feeds) {
 			this.logger.info('init', feed)
 			this.addFeed(feed)
@@ -118,29 +120,37 @@ export class RSSCore {
 		return feed
 	}
 
-	async unsubscribe(id: number) {
+	async unsubscribe(id: number): Promise<void> {
 		const feed = (await this.database.get('rssfeed', [id]))[0] as Feed
-		await this.database.remove('rssfeed', [id])
+		await this.database.remove('rssfeed', id)
 		this.delFeed(feed)
 	}
 
-	async reset() {
-		await this.database.remove('rssfeed', 1)
+	async reload() {
 		this.hook = {}
 		this.feeder.destroy()
 		this.feeder = this.genFeeder()
+		await this.initialize()
 	}
 
 	receive(feed: Feed, payload: FeedItem) {
 		this.logger.info('receive', feed, payload)
-		let title = payload.title || 'new item'
-		title += feed.title
 
-		this.ctx.broadcast([feed.channel], (new Boardcast({
+		const boardcast = new Boardcast({
 			type: 'RSS',
-			title,
+			title: payload.title,
 			link: payload.link,
-		})).toString(feed.channel.split(':', 1)[0]))
+			images: [],
+		})
+		xss(payload.description, {
+			onTagAttr: (tag, name, value) => {
+				if (tag === "img" && name === "src") {
+					boardcast.images.push(friendlyAttrValue(value));
+				}
+			},
+		})
+
+		this.ctx.broadcast([feed.channel], boardcast.toString(feed.channel.split(':', 1)[0]))
 	}
 
 	constructor(ctx: Context, config: Config) {

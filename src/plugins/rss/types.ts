@@ -15,8 +15,8 @@ export const Config: Schema<Config> = Schema.object({
 
 
 export interface RSSOptions {
-  filter: {
-    title: string
+  title?: string
+  filter?: {
   }
 }
 
@@ -25,7 +25,6 @@ export interface Feed {
   id?: number
   channel: string
   url: string
-  title: string
   refresh: number
   last_update: Date
   options: RSSOptions

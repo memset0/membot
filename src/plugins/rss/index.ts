@@ -1,7 +1,8 @@
-import { Context, Logger } from 'koishi'
+import { Context, Logger, segment } from 'koishi'
 
 import { RSSCore, fetchTitle, fetchRSS } from './core'
 import { Config, Feed, FeedItem, RSSOptions } from './types'
+import { escapeTelegramHTML } from '../../utils/string'
 
 declare module 'koishi' {
   interface Modules {
@@ -25,7 +26,6 @@ export function apply(ctx: Context, config: Config) {
     id: 'unsigned',
     channel: 'string',
     url: 'string',
-    title: 'string',
     refresh: 'unsigned',
     last_update: 'timestamp',
     options: 'json',
@@ -48,13 +48,14 @@ export function apply(ctx: Context, config: Config) {
     .option('title', '-t 设置标题')
     .option('refresh', '-r 设置刷新时间')
     .action(async ({ session, options }, url: string) => {
-      if (!url) { return session.execute('help rss.sub') }
+      if (!url) {
+        return session.execute('help rss.sub')
+      }
       const channel = `${session.platform}:${session.channelId}`
 
       let payload: FeedItem
       try {
-        payload =( await fetchRSS(url, config.timeout, config.userAgent))[0]
-        console.log(payload)
+        payload = (await fetchRSS(url, config.timeout, config.userAgent))[0]
       } catch (error) {
         logger.warn('err', error)
         return `无法订阅此链接`
@@ -63,19 +64,97 @@ export function apply(ctx: Context, config: Config) {
       const feed = await core.subscribe({
         channel,
         url,
-        title: options.title || (await fetchTitle(url)) || '',
         refresh: options.refresh || config.refresh,
         last_update: new Date(),
-        options: {} as RSSOptions
+        options: {
+          title: options.title || (await fetchTitle(url)) || '',
+        } as RSSOptions
       } as Feed)
-      logger.info('sub', feed)
-      session.send(`#${feed.id} 订阅成功！`)
-      logger.info('sub demo', payload)
+      await session.send(`#${feed.id} 订阅成功！`)
       await core.receive(feed, payload)
     })
 
+  ctx.command('rss.unsub <id:number>', '取消订阅 RSS', { authority: 3 })
+    .action(async ({ session, options }, id: number) => {
+      if (!id) {
+        return session.execute('help rss.unsub')
+      }
+      const channel = `${session.platform}:${session.channelId}`
+
+      try {
+        await core.unsubscribe(id)
+        return '取消订阅成功'
+      } catch (error) {
+        logger.warn(session.content, error)
+        return '取消订阅失败'
+      }
+    })
+
+  ctx.command('rss.update <id:number>', '更新 RSS 订阅', { authority: 3 })
+    .action(async ({ session, options }, id: number) => {
+      const feed = (await ctx.database.get('rssfeed', [id]))[0] as Feed
+      const payload = (await fetchRSS(feed.url, config.timeout, config.userAgent))[0]
+      await core.receive(feed, payload)
+    })
+
+  ctx.command('rss.import <json:text>', '导入 RSS 订阅', { authority: 4 })
+    .option('confirmed', '-y 确认')
+    .action(async ({ session, options }, json: string) => {
+      if (!json) {
+        return session.execute('help rss.import')
+      }
+      if (!options.confirmed) {
+        return '真的要导入 RSS 订阅吗？将会覆盖本频道现有订阅。带 -y 参数执行以确认操作。'
+      }
+
+      const channel = `${session.platform}:${session.channelId}`
+      const data = JSON.parse(json)
+      await ctx.database.remove('rssfeed', { channel })
+      await core.reload()
+
+      try {
+        for (const feed of data) {
+          await session.send(`导入 ${feed.title}（${feed.url}）`)
+          const payload = (await fetchRSS(feed.url, config.timeout, config.userAgent))[0]
+          await core.subscribe(feed)
+        }
+        return '导出成功'
+      } catch (error) {
+        logger.warn(error)
+        return '导入失败'
+      }
+    })
+
+  ctx.command('rss.export', '导出 RSS 订阅', { authority: 4 })
+    .option('confirmed', '-y 确认')
+    .action(async ({ session, options }) => {
+      if (!options.confirmed) {
+        return '真的要导出 RSS 订阅吗？将可能泄露 RSS 订阅链接。带 -y 参数执行以确认操作。'
+      }
+
+      const channel = `${session.platform}:${session.channelId}`
+      const data = await ctx.database.get('rssfeed', { channel })
+      const json = JSON.stringify(data, null, 2)
+      if (session.platform === 'telegram') {
+        return segment('html') +
+          `频道 ${channel} 的所有订阅数据\n` +
+          '<pre><code class="language-json">' +
+          escapeTelegramHTML(json) +
+          '</code></pre>'
+      } else {
+        return `频道 ${channel} 的所有订阅数据\n${json}`
+      }
+    })
+
   ctx.command('rss.reset', '重置 RSS 订阅', { authority: 4 })
-    .action(async ({ session }) => {
-      await core.reset()
+    .option('confirmed', '-y 确认')
+    .action(async ({ options }) => {
+      if (!options.confirmed) {
+        return '真的要重置 RSS 订阅吗？带 -y 参数执行以确认操作。'
+      }
+
+      await ctx.database.remove('rssfeed', { id: { $gt: 0 } })
+      await core.reload()
+      return 'RSS 订阅已重置'
     })
 }

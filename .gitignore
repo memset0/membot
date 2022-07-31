@@ -1,6 +1,7 @@
 /logs
 /deploy.bat
 /config.yml
+/rss.json
 
 # Logs
 logs
