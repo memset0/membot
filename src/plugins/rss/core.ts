@@ -2,6 +2,7 @@ import { Context, Logger, Database } from 'koishi'
 import xss from 'xss'
 import md5 from 'md5'
 import { friendlyAttrValue } from 'xss'
+import { convert as htmlToText } from 'html-to-text'
 import RssFeedEmitter from 'rss-feed-emitter'
 
 import { Config, Feed, UrlHook, FeedItem } from './types'
@@ -146,7 +147,17 @@ export class RSSCore {
 		})
 
 		if (feed.options.feature?.summary) {
-
+			boardcast.content = htmlToText((payload.summary || payload.description), {
+				wordwrap: 1 << 30,
+				selectors: [
+					{ selector: 'a', options: { ignoreHref: true } },
+					{ selector: 'img', format: 'skip' }
+				]
+			})
+			const limit = 250
+			if (boardcast.content.length > limit) {
+				boardcast.content = boardcast.content.slice(0, limit - 3) + '...'
+			}
 		}
 
 		if (feed.options.feature?.image) {
