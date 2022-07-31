@@ -15,13 +15,13 @@ declare module 'koishi' {
 }
 
 
-const logger = new Logger('rss')
-
-export const name = 'RSS'
+export const name = 'rss'
 export const using = ['database'] as const
 
 
 export function apply(ctx: Context, config: Config) {
+  const logger = ctx.logger('rss')
+
   ctx.model.extend('rssfeed', {
     id: 'unsigned',
     channel: 'string',
@@ -37,6 +37,7 @@ export function apply(ctx: Context, config: Config) {
     timeout: 3000,
     refresh: 1000 * 60 * 10,
     userAgent: '',
+    defaults: {},
     ...config,
   } as Config
 
@@ -68,6 +69,7 @@ export function apply(ctx: Context, config: Config) {
         last_update: new Date(),
         options: {
           title: options.title || (await fetchTitle(url)) || '',
+          ...config.defaults
         } as RSSOptions
       } as Feed)
       await session.send(`#${feed.id} 订阅成功！`)

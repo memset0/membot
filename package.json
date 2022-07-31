@@ -51,6 +51,7 @@
     "await-timeout": "^1.1.1",
     "cheerio": "^1.0.0-rc.12",
     "fluent-ffmpeg": "^2.1.2",
+    "html-to-text": "^8.2.1",
     "koishi": "^4.8.0",
     "md5": "^2.3.0",
     "qface": "^1.2.0",

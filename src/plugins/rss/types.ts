@@ -5,6 +5,7 @@ export interface Config {
   timeout?: number
   refresh?: number
   userAgent?: string
+  defaults?: RSSOptions
 }
 
 export const Config: Schema<Config> = Schema.object({
@@ -16,6 +17,10 @@ export const Config: Schema<Config> = Schema.object({
 
 export interface RSSOptions {
   title?: string
+  feature?: {
+    summary?: boolean
+    image?: boolean
+  }
   filter?: {
   }
 }

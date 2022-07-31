@@ -140,15 +140,23 @@ export class RSSCore {
 			type: 'RSS',
 			title: payload.title,
 			link: payload.link,
-			images: [],
+			content: '',
+			image: '',
 		})
-		xss(payload.description, {
-			onTagAttr: (tag, name, value) => {
-				if (tag === "img" && name === "src") {
-					boardcast.images.push(friendlyAttrValue(value));
-				}
-			},
-		})
+
+		if (feed.options.feature?.summary) {
+
+		}
+
+		if (feed.options.feature?.image) {
+			xss(payload.description, {
+				onTagAttr: (tag, name, value) => {
+					if (tag === "img" && name === "src") {
+						boardcast.image = boardcast.image || friendlyAttrValue(value);
+					}
+				},
+			})
+		}
 
 		this.ctx.broadcast([feed.channel], boardcast.toString(feed.channel.split(':', 1)[0]))
 	}
