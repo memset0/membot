@@ -13,10 +13,21 @@
 | o | This feature is under development |
 | - | The platform doesn't support this feature |
 
-
-| Platform    | Text | RichMsg | At   | Quote | Image | Video | File | Reply* | Recall* |
-| ----------- | ---- | ------- | ---- | ----- | ----- | ----- | ---- | ------ | ------- |
-| onebot (QQ) | √    | -       | √    | √     | √     | ×     | ×    | √      | o       |
-| Telegram    | √    | o       | o    | √     | √     | ×     | ×    | o      | o       |
-| KOOK        | √    | √       | √    | √     | √     | o     | o    | ×      | ×       |
-
+| Feature | onebot(QQ) | Telegram | KOOK |
+| :-: | :-: | :-: | :-: |
+| Plain Text | √ | √ | √ |
+| Mixed | √ | √ | √ |
+| RichMsg | - | √ | √ |
+| At | √ | √ | √ |
+| Quote | √ | √ | o |
+| Image (Static) | √ | √ | √ |
+| Image (Animated) | √ | o | √ |
+| Video | x | x | x |
+| File | x | x | x |
+| Location | x | x | - |
+| Markdown | - | √ | x |
+| HTML | - | √ | - |
+| App (onebot only) | x | - | - |
+| Sticker (Telegram only) | - | √ (without *.tgs) | - |
+| Card Message (KOOK only) | - | - | √ |
+| Recall | √ | o | √ |
