@@ -14,7 +14,7 @@ export interface Boardcast {
 	links?: string[]
 
 	content?: string
-	tag?: string
+	tag?: string[]
 }
 
 export class Boardcast extends Template {

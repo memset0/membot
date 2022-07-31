@@ -17,6 +17,7 @@ export const Config: Schema<Config> = Schema.object({
 
 export interface RSSOptions {
   title?: string
+  tag?: string[]
   feature?: {
     summary?: boolean
     image?: boolean

@@ -142,6 +142,7 @@ export class RSSCore {
 			link: payload.link,
 			content: '',
 			image: '',
+			tag: feed.options.tag || [],
 		})
 
 		if (feed.options.feature?.summary) {
