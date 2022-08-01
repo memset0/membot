@@ -142,10 +142,11 @@ export function apply(ctx: Context, config: Config) {
           await sleep(core.genTimePerturbation(feed.refresh) / 10)
           if (feed.id) { delete feed.id }
           feed.channel = channel
-          feed.last_update = feed.lastupdate ? (new Date(feed.last_update)) : (new Date())
+          feed.last_update = feed.last_update ? (new Date(feed.last_update)) : (new Date())
           message += `导入 ${feed.url}`
           const newFeed = await core.subscribe(feed)
           message += ` » #${newFeed.id}\n`
+          logger.info(`import #${newFeed.id}: ${feed.url}`)
           // await fetchRSS(feed.url, config.timeout, config.userAgent)
         }
         return message + '导入完成'

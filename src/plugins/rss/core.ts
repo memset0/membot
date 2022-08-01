@@ -9,8 +9,9 @@ import RssFeedEmitter from 'rss-feed-emitter'
 import { friendlyAttrValue } from 'xss'
 import { convert as htmlToText } from 'html-to-text'
 
-import { Config, Feed, UrlHook, FeedItem } from './types'
+import '../../utils/date'
 import { Broadcast } from '../../templates/broadcast'
+import { Config, Feed, UrlHook, FeedItem } from './types'
 
 
 export const apiImageUrlFilter = [
@@ -72,7 +73,7 @@ export class RSSCore {
 	}
 
 	genTimePerturbation(defaults: number): number {
-		return Math.floor(Math.random() * Math.min(defaults * 0.1, this.config.timeout / 10))
+		return Math.floor(Math.random() * Math.min(defaults * 0.1, this.config.timeout))
 	}
 
 	addFeed(feed: Feed): boolean {
@@ -84,10 +85,10 @@ export class RSSCore {
 				eventName: md5(url),
 				refresh: feed.refresh + this.genTimePerturbation(feed.refresh),
 			})
-			this.feeder.on(md5(url), (payload: FeedItem) => {
+			this.feeder.on(md5(url), async (payload: FeedItem) => {
 				this.logger.info('receive', url)
 				for (const feed of this.hook[url]) {
-					this.receive(feed, payload, true)
+					await this.receive(feed, payload, true)
 				}
 			})
 		}
@@ -157,9 +158,18 @@ export class RSSCore {
 		await this.initialize()
 	}
 
-	receive(feed: Feed, payload: FeedItem, isNew = false) {
+	async receive(feed: Feed, payload: FeedItem, isNew = false) {
 		if (isNew) { this.logger.info('receive new', feed, payload) }
 		feed.options = deepmerge(this.config.defaults, feed.options)
+
+		const lastDate = (new Date((await this.database.get('rssfeed', [feed.id]))[0].last_update)) || (new Date())
+		const date = payload.date || payload.pubdate || (new Date())
+		if (date < lastDate) {
+			if (isNew) { return }
+		} else if (date > lastDate) {
+			await this.database.set('rssfeed', [feed.id], { last_update: date })
+		}
+		this.logger.info('receive', date, lastDate)
 
 		const broadcast = new Broadcast({
 			type: 'RSS',
@@ -206,7 +216,6 @@ export class RSSCore {
 		}
 
 		// this.logger.info('broadcast', broadcast)
-
 		this.ctx.broadcast([feed.channel], broadcast.toString(feed.channel.split(':', 1)[0]))
 	}
 
