@@ -54,6 +54,7 @@ export function apply(ctx: Context, config: Config) {
       if (!url) {
         return session.execute('help rss.sub')
       }
+      url = url.replace(/&amp;/g, '&')
       const channel = `${session.platform}:${session.channelId}`
 
       let payload: FeedItem
