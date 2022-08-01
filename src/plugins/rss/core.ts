@@ -2,7 +2,9 @@ import { Context, Logger, Database } from 'koishi'
 import xss from 'xss'
 import md5 from 'md5'
 import axios from 'axios'
+import sleep from 'sleep-promise'
 import deepmerge from 'deepmerge'
+import arrayShuffle from 'shuffle-array'
 import RssFeedEmitter from 'rss-feed-emitter'
 import { friendlyAttrValue } from 'xss'
 import { convert as htmlToText } from 'html-to-text'
@@ -69,14 +71,18 @@ export class RSSCore {
 		return feeder
 	}
 
+	genTimePerturbation(defaults: number): number {
+		return Math.floor(Math.random() * Math.min(defaults * 0.1, this.config.timeout / 10))
+	}
+
 	addFeed(feed: Feed): boolean {
 		const { url } = feed
 		if (!this.hook[url]) {
 			this.hook[url] = []
 			this.feeder.add({
 				url,
-				refresh: feed.refresh,
 				eventName: md5(url),
+				refresh: feed.refresh + this.genTimePerturbation(feed.refresh),
 			})
 			this.feeder.on(md5(url), (payload: FeedItem) => {
 				this.logger.info('receive', url)
@@ -102,8 +108,8 @@ export class RSSCore {
 	}
 
 	updateFeed(feed: Feed): boolean {
-		const { url } = feed;
-		if (!this.hook[url]) { return false; }
+		const { url } = feed
+		if (!this.hook[url]) { return false }
 		for (const i in this.hook[url]) {
 			if (this.hook[url][i].id === feed.id) {
 				this.hook[url].splice(+i, 1, feed)
@@ -114,7 +120,8 @@ export class RSSCore {
 
 	async initialize() {
 		const feeds = (await this.database.get('rssfeed', { id: { $gt: 0 } })) as Feed[]
-		for (const feed of feeds) {
+		for (const feed of arrayShuffle(feeds)) {
+			await sleep(this.genTimePerturbation(feed.refresh))
 			this.logger.info('init', feed)
 			this.addFeed(feed)
 		}

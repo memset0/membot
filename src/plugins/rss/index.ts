@@ -1,5 +1,6 @@
 import { Context, Logger, segment } from 'koishi'
 import axios from 'axios'
+import sleep from 'sleep-promise'
 
 import { RSSCore, fetchTitle, fetchRSS } from './core'
 import { Config, Feed, FeedItem, RSSOptions } from './types'
@@ -138,9 +139,10 @@ export function apply(ctx: Context, config: Config) {
       let message = ''
       try {
         for (const feed of data) {
+          await sleep(core.genTimePerturbation(feed.refresh) / 10)
           if (feed.id) { delete feed.id }
           feed.channel = channel
-          feed.last_update = new Date(feed.last_update)
+          feed.last_update = feed.lastupdate ? (new Date(feed.last_update)) : (new Date())
           message += `导入 ${feed.url}`
           const newFeed = await core.subscribe(feed)
           message += ` » #${newFeed.id}\n`
