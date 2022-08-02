@@ -1,4 +1,4 @@
-import { Context, Session, Logger, segment } from 'koishi'
+import { Bot, Context, Logger, Session, segment } from 'koishi'
 
 import { sliceWithEllipsis } from '../../utils/string'
 import { QFace, getUserName } from '../../utils/onebot'
@@ -7,7 +7,7 @@ import { BufferConverter } from '../../utils/file-type'
 import adaptKook from './adapter/kook'
 import adaptTelegram from './adapter/telegram'
 import { templateArgvFactory } from './template'
-import { ForwardTarget, MessageRecord, Type2Text, MessageRecordMeta } from './types'
+import { ForwardTarget, SpecialMessage, MessageRecord, Type2Text, MessageRecordMeta } from './types'
 
 
 export interface Config {
@@ -19,7 +19,8 @@ const revForwardingList: Config = {}
 const messageRecord: Array<MessageRecord> = []
 
 
-export const name = 'forward'
+export const name = 'forward' as const
+export const logger = new Logger(name)
 
 export async function apply(ctx: Context, config: Config) {
 	const logger = ctx.logger(name)
@@ -99,7 +100,40 @@ export async function apply(ctx: Context, config: Config) {
 }
 
 
-function findMessage(messageId: string | undefined, sessionPlatform: string, targetPlatform: string, reverse: boolean = false): MessageRecordMeta | null {
+async function deleteMessage(bots: Bot[], platform: string, channelId: string, messageId: string) {
+	let success = false
+	for (const bot of bots) {
+		if (bot.platform === platform) {
+			try {
+				await bot.deleteMessage(channelId, messageId)
+				success = true
+			} catch (error) {
+				continue
+			}
+		}
+	}
+	if (!success) {
+		logger.warn('deleteMessage failed', platform, channelId, messageId)
+	}
+}
+
+function findMessage(messageId: string, channelId: string, platform: string): Partial<MessageRecordMeta> | null {
+	for (let shift = 0; shift < 2; shift++) {
+		for (const record of messageRecord) {
+			if (record[shift] === platform && record[2 + shift][0] === messageId && record[2 + shift][1] === channelId) {
+				return {
+					author: {
+						userId: record[4][0],
+						username: record[4][1],
+					},
+					shortcut: record[5],
+				} as Partial<MessageRecordMeta>
+			}
+		}
+	}
+}
+
+function findForwardedMessage(messageId: string | undefined, sessionPlatform: string, targetPlatform: string, reverse: boolean = false): MessageRecordMeta | null {
 	for (const record of messageRecord) {
 		if (record[0] === sessionPlatform && record[1] === targetPlatform && record[2][0] === messageId) {
 			return {
@@ -142,14 +176,10 @@ function onMessageDeleted(session: Session) {
 
 	forwardingList[`${session.platform}:${session.channelId}`]
 		.forEach(async (target: ForwardTarget) => {
-			const record = target.cache.use && findMessage(session.messageId, session.platform, target.platform, target.options.reverseHook)
+			const record = target.cache.use && findForwardedMessage(session.messageId, session.platform, target.platform, target.options.reverseHook)
 			if (!record) { return }
 
-			for (const bot of session.app.bots) {
-				if (bot.platform === record.platform) {
-					bot.deleteMessage(record.channelId, record.messageId)
-				}
-			}
+			return deleteMessage(session.app.bots, record.platform, record.channelId, record.messageId)
 		})
 }
 
@@ -171,34 +201,60 @@ function middleware(ctx: Context) {
 		}
 	}
 
-	function ignore(chain: segment.Chain) {
-		if (chain?.[0]?.type === 'quote') {
-			chain = chain.slice(1)
-		}
-		if (chain?.[0]?.type === 'at') {
-			chain = chain.slice(1)
-			if (chain?.[0]?.type === 'text' && chain[0].data?.content?.startsWith(' ')) {
-				chain[0].data.content = chain[0].data.content.slice(1)
-			}
-		}
-		return segment.join(chain).trim().startsWith('//')
+	function getMessageType(chain: segment.Chain): SpecialMessage {
+		let start = 0
+		while (start < chain.length && !(chain[start].type === 'text' && chain[start].data.content?.trim())) { start++ }
+		if (start >= chain.length) { return SpecialMessage.NORMAL }
+
+		const plain = segment.join(chain.slice(start)).trim()
+		if (plain.startsWith('//')) { return SpecialMessage.IGNORE }
+		if (chain?.[0]?.type === 'quote' && plain.startsWith('!!')) { return SpecialMessage.RECALL }
+		return SpecialMessage.NORMAL
 	}
 
-	return function (session: Session, next: () => void) {
+	return async function (session: Session, next: () => void) {
 		if (!session.channelId || session.author.userId === session.bot.selfId) { return next() }
 		if (!Object.keys(forwardingList).includes(`${session.platform}:${session.channelId}`)) { return next() }
-
 		// logger.info('receive', `${session.platform}:${session.channelId}`, [loggerToText(session.content)])
+
+		const chain = segment.parse(session.content)
+		const type = getMessageType(chain)
+		if (type === SpecialMessage.IGNORE) { return next() }
+		if (type === SpecialMessage.RECALL) {
+			logger.info('RECALL', session.channelId, session.messageId, chain[0].data.id)
+			if (session.platform === 'telegram') {
+				// function findForwardedMessage(messageId: string | undefined, sessionPlatform: string, targetPlatform: string, reverse: boolean = false): MessageRecordMeta | null {
+				const deletedRecord = findMessage(chain[0].data.id, session.channelId, session.platform)
+				if (!deletedRecord) {
+					logger.warn('RECALL', session.channelId, session.messageId, chain[0].data.id, '撤回失败，无法找到该消息')
+					return next()
+				}
+				if (deletedRecord.author.userId !== session.author.userId) {
+					logger.warn('RECALL', session.channelId, deletedRecord.author.userId, session.author.userId, '撤回失败，消息只能由发送者本人撤回')
+					await session.bot.sendMessage(session.channelId, '撤回失败，消息只能由发送者本人撤回')
+					return next()
+				}
+				logger.info('RECALL', deletedRecord)
+				const deletedSession = session.bot.session()
+				deletedSession.platform = session.platform
+				deletedSession.channelId = session.channelId
+				deletedSession.messageId = chain[0].data.id
+				deletedSession.author = deletedRecord.author
+				deleteMessage(session.app.bots, 'telegram', session.channelId, chain[0].data.id)
+				deleteMessage(session.app.bots, 'telegram', session.channelId, session.messageId)
+				await onMessageDeleted(deletedSession)
+				return
+			}
+		}
 
 		forwardingList[`${session.platform}:${session.channelId}`]
 			.forEach(async (target: ForwardTarget) => {
 				const chain = segment.parse(session.content)
-				if (ignore(chain)) { return next() }
 				let start = 0
 				filterOutEmpty(chain)
 
 				if (chain?.[0]?.type === 'quote') {
-					const record = target.cache.use && findMessage(chain[0].data?.id, session.platform, target.platform, true)
+					const record = target.cache.use && findForwardedMessage(chain[0].data?.id, session.platform, target.platform, true)
 					for (let _ = 0; _ < 2; _++) {
 						if (chain?.[1]?.type === 'at') {
 							if (chain?.[2]?.type === 'text' && chain[2].data.content?.startsWith(' ')) {

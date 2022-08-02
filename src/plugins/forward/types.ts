@@ -28,6 +28,13 @@ export interface ForwardTarget {
 }
 
 
+export enum SpecialMessage {
+	NORMAL,
+	IGNORE,
+	RECALL,
+}
+
+
 export type MessageRecord = [
 	string,   // session.platform
 	string,   // target.platform
