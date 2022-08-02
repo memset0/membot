@@ -147,7 +147,6 @@ function onMessageDeleted(session: Session) {
 
 			for (const bot of session.app.bots) {
 				if (bot.platform === record.platform) {
-					// console.log(record)
 					bot.deleteMessage(record.channelId, record.messageId)
 				}
 			}
@@ -231,6 +230,16 @@ function middleware(ctx: Context) {
 						chain[0] = {
 							type: 'text',
 							data: { content: '[回复消息] ' },
+						}
+					}
+				}
+
+				if (target.platform !== session.platform) {
+					for (const i in chain) {
+						if (chain[i].type === 'at' && chain?.[+i + 1].type === 'text') {
+							if (chain[+i + 1].data.content && !chain[+i + 1].data.content[0].match(/\s/) && chain[+i + 1].data.content?.match(/\S/)) {
+								chain[+i + 1].data.content = ' ' + chain[+i + 1].data.content
+							}
 						}
 					}
 				}
