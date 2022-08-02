@@ -159,6 +159,19 @@ function middleware(ctx: Context) {
 	const templateArgv = templateArgvFactory(ctx)
 	const logger = ctx.logger(name)
 
+	function filterOutEmpty(chain: any[], start: number = -1) {
+		if (~start) {
+			while (start < chain.length && chain[start].type === 'text' && !chain[start].data.content) { chain.splice(start, 1) }
+		} else {
+			for (let i = 0; i < chain.length; i++) {
+				if (chain[i].type === 'text' && !chain[i].data.content) {
+					chain.splice(i, 1)
+					i -= 1
+				}
+			}
+		}
+	}
+
 	function ignore(chain: segment.Chain) {
 		if (chain?.[0]?.type === 'quote') {
 			chain = chain.slice(1)
@@ -183,9 +196,19 @@ function middleware(ctx: Context) {
 				const chain = segment.parse(session.content)
 				if (ignore(chain)) { return next() }
 				let start = 0
+				filterOutEmpty(chain)
 
 				if (chain?.[0]?.type === 'quote') {
 					const record = target.cache.use && findMessage(chain[0].data?.id, session.platform, target.platform, true)
+					for (let _ = 0; _ < 2; _++) {
+						if (chain?.[1]?.type === 'at') {
+							if (chain?.[2]?.type === 'text' && chain[2].data.content?.startsWith(' ')) {
+								chain[2].data.content = chain[2].data.content.slice(1)
+								if (!chain[2].data.content) { chain.splice(2, 1) }
+							}
+							chain.splice(1, 1)
+						}
+					}
 					if (record) {
 						if (target.platform === 'onebot' || target.platform === 'telegram') {
 							start++
@@ -196,17 +219,11 @@ function middleware(ctx: Context) {
 									channelId: record.channelId
 								},
 							}
-							if (chain?.[1]?.type === 'at' && chain?.[1]?.data?.id === record.author.userId) {
-								if (chain?.[2]?.type == 'text' && chain?.[2]?.data?.content?.[0] === ' ') {
-									chain[2].data.content = chain[2].data.content.slice(1)
-								}
-								chain.splice(1, 1)
-							}
 						} else {
 							chain[0] = {
 								type: 'text',
 								data: {
-									content: `[回复 ${record.author.username}: ${record.shortcut}] `
+									content: `[回复 ${segment.at(record.author.username)}: ${record.shortcut}] `
 								},
 							}
 						}
@@ -398,6 +415,8 @@ function loggerToText(plain: string): string {
 	const chain = segment.parse(plain)
 	for (const seg of chain) {
 		switch (seg.type) {
+			case 'at':
+			case 'quote':
 			case 'text': {
 				break
 			}
