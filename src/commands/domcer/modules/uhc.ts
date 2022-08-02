@@ -6,10 +6,10 @@ import { codeErrorMessage } from '../utils'
 
 
 export function apply(ctx: Context) {
-	ctx.command('domcer.uhc <username>', '查询 UHC 数据')
+	ctx.command('domcer.uhc <username:string>', '查询 UHC 数据')
 		.alias('domcer.buhc')
 		.check((_, name) => Checker.isUserName(name))
-		.action(async ({ session }, name) => {
+		.action(async ({ session }, name: string) => {
 			if (!name) { return session.execute('help domcer.uhc') }
 			let data = await getJSON('/player/getByName', { name })
 			if (data.status !== 200) { return codeErrorMessage(data.status) }

@@ -6,11 +6,11 @@ import { codeErrorMessage } from '../utils'
 
 
 export function apply(ctx: Context) {
-	ctx.command('domcer.bw <username>', '查询起床战争数据')
+	ctx.command('domcer.bw <username:string>', '查询起床战争数据')
 		.alias('domcer.bedwar')
 		.alias('domcer.bedwars')
 		.check((_, name) => Checker.isUserName(name))
-		.action(async ({ session }, name) => {
+		.action(async ({ session }, name: string) => {
 			if (!name) return session.execute('help domcer.bw')
 			let data = await getJSON('/player/getByName', { name })
 			if (data.status !== 200) { return codeErrorMessage(data.status) }

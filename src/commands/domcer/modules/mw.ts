@@ -21,7 +21,7 @@ export const MegaWallsModeRemap = {
 
 
 export function apply(ctx: Context) {
-	ctx.command('domcer.mw <username>', '查询超级战墙数据')
+	ctx.command('domcer.mw <username:string>', '查询超级战墙数据')
 		.alias('domcer.megawall')
 		.alias('domcer.megawalls')
 		.usage('（2022.3.15更新）修复数据值翻倍的问题\n' +
@@ -41,9 +41,8 @@ export function apply(ctx: Context) {
 		.check(({ options }) => Checker.isRatio(options.ratio))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTotalDamage) && Checker.isInteger(options.minTotalDamage))
 		// .check(({ options }) => Checker.isNotEmpty(options.minTakenDamage) && Checker.isInteger(options.minTakenDamage))
-		.action(async ({ session, options }, name) => {
+		.action(async ({ session, options }, name: string) => {
 			if (!name) { return session.execute('help domcer.mw') }
-			name = String(name)
 			const data = await getJSON('/match/getMegaWallsMatchList', { name })
 			if (data.status !== 200) { return codeErrorMessage(data.status) }
 			if (data.data.length === 0) { return `该玩家没有超级战墙游玩历史` }
@@ -173,14 +172,14 @@ export function apply(ctx: Context) {
 		})
 
 
-	ctx.command('domcer.mwl <username>', '查询超级战墙对局列表')
+	ctx.command('domcer.mwl <username:string>', '查询超级战墙对局列表')
 		.alias('domcer.mwlist')
 		.alias('domcer.megawallList')
 		.alias('domcer.megawallsList')
 		.option('page', '-p [page]')
 		.check((_, name) => Checker.isUserName(name))
 		.check(({ options }) => Checker.isNotEmpty(options.page) && Checker.isInteger(options.page))
-		.action(async ({ session, options }, name) => {
+		.action(async ({ session, options }, name: string) => {
 			if (!name) { return session.execute('help domcer.mwl') }
 			const data = await getJSON('/match/getMegaWallsMatchList', { name })
 			if (data.status !== 200) { return codeErrorMessage(data.status) }
@@ -216,12 +215,12 @@ export function apply(ctx: Context) {
 		})
 
 
-	ctx.command('domcer.mwr <roundID>', '查询超级战墙对局')
+	ctx.command('domcer.mwr <roundID:string>', '查询超级战墙对局')
 		.alias('domcer.mwround')
 		.alias('domcer.megawallRound')
 		.alias('domcer.megawallsRound')
 		.check((_, matchID) => Checker.isMatchID(matchID))
-		.action(async ({ session, options }, matchID) => {
+		.action(async ({ session }, matchID: string) => {
 			if (!matchID) { return session.execute('help domcer.mwr') }
 			const plain = await get('/match/megawalls', { id: matchID })
 			if (plain == '') { return '对局不存在' }
