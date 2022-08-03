@@ -5,7 +5,40 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title><%= title %></title>
     <link rel="icon" href="https://memset0.cn/img/favicon.png" />
-    <link href="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.css" rel="stylesheet" />
   </head>
   <body>
-    <div class="ui container">
+    <div class="ui large borderless attached menu">
+      <div class="ui container">
+        <div class="header item"><%= koishi.nickname %></div>
+        <!--<a class="active item">Link</a>
+        <a class="item">Link</a>
+        <div class="ui dropdown item" tabindex="0">
+          Dropdown
+          <i class="dropdown icon"></i>
+          <div class="menu" tabindex="-1">
+            <div class="item">Action</div>
+            <div class="item">Another Action</div>
+            <div class="item">Something else here</div>
+            <div class="divider"></div>
+            <div class="item">Separated Link</div>
+            <div class="divider"></div>
+            <div class="item">One more separated link</div>
+          </div>
+        </div>-->
+        <div class="right menu">
+          <!--<div class="item">
+            <div class="ui action left icon input">
+              <i class="search icon"></i>
+              <input type="text" placeholder="Search" />
+              <button class="ui button">Submit</button>
+            </div>
+          </div>-->
+          <a class="item" href="https://github.com/memset0/membot" target="_blank">
+            <i class="github icon"></i>
+            Source Code
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="ui container" id="container" style="margin-top: 2rem">

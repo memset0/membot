@@ -1,23 +1,47 @@
 <%- include('_partial/header'); %>
 
-<% if (history && history.length) { %>
-  <div class="ui styled accordion" style="width: 100%">
-    <% history.forEach((article) => { %>
+<div class="ui card" style="width: 100%">
+  <div class="content">
+    <!--<img class="ui avatar image" src="/images/avatar/large/elliot.jpg">-->
+    <i class="users icon"></i>
+    群聊 <%= channelName || data.channel %> 的绝句文章
+    <!--<div class="right floated meta"><%= data.channel %></div>-->
+  </div>
+  <div class="content">
+    <p>
+      <i class="cogs icon"></i>
+      每个人可以连续添加 <%= data.comboLimit %> 条绝句，每条绝句的长度限制为 <%= data.lengthLimit %>。
+    </p>
+  </div>
+  <div class="content">
+    <p>
+      <i class="archive icon"></i>
+      <% if (history && history.length) { %>
+      <span>当前共有 <%= history.length %> 篇绝句文章</span>
+      <% } else { %>
+      <span>当前还没有绝句文章哦</span>
+      <% } %>
+    </p>
+    <% if (history && history.length) { %>
+    <div class="ui styled accordion" style="width: 100%">
+      <% [...history].reverse().forEach((article) => { %>
       <div class="title">
         <i class="dropdown icon"></i>
         《<%= article.article.title %>》
       </div>
       <div class="content">
-        <p class="transition hidden">
-          <% article.article.data.forEach((sentence) => { %>
-            <%= sentence.content %>
-          <% }) %>
-        </p>
+        <% article.article.data.forEach((sentence) => { %>
+        <span><%= sentence.content %></span>
+        <% }) %>
       </div>
-    <% }) %>
+      <% }) %>
+    </div>
+    <% } %>
   </div>
-<% } %>
+</div>
 
-<script type="text/javascript">document.addEventListener('DOMContentLoaded',() => $('.ui.accordion').accordion())</script>
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', () => $('.ui.accordion').accordion());
+</script>
 
 <%- include('_partial/footer'); %>

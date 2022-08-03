@@ -49,24 +49,43 @@ export class WebService {
 	app: express.Application
 	ctx: Context
 	config: Config
+	global: any
 
-	registerPage(hashData: any, template: string, data: any): string {
-		const path = '/p/' + hash({
+	pageCache: { [hash: string]: [string, any] }
+
+	registerPage(hashData: any, template: string, data: any, cacheTime: number = -1): string {
+		const hashed = hash({
 			_key: hashData?.key || this.config.key,
 			_template: template,
 			...hashData,
 		}, {
 			algorithm: 'sha1',
 		}).slice(0, 8)
-		this.app.get(path, (req, res) => {
-			res.render(template, data)
-		})
-		return this.config.hostname + path
+		this.pageCache[hashed] = [template, data]
+		if (~cacheTime) {
+			// TODO
+		}
+		return `${this.config.hostname}/p/${hashed}`
 	}
 
 	constructor(app: express.Application, ctx: Context, config: Config) {
 		this.app = app
 		this.ctx = ctx
 		this.config = config
+		this.global = {
+			koishi: ctx.app.options,
+			title: 'membot',
+		}
+
+		this.pageCache = {}
+
+		this.app.get('/p/:hash', (req, res, next) => {
+			if (!Object.keys(this.pageCache).includes(req.params.hash)) { return next() }
+			const data = this.pageCache[req.params.hash]
+			res.render(data[0], {
+				...this.global,
+				...data[1],
+			})
+		})
 	}
 }
