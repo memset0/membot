@@ -61,6 +61,7 @@ const koishi = {
  */
 const scan = (dir) => fs.readdirSync(dir).map(subdir => path.join(dir, subdir))
 for (const dir of [
+	...scan(path.join(__dirname, './src/services')),
 	...scan(path.join(__dirname, './src/plugins')),
 	...scan(path.join(__dirname, './src/commands')),
 	...scan(path.join(__dirname, './src/scripts')),
