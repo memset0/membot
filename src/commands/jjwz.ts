@@ -17,7 +17,7 @@ export interface JjwzMeta {
 	comboLimit: number
 	article: Partial<Article>
 }
-export interface JjwzHistoryMeta extends JjwzMeta{
+export interface JjwzHistoryMeta extends JjwzMeta {
 	time: Date
 }
 
@@ -85,7 +85,8 @@ export default async function (ctx: Context) {
 		if (session.content.startsWith('绝句 ')) { return session.execute(`jjwz.add ` + session.content.slice(3)) }
 		if (session.content.startsWith('绝句文章 ')) { return session.execute(`jjwz.new ` + session.content.slice(5)) }
 		if (session.content === '删除绝句') { return session.execute(`jjwz.del`) }
-	})
+		return next()
+	}, true)
 
 	ctx.command('jjwz', '绝句文章 [高级功能]')
 		.usage(['可用的前缀有：',
@@ -215,7 +216,7 @@ export default async function (ctx: Context) {
 		.action(async ({ session }) => {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '你群还未启用绝句文章功能咧' }
-			const history =await ctx.database.get('jjwz_history', {
+			const history = await ctx.database.get('jjwz_history', {
 				channel: `${session.platform}:${session.channelId}`
 			})
 			const url = ctx.web.registerPage({
