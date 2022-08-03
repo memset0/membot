@@ -37,7 +37,7 @@
       </div>
       <div class="content">
         <% article.article.data.forEach((sentence) => { %>
-        <span><%= sentence.content %></span>
+        <span class="jjwz-sentence" data-content="<%= sentence.author %>"><%= sentence.content %></span>
         <% }) %>
       </div>
       <% }) %>
@@ -46,8 +46,20 @@
   </div>
 </div>
 
+<style>
+  .jjwz-sentence {
+    transition: background-color 0.5s;
+  }
+  .jjwz-sentence:hover {
+    background-color: yellow;
+  }
+</style>
+
 <script type="text/javascript">
-  document.addEventListener('DOMContentLoaded', () => $('.ui.accordion').accordion());
+  document.addEventListener('DOMContentLoaded', () => {
+    $('.ui.accordion').accordion();
+    $('.jjwz-sentence').popup({ on: 'hover' });
+  });
 </script>
 
 <%- include('_partial/footer'); %>
