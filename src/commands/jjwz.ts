@@ -1,5 +1,7 @@
 import { Context, Session, segment } from 'koishi'
 
+import { escapeCqCode, unescapeCqCode } from '../utils/string'
+
 declare module 'koishi' {
 	interface Tables {
 		jjwz: JjwzMeta,
@@ -63,7 +65,7 @@ export class Article {
 		if (this.title) { rsp += '《' + this.title + '》\n' }
 		for (const sentence of this.data) { rsp += sentence.content }
 		// if (!this.title) { rsp += ' ...' }
-		return rsp
+		return escapeCqCode(rsp)
 	}
 
 	constructor(channel: string, title: string, data: Array<Sentence>) {
@@ -79,10 +81,6 @@ export default async function (ctx: Context) {
 	const config = {
 		lengthLimit: 5,
 		comboLimit: 1,
-	}
-
-	function parse(content: string): string {
-		return content.replace(/\\n/g, '\n').replace(/&#91;/g, '[').replace(/&#93;/g, ']').replace(/&amp;/g, '&')
 	}
 
 	function at(session: Session): string {
@@ -150,7 +148,7 @@ export default async function (ctx: Context) {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '肥肠抱歉，你群并未开启绝句文章功能' }
 			if (!sentence) { return session.execute('help jjwz.add') }
-			sentence = parse(sentence)
+			sentence = unescapeCqCode(sentence)
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
 			if (sentence.length > meta.lengthLimit) { return '啊咧咧，你这也太长了吧' }
 			if (meta.article.countBack(session.userId) >= meta.comboLimit) { return '别写了别写了，换别人来写两句' }
@@ -183,7 +181,7 @@ export default async function (ctx: Context) {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '肥肠抱歉，你群并未开启绝句文章功能' }
 			if (!sentence) { return session.execute('help jjwz.edit') }
-			sentence = parse(sentence)
+			sentence = unescapeCqCode(sentence)
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
 			if (!meta.article.countBack(session.userId)) {
 				if (!Object.keys(options).includes('force')) { return '我寻思刚也不是你写的你改什么呢' }
