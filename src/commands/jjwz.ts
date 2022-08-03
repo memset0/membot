@@ -81,8 +81,11 @@ export default async function (ctx: Context) {
 		comboLimit: 1,
 	}
 
-	function at(author: any): string {
-		return segment.at(author.username || author.nickname || author.userId)
+	function at(session: Session): string {
+		if (session.platform === 'telegram') {
+			return segment.at(session.author.username || session.author.nickname || session.author.userId)
+		}
+		return segment.at(session.author.userId)
 	}
 
 	async function query(channel: string): Promise<JjwzMeta | null> {
@@ -151,7 +154,7 @@ export default async function (ctx: Context) {
 				content: sentence.replace(/\\n/g, '\n'),
 			})
 			await sync(meta)
-			return at(session.author) + meta.article.toMessage()
+			return at(session) + meta.article.toMessage()
 		})
 
 	ctx.command('jjwz.del', '删除绝句')
@@ -162,11 +165,11 @@ export default async function (ctx: Context) {
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
 			if (!meta.article.countBack(session.userId)) {
 				if (!Object.keys(options).includes('force')) { return '我寻思刚也不是你写的你删什么呢' }
-				await session.send('你们可都看见了啊，是' + at(session.author) + '叫我删的')
+				await session.send('你们可都看见了啊，是' + at(session) + '叫我删的')
 			}
 			meta.article.data.pop()
 			await sync(meta)
-			return at(session.author) + meta.article.toMessage()
+			return at(session) + meta.article.toMessage()
 		})
 
 	ctx.command('jjwz.edit <sentence:string>', '修改绝句')
@@ -178,11 +181,11 @@ export default async function (ctx: Context) {
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
 			if (!meta.article.countBack(session.userId)) {
 				if (!Object.keys(options).includes('force')) { return '我寻思刚也不是你写的你改什么呢' }
-				await session.send('你们可都看见了啊，是' + at(session.author) + '叫我改的')
+				await session.send('你们可都看见了啊，是' + at(session) + '叫我改的')
 			}
 			meta.article.back().content = sentence.replace(/\\n/g, '\n')
 			await sync(meta)
-			return at(session.author) + meta.article.toMessage()
+			return at(session) + meta.article.toMessage()
 		})
 
 	ctx.command('jjwz.new <sentence:string>', '新建绝句文章')
@@ -194,7 +197,7 @@ export default async function (ctx: Context) {
 			meta.article.data = []
 			if (sentence) { meta.article.data.push({ author: session.author.userId, content: sentence }) }
 			await sync(meta)
-			return at(session.author) + meta.article.toMessage()
+			return at(session) + meta.article.toMessage()
 		})
 
 	ctx.command('jjwz.end <title:string>', '结束绝句文章')
@@ -217,7 +220,7 @@ export default async function (ctx: Context) {
 			if (!meta.article.title) { return '纳尼，你群尚无写完的绝句文章！' }
 			meta.article.title = ''
 			await sync(meta)
-			return at(session.author) + meta.article.toMessage()
+			return at(session) + meta.article.toMessage()
 		})
 
 	ctx.command('jjwz.show', '展示当前绝句文章')
@@ -225,7 +228,7 @@ export default async function (ctx: Context) {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '肥肠抱歉，你群并未开启绝句文章功能' }
 			if (!meta.article.data.length) { return '纳尼，你群尚无在写绝句文章！' }
-			return at(session.author) + meta.article.toMessage()
+			return at(session) + meta.article.toMessage()
 		})
 
 	ctx.command('jjwz.enable', '启用绝句文章功能', { authority: 3 })
