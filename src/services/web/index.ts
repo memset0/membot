@@ -17,6 +17,8 @@ export interface Config {
 	key: string
 	port: number
 	hostname: string
+	logoUrl: string
+	faviconUrl: string
 }
 
 export function apply(ctx: Context, config: Config) {
@@ -76,7 +78,8 @@ export class WebService {
 		this.global = {
 			koishi: ctx.app.options,
 			title: 'membot',
-			moment: moment,
+			moment,
+			config,
 		}
 
 		this.pageCache = {}
