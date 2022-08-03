@@ -15,15 +15,21 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 
+export interface Filter {
+  [tag: string]: string[]
+  _image_prefix: string[]
+}
+
 export interface RSSOptions {
   title?: string
+  type?: string
   tag?: string[]
   feature?: {
     summary?: boolean
     image?: boolean
   }
-  filter?: {
-  }
+  filter?: Filter
+  filter_out?: Filter
 }
 
 

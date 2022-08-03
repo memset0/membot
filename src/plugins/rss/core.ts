@@ -11,13 +11,18 @@ import { convert as htmlToText } from 'html-to-text'
 
 import '../../utils/date'
 import { Broadcast } from '../../templates/broadcast'
-import { Config, Feed, UrlHook, FeedItem } from './types'
+import { Config, Feed, Filter, UrlHook, FeedItem } from './types'
+
+export const globalFilterOut = {
+	_image_prefix: [
+		'https://www.zhihu.com/equation'
+	]
+} as Filter
 
 
-export const apiImageUrlFilter = [
-	'https://www.zhihu.com/equation'
-]
-
+export function getDisplayName(feed: Feed): string {
+	return feed.options.title || `${(new URL(feed.url)).hostname} 的订阅`
+}
 
 export async function fetchTitle(url: string): Promise<string> {
 	const res = await axios.get(url)
@@ -172,8 +177,8 @@ export class RSSCore {
 		this.logger.info('receive', date, lastDate)
 
 		const broadcast = new Broadcast({
-			type: 'RSS',
-			title: feed.options.title || `${(new URL(feed.url)).hostname} 的订阅`,
+			type: feed.options.type || 'RSS',
+			title: getDisplayName(feed),
 			link: payload.link,
 			linkname: payload.title,
 			content: '',
@@ -201,7 +206,7 @@ export class RSSCore {
 				onTagAttr: (tag, name, value) => {
 					if (tag === "img" && name === "src" && !broadcast.image) {
 						let flag = true
-						for (const prefix of apiImageUrlFilter) {
+						for (const prefix of [...globalFilterOut._image_prefix, ...(feed.options.filter_out?._image_prefix || [])]) {
 							if (value.startsWith(prefix)) {
 								flag = false
 								break

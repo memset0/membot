@@ -2,7 +2,7 @@ import { Context, Logger, segment } from 'koishi'
 import axios from 'axios'
 import sleep from 'sleep-promise'
 
-import { RSSCore, fetchTitle, fetchRSS } from './core'
+import { RSSCore, getDisplayName, fetchTitle, fetchRSS } from './core'
 import { Config, Feed, FeedItem, RSSOptions } from './types'
 import { escapeTelegramHTML } from '../../utils/string'
 
@@ -109,8 +109,19 @@ export function apply(ctx: Context, config: Config) {
   ctx.command('rss.list', '列出 RSS 订阅', { authority: 3 })
     .action(async ({ session }) => {
       const channel = `${session.platform}:${session.channelId}`
-      const feeds = await ctx.database.remove('rssfeed', { channel })
-
+      const feeds = await ctx.database.get('rssfeed', { channel })
+      let output = ''
+      if (session.platform === 'telegram') {
+        output += segment('html')
+        for (const feed of feeds) {
+          output += `<b>#${feed.id}.</b> ${escapeTelegramHTML(getDisplayName(feed))}\n`
+        }
+      } else {
+        for (const feed of feeds) {
+          output += `#${feed.id}. ${getDisplayName(feed)}\n`
+        }
+      }
+      return output
     })
 
   ctx.command('rss.import <json:text>', '导入 RSS 订阅', { authority: 4 })
