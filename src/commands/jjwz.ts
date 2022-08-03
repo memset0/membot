@@ -211,6 +211,15 @@ export default async function (ctx: Context) {
 			return '成功禁用绝句文章！'
 		})
 
+	ctx.command('jjwz.config <lengthLimit:number> <comboLimit:number>', '修改绝句文章设置', { authority: 3 })
+		.action(async ({ session }, lengthLimit: number, comboLimit: number) => {
+			const meta = await query(`${session.platform}:${session.channelId}`)
+			if (!meta) { return '你群还未启用绝句文章功能咧' }
+			if (lengthLimit < 0 || comboLimit < 0 || isNaN(lengthLimit) || isNaN(comboLimit)) { return '这样设置可是不行的哦' }
+			await ctx.database.set('jjwz', { channel: `${session.platform}:${session.channelId}` }, { comboLimit, lengthLimit })
+			return `更新成功！当前规则：每个人可以连续添加 ${comboLimit} 条绝句，每条绝句的长度限制为 ${lengthLimit}。`
+		})
+
 	ctx.command('jjwz.status', '查询本群绝句文章统计')
 		.alias('jjwz.stat')
 		.action(async ({ session }) => {
