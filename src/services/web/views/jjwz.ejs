@@ -1,0 +1,23 @@
+<%- include('_partial/header'); %>
+
+<% if (history && history.length) { %>
+  <div class="ui styled accordion" style="width: 100%">
+    <% history.forEach((article) => { %>
+      <div class="title">
+        <i class="dropdown icon"></i>
+        《<%= article.article.title %>》
+      </div>
+      <div class="content">
+        <p class="transition hidden">
+          <% article.article.data.forEach((sentence) => { %>
+            <%= sentence.content %>
+          <% }) %>
+        </p>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<script type="text/javascript">document.addEventListener('DOMContentLoaded',() => $('.ui.accordion').accordion())</script>
+
+<%- include('_partial/footer'); %>

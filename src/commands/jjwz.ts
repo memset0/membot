@@ -1,4 +1,5 @@
 import { Context, Session, segment } from 'koishi'
+import Koa from 'koa'
 
 import { escapeCqCode, unescapeCqCode } from '../utils/string'
 
@@ -19,62 +20,7 @@ export interface JjwzMeta {
 
 
 export const name = 'jjwz' as const
-
-
-export interface Sentence {
-	author: string
-	content: string
-}
-
-export class Article {
-	channel: string
-	title: string
-	data: Array<Sentence>
-
-	end(): boolean { return !!(this.title || this.data.length === 0) }
-	back(): Sentence { return this.data[this.data.length - 1] }
-
-	reset() {
-		this.channel = ''
-		this.title = ''
-		this.data = []
-	}
-
-	count(author: string): number {
-		let count = 0
-		for (const sentence of this.data) {
-			if (sentence.author === author) { count += 1 }
-		}
-		return count
-	}
-
-	countBack(author: string): number {
-		let count = 0
-		for (let i = this.data.length - 1; i >= 0; i--) {
-			if (this.data[i].author === author) {
-				count += 1
-			} else {
-				break
-			}
-		}
-		return count
-	}
-
-	toMessage(): string {
-		let rsp = ''
-		if (this.title) { rsp += '《' + this.title + '》\n' }
-		for (const sentence of this.data) { rsp += sentence.content }
-		// if (!this.title) { rsp += ' ...' }
-		return escapeCqCode(rsp)
-	}
-
-	constructor(channel: string, title: string, data: Array<Sentence>) {
-		this.channel = channel
-		this.title = title
-		this.data = data
-	}
-}
-
+export const using = ['web', 'database'] as const
 
 export default async function (ctx: Context) {
 	const logger = ctx.logger(name)
@@ -257,4 +203,75 @@ export default async function (ctx: Context) {
 			})
 			return '成功禁用绝句文章！'
 		})
+
+	ctx.command('jjwz.status', '查询本群绝句文章统计')
+		.alias('jjwz.stat')
+		.action(async ({ session }) => {
+			const meta = await query(`${session.platform}:${session.channelId}`)
+			if (!meta) { return '你群还未启用绝句文章功能咧' }
+			const url = ctx.web.registerPage({
+				platform: session.platform,
+				channelId: session.channelId,
+			}, 'jjwz', {
+				title: '绝句文章',
+				data: meta,
+				history: await ctx.database.get('jjwz_history', { channel: `${session.platform}:${session.channelId}` })
+			})
+			return url
+		})
+}
+
+
+export interface Sentence {
+	author: string
+	content: string
+}
+
+export class Article {
+	channel: string
+	title: string
+	data: Array<Sentence>
+
+	end(): boolean { return !!(this.title || this.data.length === 0) }
+	back(): Sentence { return this.data[this.data.length - 1] }
+
+	reset() {
+		this.channel = ''
+		this.title = ''
+		this.data = []
+	}
+
+	count(author: string): number {
+		let count = 0
+		for (const sentence of this.data) {
+			if (sentence.author === author) { count += 1 }
+		}
+		return count
+	}
+
+	countBack(author: string): number {
+		let count = 0
+		for (let i = this.data.length - 1; i >= 0; i--) {
+			if (this.data[i].author === author) {
+				count += 1
+			} else {
+				break
+			}
+		}
+		return count
+	}
+
+	toMessage(): string {
+		let rsp = ''
+		if (this.title) { rsp += '《' + this.title + '》\n' }
+		for (const sentence of this.data) { rsp += sentence.content }
+		// if (!this.title) { rsp += ' ...' }
+		return escapeCqCode(rsp)
+	}
+
+	constructor(channel: string, title: string, data: Array<Sentence>) {
+		this.channel = channel
+		this.title = title
+		this.data = data
+	}
 }
