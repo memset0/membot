@@ -6,7 +6,7 @@ import { escapeCqCode, unescapeCqCode } from '../utils/string'
 declare module 'koishi' {
 	interface Tables {
 		jjwz: JjwzMeta,
-		jjwz_history: JjwzMeta,
+		jjwz_history: JjwzHistoryMeta,
 	}
 }
 
@@ -16,6 +16,9 @@ export interface JjwzMeta {
 	lengthLimit: number
 	comboLimit: number
 	article: Partial<Article>
+}
+export interface JjwzHistoryMeta extends JjwzMeta{
+	time: Date
 }
 
 
@@ -67,6 +70,7 @@ export default async function (ctx: Context) {
 
 	ctx.model.extend('jjwz_history', {
 		id: 'unsigned',
+		time: 'timestamp',
 		channel: 'string',
 		lengthLimit: 'unsigned',
 		comboLimit: 'unsigned',
@@ -158,8 +162,10 @@ export default async function (ctx: Context) {
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
 			meta.article.title = title
 			await sync(meta)
-			delete meta.id
-			await ctx.database.create('jjwz_history', meta)
+			const history = meta as JjwzHistoryMeta
+			delete history.id
+			history.time = new Date()
+			await ctx.database.create('jjwz_history', history)
 			await session.send(meta.article.toMessage())
 		})
 
@@ -209,15 +215,22 @@ export default async function (ctx: Context) {
 		.action(async ({ session }) => {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '你群还未启用绝句文章功能咧' }
+			const history =await ctx.database.get('jjwz_history', {
+				channel: `${session.platform}:${session.channelId}`
+			})
 			const url = ctx.web.registerPage({
 				platform: session.platform,
 				channelId: session.channelId,
 			}, 'jjwz', {
-				title: '绝句文章',
+				title: `绝句文章`,
+				history,
 				data: meta,
-				history: await ctx.database.get('jjwz_history', { channel: `${session.platform}:${session.channelId}` })
+				channelName: session.channelName,
 			})
-			return url
+			return [
+				`当前规则：每个人可以连续添加 ${meta.comboLimit} 条绝句，每条绝句的长度限制为 ${meta.lengthLimit}。`,
+				`本群已写了 ${history.length} 篇绝句文章，前往 ${url} 查看历史记录。`,
+			].join('\n')
 		})
 }
 

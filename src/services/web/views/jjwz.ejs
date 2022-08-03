@@ -27,7 +27,13 @@
       <% [...history].reverse().forEach((article) => { %>
       <div class="title">
         <i class="dropdown icon"></i>
-        《<%= article.article.title %>》
+        <span>《<%= article.article.title %>》</span>
+        <% if (article.time) { %>
+        <span>
+          <i class="calendar alternate icon"></i>
+          <%= moment(article.time).format('YYYY/MM/DD HH:mm:ss') %>
+        </span>
+        <% } %>
       </div>
       <div class="content">
         <% article.article.data.forEach((sentence) => { %>

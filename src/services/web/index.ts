@@ -1,5 +1,6 @@
 import { Context } from 'koishi'
 import path from 'path'
+import moment from 'moment'
 import express from 'express'
 import hash from 'object-hash'
 import bodyParser from 'body-parser'
@@ -75,6 +76,7 @@ export class WebService {
 		this.global = {
 			koishi: ctx.app.options,
 			title: 'membot',
+			moment: moment,
 		}
 
 		this.pageCache = {}
