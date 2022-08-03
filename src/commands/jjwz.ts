@@ -81,6 +81,10 @@ export default async function (ctx: Context) {
 		comboLimit: 1,
 	}
 
+	function parse(content: string): string {
+		return content.replace(/\\n/g, '\n').replace(/&#91;/g, '[').replace(/&#93;/g, ']').replace(/&amp;/g, '&')
+	}
+
 	function at(session: Session): string {
 		if (session.platform === 'telegram') {
 			return segment.at(session.author.username || session.author.nickname || session.author.userId)
@@ -146,12 +150,13 @@ export default async function (ctx: Context) {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '肥肠抱歉，你群并未开启绝句文章功能' }
 			if (!sentence) { return session.execute('help jjwz.add') }
+			sentence = parse(sentence)
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
 			if (sentence.length > meta.lengthLimit) { return '啊咧咧，你这也太长了吧' }
 			if (meta.article.countBack(session.userId) >= meta.comboLimit) { return '别写了别写了，换别人来写两句' }
 			meta.article.data.push({
 				author: session.author.userId,
-				content: sentence.replace(/\\n/g, '\n'),
+				content: sentence,
 			})
 			await sync(meta)
 			return at(session) + meta.article.toMessage()
@@ -178,12 +183,13 @@ export default async function (ctx: Context) {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '肥肠抱歉，你群并未开启绝句文章功能' }
 			if (!sentence) { return session.execute('help jjwz.edit') }
+			sentence = parse(sentence)
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
 			if (!meta.article.countBack(session.userId)) {
 				if (!Object.keys(options).includes('force')) { return '我寻思刚也不是你写的你改什么呢' }
 				await session.send('你们可都看见了啊，是' + at(session) + '叫我改的')
 			}
-			meta.article.back().content = sentence.replace(/\\n/g, '\n')
+			meta.article.back().content = sentence
 			await sync(meta)
 			return at(session) + meta.article.toMessage()
 		})
