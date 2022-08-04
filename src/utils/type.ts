@@ -1,4 +1,4 @@
-export function isInteger(obj: any) {
+export function isInteger(obj: any): boolean {
 	if (typeof obj === 'number') {
 		return Number.isInteger(obj)
 	}
@@ -8,6 +8,10 @@ export function isInteger(obj: any) {
 		return Number.isInteger(obj)
 	}
 	return false
+}
+
+export function isValidDate(date: any): boolean {
+	return date && !isNaN(Date.parse((new Date(date)) as unknown as string))
 }
 
 export function deepCopy<T>(target: T): T {

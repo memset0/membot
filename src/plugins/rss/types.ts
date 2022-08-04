@@ -63,5 +63,5 @@ export interface FeedItem {
 
 
 export interface UrlHook {
-	[url: string]: Feed[]
+	[url: string]: Feed | null
 }

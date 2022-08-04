@@ -1,4 +1,4 @@
-import { Context, Logger, Database } from 'koishi'
+import { Context, Time, Logger, Database } from 'koishi'
 import xss from 'xss'
 import md5 from 'md5'
 import axios from 'axios'
@@ -11,6 +11,7 @@ import { convert as htmlToText } from 'html-to-text'
 
 import '../../utils/date'
 import { Broadcast } from '../../templates/broadcast'
+import { isValidDate } from '../../utils/type'
 import { Config, Feed, Filter, UrlHook, FeedItem } from './types'
 
 export const globalFilterOut = {
@@ -82,46 +83,30 @@ export class RSSCore {
 	}
 
 	addFeed(feed: Feed): boolean {
-		const { url } = feed
-		if (!this.hook[url]) {
-			this.hook[url] = []
-			this.feeder.add({
-				url,
-				eventName: md5(url),
-				refresh: feed.refresh + this.genTimePerturbation(feed.refresh),
-			})
-			this.feeder.on(md5(url), async (payload: FeedItem) => {
-				this.logger.info('receive', url)
-				for (const feed of this.hook[url]) {
-					await this.receive(feed, payload, true)
-				}
-			})
-		}
-		this.hook[url].push(feed)
+		const link = new URL(feed.url)
+		const registerTime = Date.now()
+		link.search += (link.search ? '&' : '?') + `i=${feed.id}&t=${registerTime % 1000}`
+		const url = link.href
+		this.logger.info('add feed', url)
+		if (this.hook[url]) { return false }
+		this.feeder.add({
+			url,
+			eventName: md5(url),
+			refresh: feed.refresh + this.genTimePerturbation(feed.refresh),
+		})
+		this.feeder.on(md5(url), async (payload: FeedItem) => {
+			// this.logger.info('receive', url)
+			await this.receive(feed, payload, Date.now() - registerTime < this.config.timeout ? 1 : 2)
+		})
+		this.hook[url] = feed
 		return true
 	}
 
 	delFeed(feed: Feed): boolean {
 		const { url } = feed
 		if (!this.hook[url]) { return false }
-		for (const i in this.hook[url]) {
-			if (this.hook[url][i].id === feed.id) {
-				this.hook[url].splice(+i, 1)
-				return true
-			}
-		}
-		return false
-	}
-
-	updateFeed(feed: Feed): boolean {
-		const { url } = feed
-		if (!this.hook[url]) { return false }
-		for (const i in this.hook[url]) {
-			if (this.hook[url][i].id === feed.id) {
-				this.hook[url].splice(+i, 1, feed)
-				return true
-			}
-		}
+		this.hook[url] = null
+		return true
 	}
 
 	async initialize() {
@@ -163,17 +148,21 @@ export class RSSCore {
 		await this.initialize()
 	}
 
-	async receive(feed: Feed, payload: FeedItem, isNew = false) {
+	async receive(feed: Feed, payload: FeedItem, status: number = 0) {
 		feed.options = deepmerge(this.config.defaults, feed.options)
 
 		const lastDate = (new Date((await this.database.get('rssfeed', [feed.id]))[0].last_update)) || (new Date())
-		const date = payload.date || payload.pubdate || (new Date())
+		const date = (isValidDate(payload.date) && payload.date) || (isValidDate(payload.pubdate) && payload.pubdate) || (new Date())
+		if (!isValidDate(payload.date) && !isValidDate(payload.pubdate)) {
+			if (status === 1) { return }
+		}
 		if (date <= lastDate) {
-			if (isNew) { return }
-		} else if (date > lastDate) {
+			if (status) { return }
+		} else {
 			await this.database.set('rssfeed', [feed.id], { last_update: date })
 		}
-		this.logger.info('receive', isNew ? 'new' : 'old', date, lastDate)
+		// this.logger.info([isValidDate(payload.date), isValidDate(payload.pubdate), payload.date, payload.pubdate, new Date()])
+		this.logger.info('receive', status, date, lastDate)
 
 		const broadcast = new Broadcast({
 			type: feed.options.type || 'RSS',
