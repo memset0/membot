@@ -76,6 +76,7 @@ export default async function (ctx: Context) {
 		channel: 'string',
 		lengthLimit: 'unsigned',
 		comboLimit: 'unsigned',
+		owenowlMode: 'boolean',
 		article: 'json',
 	}, {
 		autoInc: true,
