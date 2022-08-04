@@ -36,9 +36,11 @@
         <% } %>
       </div>
       <div class="content">
+        <!--
         <% article.article.data.forEach((sentence) => { %>
-        <span class="jjwz-sentence" data-content="<%= sentence.author %>"><%= sentence.content %></span>
+        --><span class="jjwz-sentence" data-content="<%= sentence.author %>"><%= sentence.content %></span><!--
         <% }) %>
+        -->
       </div>
       <% }) %>
     </div>
@@ -49,6 +51,8 @@
 <style>
   .jjwz-sentence {
     transition: background-color 0.5s;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
   .jjwz-sentence:hover {
     background-color: yellow;
