@@ -1,7 +1,7 @@
 import { Context, segment } from 'koishi'
 
 import { deepCopy } from '../utils/type'
-
+import version from '../utils/version'
 
 export const name = 'about'
 
@@ -17,7 +17,7 @@ function adaptOnebot(chain) {
 	return chain
 }
 
-function adaptKook(chain) {
+function adaptKook(chain: any[]) {
 	chain = deepCopy(chain)
 	chain.unshift({ type: 'markdown' })
 	for (const i in chain) {
@@ -36,8 +36,7 @@ function adaptKook(chain) {
 	return chain
 }
 
-
-export function apply(ctx: Context) {
+export function generateAboutMessage() {
 	const t = (s: any) => ({ type: 'text', data: { content: s as string } })
 
 	const chain = [
@@ -45,6 +44,7 @@ export function apply(ctx: Context) {
 		t('- 不会使用机器人？输入 /help 查看指令列表\n'),
 		t('- 调用指令时，记得前使用字符 / 或 . 作为前缀~\n'),
 		t('- 反馈问题可以直接 at 机器人，但是如果不友善的话...小心机器人不理你哦！\n'),
+		t(`当前机器人版本：${version.app}，koishi 版本：${version.koishi}。\n`),
 	]
 
 	const message = {
@@ -53,8 +53,17 @@ export function apply(ctx: Context) {
 		'default': segment.join(chain),
 	}
 
+	return message
+}
+
+export function apply(ctx: Context) {
+	let message: any = null
+
 	ctx.command('about', '关于这个机器人...')
 		.action(({ session }) => {
+			if (!message) {
+				message = generateAboutMessage()
+			}
 			if (Object.keys(message).includes(session.platform)) {
 				return message[session.platform]
 			} else {
