@@ -66,7 +66,9 @@ export class WebService {
 		}).slice(0, 8)
 		this.pageCache[hashed] = [template, data]
 		if (~cacheTime) {
-			// TODO
+			setTimeout(() => {
+				this.pageCache[hashed] = null
+			}, cacheTime)
 		}
 		return `${this.config.hostname}/p/${hashed}`
 	}
@@ -85,8 +87,8 @@ export class WebService {
 		this.pageCache = {}
 
 		this.app.get('/p/:hash', (req, res, next) => {
-			if (!Object.keys(this.pageCache).includes(req.params.hash)) { return next() }
 			const data = this.pageCache[req.params.hash]
+			if (!data) { return next() }
 			res.render(data[0], {
 				...this.global,
 				...data[1],

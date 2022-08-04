@@ -1,4 +1,4 @@
-import { Context, Session, segment } from 'koishi'
+import { Context, Time, Session, segment } from 'koishi'
 import Koa from 'koa'
 
 import { escapeCqCode, unescapeCqCode } from '../utils/string'
@@ -274,10 +274,10 @@ export default async function (ctx: Context) {
 						return `<span>${userId}</span>`
 					}
 				},
-			})
+			}, 10 * Time.minute)
 			return [
 				`当前规则：每个人可以连续添加 ${meta.comboLimit} 条绝句，每条绝句的长度限制为 ${meta.lengthLimit}。${meta.owenowlMode ? 'OwenOwl 模式已启用！' : ''}`,
-				`本群已写了 ${history.length} 篇绝句文章，前往 ${url} 查看历史记录。`,
+				`本群已写了 ${history.length} 篇绝句文章，前往 ${url} 查看历史记录（十分钟内有效）。`,
 			].join('\n')
 		})
 }
