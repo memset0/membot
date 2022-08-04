@@ -41,3 +41,7 @@ export async function getUserName(platform: string, userId: string, meta: BotMet
 		}
 	}
 }
+
+export function getAvatarUrl(userId: string | number) {
+	return `http://q.qlogo.cn/headimg_dl?dst_uin=${userId}&spec=640`
+}

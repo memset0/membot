@@ -2,6 +2,7 @@ import { Context, Session, segment } from 'koishi'
 import Koa from 'koa'
 
 import { escapeCqCode, unescapeCqCode } from '../utils/string'
+import * as Onebot from '../utils/onebot'
 
 declare module 'koishi' {
 	interface Tables {
@@ -93,6 +94,7 @@ export default async function (ctx: Context) {
 			if (session.content.startsWith('end ')) { return session.execute('jjwz.end ' + session.content.slice(4)) }
 			if (session.content === 'undo end') { return session.execute('jjwz.revert') }
 			if (session.content === 'undo') { return session.execute('jjwz.del') }
+			if (session.content === 'show') { return session.execute('jjwz.show') }
 		}
 		return next()
 	}, true)
@@ -242,6 +244,16 @@ export default async function (ctx: Context) {
 			const history = await ctx.database.get('jjwz_history', {
 				channel: `${session.platform}:${session.channelId}`
 			})
+			const userInfo = {}
+			if (session.platform === 'onebot') {
+				const memberList = await session.bot.internal.getGroupMemberList(session.channelId)
+				for (const member of memberList) {
+					userInfo[String(member.user_id)] = {
+						username: member.nickname,
+						avatar: Onebot.getAvatarUrl(member.user_id),
+					}
+				}
+			}
 			const url = ctx.web.registerPage({
 				platform: session.platform,
 				channelId: session.channelId,
@@ -254,6 +266,13 @@ export default async function (ctx: Context) {
 				history,
 				data: meta,
 				channelName: session.channelName,
+				renderUser: (userId: string) => {
+					if (userId in userInfo) {
+						return `<img class='ui avatar image' src='${userInfo[userId].avatar}'> <span>${userInfo[userId].username}</span>`
+					} else {
+						return `<span>${userId}</span>`
+					}
+				},
 			})
 			return [
 				`当前规则：每个人可以连续添加 ${meta.comboLimit} 条绝句，每条绝句的长度限制为 ${meta.lengthLimit}。${meta.owenowlMode ? 'OwenOwl 模式已启用！' : ''}`,

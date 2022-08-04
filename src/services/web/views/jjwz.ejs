@@ -38,7 +38,7 @@
       <div class="content">
         <!--
         <% article.article.data.forEach((sentence) => { %>
-        --><span class="jjwz-sentence" data-content="<%= sentence.author %>"><%= sentence.content %></span><!--
+        --><span class="jjwz-sentence" data-html="<%- renderUser(sentence.author) %>"><%= sentence.content %></span><!--
         <% }) %>
         -->
       </div>
@@ -48,9 +48,12 @@
   </div>
 </div>
 
+<pre><%= JSON.stringify(history, null, 2) %></pre>
+
 <style>
   .jjwz-sentence {
     transition: background-color 0.5s;
+    line-height: 1.75em;
     padding-top: 4px;
     padding-bottom: 4px;
   }
