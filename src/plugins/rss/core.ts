@@ -68,7 +68,7 @@ export class RSSCore {
 
 	genFeeder(): RssFeedEmitter {
 		const feeder = new RssFeedEmitter({
-			skipFirstLoad: true,
+			skipFirstLoad: false,
 			userAgent: this.config.userAgent
 		})
 		feeder.on('error', (error) => {
@@ -164,17 +164,16 @@ export class RSSCore {
 	}
 
 	async receive(feed: Feed, payload: FeedItem, isNew = false) {
-		if (isNew) { this.logger.info('receive new', feed, payload) }
 		feed.options = deepmerge(this.config.defaults, feed.options)
 
 		const lastDate = (new Date((await this.database.get('rssfeed', [feed.id]))[0].last_update)) || (new Date())
 		const date = payload.date || payload.pubdate || (new Date())
-		if (date < lastDate) {
+		if (date <= lastDate) {
 			if (isNew) { return }
 		} else if (date > lastDate) {
 			await this.database.set('rssfeed', [feed.id], { last_update: date })
 		}
-		this.logger.info('receive', date, lastDate)
+		this.logger.info('receive', isNew ? 'new' : 'old', date, lastDate)
 
 		const broadcast = new Broadcast({
 			type: feed.options.type || 'RSS',
