@@ -231,6 +231,9 @@ export default async function (ctx: Context) {
 			const url = ctx.web.registerPage({
 				platform: session.platform,
 				channelId: session.channelId,
+				lengthLimit: meta.lengthLimit,
+				comboLimit: meta.comboLimit,
+				historyLength: history.length,
 			}, 'jjwz', {
 				title: `绝句文章`,
 				history,
