@@ -242,7 +242,7 @@ export default async function (ctx: Context) {
 		.action(async ({ session }) => {
 			const meta = await query(`${session.platform}:${session.channelId}`)
 			if (!meta) { return '你群还未启用绝句文章功能咧' }
-			const history = await ctx.database.get('jjwz_history', {
+			const history: any[] = await ctx.database.get('jjwz_history', {
 				channel: `${session.platform}:${session.channelId}`
 			})
 			const userInfo = {}
@@ -254,6 +254,15 @@ export default async function (ctx: Context) {
 						avatar: Onebot.getAvatarUrl(member.user_id),
 					}
 				}
+			}
+			for (const segment of history) {
+				segment.avatar = []
+				for (const sentence of segment.article.data) {
+					if (userInfo[sentence.author]?.avatar && !segment.avatar.includes(userInfo[sentence.author].avatar)) {
+						segment.avatar.push(userInfo[sentence.author].avatar)
+					}
+				}
+				if (!segment.avatar.length) { delete segment.avatar }
 			}
 			const url = ctx.web.registerPage({
 				platform: session.platform,
@@ -274,10 +283,10 @@ export default async function (ctx: Context) {
 						return `<span>${userId}</span>`
 					}
 				},
-			}, 10 * Time.minute)
+			}, Time.hour)
 			return [
 				`当前规则：每个人可以连续添加 ${meta.comboLimit} 条绝句，每条绝句的长度限制为 ${meta.lengthLimit}。${meta.owenowlMode ? 'OwenOwl 模式已启用！' : ''}`,
-				`本群已写了 ${history.length} 篇绝句文章，前往 ${url} 查看历史记录（十分钟内有效）。`,
+				`本群已写了 ${history.length} 篇绝句文章，前往 ${url} 查看历史记录（一小时内有效）。`,
 			].join('\n')
 		})
 }

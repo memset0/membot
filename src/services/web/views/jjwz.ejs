@@ -25,22 +25,31 @@
     <% if (history && history.length) { %>
     <div class="ui styled accordion" style="width: 100%">
       <% [...history].reverse().forEach((article) => { %>
-      <div class="title">
+      <div class="title" style="overflow: hidden; white-space: nowrap;">
         <i class="dropdown icon"></i>
         <span>《<%= article.article.title %>》</span>
-        <% if (article.time) { %>
-        <span>
-          <i class="calendar alternate icon"></i>
-          <%= moment(article.time).format('YYYY/MM/DD HH:mm:ss') %>
-        </span>
+        <% if (article.avatar) { %>
+          <span style="margin-left: 0.5em">
+            <% for (let i = 0; i < article.avatar.length; i++) { %>
+              <img class="ui avatar image" src="<%- article.avatar[i] %>" style="z-index: <%= 10 + i %>; margin-left: <%= i ? '-1.2em' : '0'%>">
+            <% } %>
+          </span>
         <% } %>
       </div>
       <div class="content">
-        <!--
-        <% article.article.data.forEach((sentence) => { %>
-        --><span class="jjwz-sentence" data-html="<%- renderUser(sentence.author) %>"><%= sentence.content %></span><!--
-        <% }) %>
-        -->
+        <p>
+          <!--
+          <% article.article.data.forEach((sentence) => { %>
+          --><span class="jjwz-sentence" data-html="<%- renderUser(sentence.author) %>"><%= sentence.content %></span><!--
+          <% }) %>
+          -->
+        </p>
+        <% if (article.time) { %>
+        <p>
+          <i class="calendar alternate icon"></i>
+          <%= moment(article.time).format('YYYY/MM/DD HH:mm:ss') %>
+        </p>
+        <% } %>
       </div>
       <% }) %>
     </div>
