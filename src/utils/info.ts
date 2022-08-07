@@ -13,7 +13,7 @@ class VersionController {
 	async init() {
 		const packageInfo = JSON.parse((await fs.promises.readFile(path.join(__dirname, '../../package.json'))).toString())
 		this.app = packageInfo.version
-		this.koishi = packageInfo.dependencies.koishi
+		this.koishi = packageInfo.dependencies.koishi.replace(/^\^/, '')
 	}
 
 	constructor() {
@@ -26,4 +26,4 @@ class VersionController {
 	}
 }
 
-export = new VersionController()
+export const version = new VersionController()

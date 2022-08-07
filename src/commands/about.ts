@@ -1,7 +1,7 @@
 import { Context, segment } from 'koishi'
 
 import { deepCopy } from '../utils/type'
-import version from '../utils/version'
+import { version } from '../utils/info'
 
 export const name = 'about'
 
