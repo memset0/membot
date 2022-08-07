@@ -60,7 +60,7 @@
     "express": "^4.18.1",
     "fluent-ffmpeg": "^2.1.2",
     "html-to-text": "^8.2.1",
-    "koishi": "^4.8.0",
+    "koishi": "^4.8.4",
     "md5": "^2.3.0",
     "moment": "^2.29.4",
     "object-hash": "^3.0.0",

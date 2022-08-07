@@ -49,8 +49,8 @@ export async function apply(ctx: Context, config: Config) {
 
 			e.options = {
 				sendGif: e.platform !== 'telegram',
-				usePrefix: !(e.options?.useCard && e.platform === 'kaiheila'),
-				transformBase64: !(e.platform === 'kaiheila'),
+				usePrefix: !(e.options?.useCard && e.platform === 'kook'),
+				transformBase64: !(e.platform === 'kook'),
 				type2text: Type2Text,
 				...(e.options || {}),
 			}
@@ -421,7 +421,7 @@ function middleware(ctx: Context) {
 
 				let messages = null
 				switch (target.platform) {
-					case "kaiheila": {
+					case "kook": {
 						messages = await adaptKook(chain, ctx, session, target)
 						break
 					}

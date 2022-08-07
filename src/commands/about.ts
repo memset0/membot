@@ -49,7 +49,7 @@ export function generateAboutMessage() {
 
 	const message = {
 		'onebot': segment.join(adaptOnebot(chain)),
-		'kaiheila': segment.join(adaptKook(chain)),
+		'kook': segment.join(adaptKook(chain)),
 		'default': segment.join(chain),
 	}
 
