@@ -42,7 +42,7 @@ export async function apply(ctx: Context) {
 				}
 			}
 			if (flagAlert) {
-				return '你已被封禁，无法调用指令，更多信息请联系机器人作者'
+				return '非常抱歉，你已被禁止使用机器人'
 			}
 			return
 		}

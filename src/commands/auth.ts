@@ -81,8 +81,8 @@ export async function apply(ctx: Context, config: Config) {
 
 			if (session.userId == user[platform]) { return '不能给自己授权' }
 			if (userId == session.selfId) { return `不能给机器人授权` }
-			if (targetAuthority === 0 && selfAuthority < 4) { return '你没有解封用户的权限' }
-			if (level === 0 && selfAuthority < 4) { return '你没有封禁用户的权限' }
+			if (targetAuthority === 0 && selfAuthority < 4) { return '你没有解除禁用用户的权限' }
+			if (level === 0 && selfAuthority < 4) { return '你没有禁用用户的权限' }
 			if (level >= selfAuthority) { return '你只能授予比自己低的权限等级' }
 			if (selfAuthority !== 4 && level < targetAuthority) { return '你不能降低其他用户的权限等级' }
 
@@ -90,7 +90,7 @@ export async function apply(ctx: Context, config: Config) {
 			if (level) {
 				return `已授予${segment('at', { id: userId })} ${level} 级权限`
 			} else {
-				return `已封禁 ${segment('at', { id: userId })}`
+				return `已禁用 ${segment('at', { id: userId })}`
 			}
 		})
 }
