@@ -1,4 +1,4 @@
-import { Context } from 'koishi'
+import { Context, segment } from 'koishi'
 
 import { Checker } from '../checker'
 import { get, getJSON } from '../api'
@@ -24,11 +24,13 @@ export function apply(ctx: Context) {
 	ctx.command('domcer.mw <username:string>', '查询超级战墙数据')
 		.alias('domcer.megawall')
 		.alias('domcer.megawalls')
-		.usage('（2022.3.15更新）修复数据值翻倍的问题\n' +
-			'（2022.3.13更新）战绩默认统计近30日内对局，可用-g选项切换\n' +
-			'（2022.2.4更新）战绩支持自定义取样比例，默认25%，输出和承伤分别计算\n' +
-			'（2022.1.31更新）战绩只统计数据值前25%的对局')
-		.option('global', '-g 筛选器：统计全局战绩')
+		.usage('更新日志：\n' +
+			'    20220902  重构domcer插件，修改显示效果\n' +
+			'    20220315  修复数据值翻倍的问题\n' +
+			'    20220313  默认统计近30日内对局，可用-g选项切换（已删除）\n' +
+			'    20220204  支持自定义取样比例，默认25%，输出和承伤分别计算\n' +
+			'    20220131  只统计数据值前25%的对局')
+		// .option('global', '-g 筛选器：统计全局战绩')
 		.option('allmode', '-a 筛选器：所有模式')
 		.option('clonemode', '-c 筛选器：克隆大作战')
 		.option('infinitemode', '-f 筛选器：无限火力')
@@ -45,14 +47,9 @@ export function apply(ctx: Context) {
 			if (!name) { return session.execute('help domcer.mw') }
 			const data = await getJSON('/match/getMegaWallsMatchList', { name })
 			if (data.status !== 200) { return codeErrorMessage(data.status) }
-			if (data.data.length === 0) { return `该玩家没有超级战墙游玩历史` }
-			// logger.info(name, JSON.stringify(options))
+			if (data.data.length === 0) { return segment.at(session.userId) + `没有找到该玩家或该玩家没有超级战墙游玩历史` }
+			if ((options.allmode ? 1 : 0) + (options.infinitemode ? 1 : 0) + (options.clonemode ? 1 : 0) > 1) { return segment.at(session.userId) + '模式筛选器至多启用一个' }
 
-			if ((options.allmode ? 1 : 0) + (options.infinitemode ? 1 : 0) + (options.clonemode ? 1 : 0) > 1) {
-				return '模式筛选器至多启用一个'
-			}
-
-			const nowTime = Date.now()
 			const sum = {
 				mvps: 0,
 				games: 0,
@@ -71,10 +68,6 @@ export function apply(ctx: Context) {
 			let allTotalDamage = []
 			let allTakenDamage = []
 			let kitCounterMap = new Map<string, number>()
-			let monlyGames = 0
-			let monthlyTotalDamage = []
-			let monthlyTakenDamage = []
-			let monthlyKitCounterMap = new Map<string, number>()
 
 			for (const round of data.data) {
 				if (round.mode == 'NORMAL' && (options.infinitemode || options.clonemode)) { continue }
@@ -96,26 +89,10 @@ export function apply(ctx: Context) {
 					allTotalDamage.push(round.totalDamage)
 					allTakenDamage.push(round.takenDamage)
 				}
-				if (nowTime - round.startTime <= 1000 * 3600 * 24 * 30) {
-					monlyGames += 1
-					monthlyKitCounterMap[round.selectedKit] = (monthlyKitCounterMap[round.selectedKit] || 0) + 1
-					if (round.liveInDeathMatch) {
-						monthlyTotalDamage.push(round.totalDamage)
-						monthlyTakenDamage.push(round.takenDamage)
-					}
-				}
 			}
 
-			if (allTotalDamage.length && monthlyTotalDamage.length < 5) {
-				options.global = true
-			}
-			if (!options.global) {
-				allTotalDamage = monthlyTotalDamage
-				allTakenDamage = monthlyTakenDamage
-				kitCounterMap = monthlyKitCounterMap
-			}
+			if (!sum.games) { return segment.at(session.userId) + '没有符合条件的对局' }
 
-			const countedGames = options.global ? sum.games : monlyGames
 			let commonlyUsed = []
 			for (const kit in kitCounterMap) {
 				commonlyUsed.push(kit)
@@ -123,7 +100,7 @@ export function apply(ctx: Context) {
 			commonlyUsed.sort((a, b) => (kitCounterMap[b] - kitCounterMap[a]))
 			if (commonlyUsed.length > 3) commonlyUsed = commonlyUsed.slice(0, 3)
 			const kitParser = (kit: string) => {
-				return `${kit}(${Math.floor(kitCounterMap[kit] / countedGames * 100)}%)`
+				return `${kit}(${Math.floor(kitCounterMap[kit] / sum.games * 100)}%)`
 			}
 
 			allTotalDamage.sort((a, b) => (b - a))
@@ -140,35 +117,24 @@ export function apply(ctx: Context) {
 			average.totalDamage = sum.totalDamage / allTotalDamage.length / 2.
 			average.takenDamage = sum.takenDamage / allTakenDamage.length / 2.
 
-			let res = `${name} 的超级战墙数据\n`
-
-			if (sum.games) {
-				let limits = []
-				if (options.kit) limits.push(options.kit)
-				if (options.global) {
-					limits.push('全局战绩')
-				}
-				if (options.allmode) {
-					limits.push('所有模式')
-				} else if (options.clonemode) {
-					limits.push('克隆大作战')
-				} else if (options.infinitemode) {
-					limits.push('无限火力')
-				}
-				if (limits.length) {
-					res = res.slice(0, -1) + `（筛选器已启用：${limits.join(' / ')}）\n`
-				}
-
-				res += `【最终击杀】${sum.finalKills}【最终助攻】${sum.finalAssists}【MVP】${sum.mvps}\n`
-				res += `【对局数】${sum.games}【DM 数】${sum.alives}【胜局数】${sum.wins}【胜率】${(sum.wins / sum.games * 100).toFixed(2)}%\n`
-				if (sum.alives) res += `【场均输出】${average.totalDamage.toFixed(4)}【场均承伤】${average.takenDamage.toFixed(4)}\n`
-				if (!options.kit) res += `【常用职业】${commonlyUsed.map(kitParser).join(' ')}\n`
-
-			} else {
-				res += '没有符合条件的对局\n'
+			const res = {
+				...sum,
+				name,
+				average,
+				options,
+				limits: [],
+				commonKit: commonlyUsed.map(kitParser).join('  '),
+			}
+			if (options.kit) res.limits.push(options.kit)
+			if (options.allmode) {
+				res.limits.push('所有模式')
+			} else if (options.clonemode) {
+				res.limits.push('克隆大作战')
+			} else if (options.infinitemode) {
+				res.limits.push('无限火力')
 			}
 
-			session.send(res.slice(0, -1))
+			return segment.at(session.userId) + '\n' + ctx.template.render('domcer/megawalls', res)
 		})
 
 
@@ -183,7 +149,7 @@ export function apply(ctx: Context) {
 			if (!name) { return session.execute('help domcer.mwl') }
 			const data = await getJSON('/match/getMegaWallsMatchList', { name })
 			if (data.status !== 200) { return codeErrorMessage(data.status) }
-			if (data.data.length === 0) { return `该玩家没有超级战墙游玩历史` }
+			if (data.data.length === 0) { return segment.at(session.userId) + `该玩家没有超级战墙游玩历史` }
 
 			const result = []
 			result.push(`${name} 的超级战墙对局列表`)
@@ -200,7 +166,7 @@ export function apply(ctx: Context) {
 			for (let i = 1 + (currentPage - 1) * perPage; i <= currentPage * perPage && i <= rounds.length; i++) {
 				const round = rounds[i - 1]
 				result.push([
-					`#${i}. ${round.id}`,
+					`#${i}  ${round.id}`,
 					round.mapName + (round.mode != 'NORMAL' ? '(' + MegaWallsModeRemap[round.mode] + ')' : ''),
 					round.selectedKit,
 					TeamColorRemap[round.team] + '队',
@@ -211,7 +177,7 @@ export function apply(ctx: Context) {
 			}
 
 			result.push(`第${currentPage}页，共${totalPage}页`)
-			session.send(result.join('\n'))
+			return segment.at(session.userId) + '\n' + result.join('\n')
 		})
 
 
@@ -219,54 +185,54 @@ export function apply(ctx: Context) {
 		.alias('domcer.mwround')
 		.alias('domcer.megawallRound')
 		.alias('domcer.megawallsRound')
+		.option('allteam', '-a 筛选器：所有队伍')
 		.check((_, matchID) => Checker.isMatchID(matchID))
-		.action(async ({ session }, matchID: string) => {
+		.action(async ({ session, options }, matchID: string) => {
 			if (!matchID) { return session.execute('help domcer.mwr') }
 			const plain = await get('/match/megawalls', { id: matchID })
 			if (plain == '') { return '对局不存在' }
 
 			const data = JSON.parse(plain)
+			const winner = TeamColorRemap[data.winner]
 
-			const round = data
-			const time = new Date(round.endTime)
-			const result = []
-			result.push(`超级战墙对局 ${round.id} / ${round.mapName} / ${MegaWallsModeRemap[round.mode]}`)
-			result.push(`【时间】${time.toChineseString()}`)
-
-			if (round.winner in TeamColorList) {
-				result.push(`【获胜队伍】${TeamColorRemap[round.winner]}队【MVP】${round.mvp}`)
-			} else {
-				result.push('【获胜队伍】无')
-			}
-
+			const finals = []
 			const teams = {}
-			teams[round.winner] = []
+			teams[TeamColorRemap[data.winner]] = []
 			for (const color of TeamColorList) {
-				teams[color] = []
+				teams[TeamColorRemap[color]] = []
 			}
-
 			for (const player of data.playerStatistics) {
-				if (player.liveInDeathMatch) { teams[player.team].push(player) }
-			}
-
-			for (const teamColor in teams) {
-				const teamPlayers = teams[teamColor]
-				teamPlayers.sort((a, b) => ((b.totalDamage + b.takenDamage) - (a.totalDamage + a.takenDamage)))
-				if (teamPlayers.length) {
-					result.push(`【${TeamColorRemap[teamColor]}队】`)
-					for (let i = 1; i <= Math.min(teamColor == round.winner ? 6 : 4, teamPlayers.length); i++) {
-						const player = teamPlayers[i - 1]
-						result.push([
-							`#${i}. ${player.realName}`,
-							player.selectedKit,
-							`${player.finalKills}FK${player.finalAssists}FA`,
-							`${(player.totalDamage / 2).toFixed(2)}输出`,
-							`${(player.takenDamage / 2).toFixed(2)}承伤`,
-						].join(' / '))
-					}
+				if (player.liveInDeathMatch) {
+					player.team = TeamColorRemap[player.team]
+					finals.push(player)
+					if (options.allteam || player.team === winner) { teams[player.team].push(player) }
 				}
 			}
 
-			session.send(result.join('\n'))
+			finals.sort((a: any, b: any) => {
+				if (a.finalKills !== b.finalKills) { return b.finalKills - a.finalKills }
+				if (a.finalAssists !== b.finalAssists) { return b.finalAssists - a.finalAssists }
+				return (b.totalDamage + b.takenDamage) - (a.totalDamage + a.takenDamage)
+			})
+
+			for (const color in teams) {
+				if (teams[color].length) {
+					teams[color].sort((a: any, b: any) => ((b.totalDamage + b.takenDamage) - (a.totalDamage + a.takenDamage)))
+				} else {
+					delete teams[color]
+				}
+			}
+
+			const res = {
+				...data,
+				options,
+				teams,
+				finals,
+				winner,
+				mode: MegaWallsModeRemap[data.mode],
+				time: new Date(data.endTime),
+			}
+
+			return segment.at(session.userId) + '\n' + ctx.template.render('domcer/megawallsRound', res)
 		})
 }

@@ -5,7 +5,7 @@ export function codeErrorMessage(statusCode) {
 	} else if (statusCode == - 404) {
 		res += '（可能原因：该用户 / 对局不存在）'
 	} else if (statusCode === 500) {
-		res += '（可能原因：API 访问次数达到上限）'
+		res += '（可能原因：Domcer 服务器内部错误）'
 	}
 
 	return res
