@@ -47,7 +47,6 @@ export class Writer {
 			let count = result.article.match(regexp).length
 			const resource = shuffle.pick(this.resource[type], { picks: count + 1 })
 			result.article = result.article.replace(regexp, () => resource[--count])
-			console.log(type, count, resource, [result.article])
 		}
 
 		result.article = result.article
