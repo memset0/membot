@@ -35,6 +35,7 @@ For example, if you want to enable its RSS Feed feature, use `ctx.plugin(require
 * [OneBot 12 标准草案](https://12.onebot.dev/)
 * [Telegram Bot API](https://core.telegram.org/bots/api)
 * [KOOK 开发者平台 文档](https://developer.kookapp.cn/doc/intro)
+* [art-template - 高性能 JavaScript 模板引擎](https://aui.github.io/art-template/)
 * [QQ Face ID Table](https://qq-face.vercel.app/)
 * [漢典 - 漢語字典, 漢語詞典, 康熙字典, 說文解字, 音韻方言, 字源字形, 異體字](https://www.zdic.net)
 * [DoMCer API](http://api.domcer.com/)

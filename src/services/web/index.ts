@@ -1,11 +1,10 @@
 import { Context } from 'koishi'
+import ejs from 'ejs'
 import path from 'path'
 import moment from 'moment'
 import express from 'express'
 import hash from 'object-hash'
 import bodyParser from 'body-parser'
-
-export const name = 'web' as const
 
 declare module 'koishi' {
 	interface Context {
@@ -21,6 +20,14 @@ export interface Config {
 	faviconUrl: string
 }
 
+
+const EjsOptions = {
+	async: true
+} as const
+
+
+export const name = 'web' as const
+
 export function apply(ctx: Context, config: Config) {
 	if (!config.key) {
 		throw new Error('Web services require a key for security')
@@ -35,6 +42,15 @@ export function apply(ctx: Context, config: Config) {
 	app.use(bodyParser.json())
 	app.use(bodyParser.urlencoded({ extended: true }))
 	app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }))
+
+	app.engine('ejs', async (path, data, callback) => {
+		try {
+			let html = await ejs.renderFile(path, data, EjsOptions)
+			callback(null, html)
+		} catch (error) {
+			callback(error, '')
+		}
+	})
 
 	app.get('/', function (req, res) {
 		res.render('index', {

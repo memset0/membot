@@ -1,0 +1,73 @@
+<%- await include('_partial/header') %>
+
+<style>
+  .note-container {
+    width: 100%;
+    max-width: 600px;
+    margin: auto !important;
+  }
+
+  .note {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .note>.ui.card {
+    width: 100%;
+  }
+</style>
+
+<div class="ui cards note-container" id="note-container">
+</div>
+
+<script id="note-template" type="text/html">
+  <div class="ui card">
+    {{if (show_images)}}
+      <div class="image">
+        {{each images}}
+          <img src="{{$value}}">
+        {{/each}}
+      </div>
+    {{/if}}
+    <div class="content">
+      <div class="description">
+        {{@ content }}
+      </div>
+    </div>
+    <div class="extra content">
+      <span class="left floated">
+      </span>
+      <span class="right floated">
+        {{ '#' + id }}
+      </span>
+    </div>
+  </div>
+</script>
+
+<script src="https://unpkg.com/art-template@4.13.2/lib/template-web.js"></script>
+
+<script>
+  function render() {
+    const $container = document.getElementById('note-container')
+    const $template = document.getElementById('note-template')
+    $container.innerHTML = ''
+    for (const note of window.notes) {
+      $note = document.createElement("div")
+      $note.setAttribute('class', 'note')
+      $note.setAttribute('data-id', note.id)
+      $note.innerHTML = template.render($template.innerHTML, {
+        show_images: note.extend && note.extend.images && note.extend.images.length && true,
+        ...note,
+        ...note.extend,
+      })
+      $container.appendChild($note)
+    }
+  }
+</script>
+
+<script>
+  window.notes = <%- JSON.stringify(await notes_getter()) %>
+  render()
+</script>
+
+<%- await include('_partial/footer') %>

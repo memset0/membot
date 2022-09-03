@@ -1,5 +1,7 @@
-import { Context, segment } from 'koishi'
+import { Time, Context, segment } from 'koishi'
 import YAML from 'yaml'
+import { cloneDeep } from 'lodash'
+import MarkdownIt from 'markdown-it'
 
 import { Note, NoteStatus, NoteUser, NoteMeta } from './note'
 import renderStatus from './templates/status'
@@ -14,6 +16,9 @@ declare module 'koishi' {
 	}
 }
 
+interface RecentMessage {
+	[K: string]: Array<Array<segment.Parsed>>
+}
 
 
 export const name = 'note'
@@ -21,7 +26,23 @@ export const using = ['database'] as const
 
 export function apply(ctx: Context) {
 	ctx.template.register('note/status', renderStatus)
+	const logger = ctx.logger('note')
 	const core = new Note(ctx)
+	const markdown = new MarkdownIt
+	const recentMessage: RecentMessage = {}
+
+	function pushMessage(id: string, message: Array<segment.Parsed>): void {
+		if (!recentMessage[id]) { recentMessage[id] = [] }
+		recentMessage[id].push(message)
+		if (recentMessage[id].length > 3) { recentMessage[id].splice(0, 1) }
+	}
+
+	function pullMessage(id: string): Array<Array<segment.Parsed>> {
+		if (!recentMessage[id]) { return [] }
+		const result = recentMessage[id]
+		recentMessage[id] = null
+		return result
+	}
 
 	ctx.model.extend('channel', {
 		note: 'json',
@@ -53,6 +74,15 @@ export function apply(ctx: Context) {
 		}
 	})
 
+	ctx.middleware((session, next) => {
+		const channelId = `${session.platform}:${session.channelId}`
+		if (channelId in core.data) {
+			const userId = `${session.platform}:${session.userId}`
+			pushMessage(`${channelId}:${userId}`, segment.parse(session.content))
+		}
+		return next()
+	})
+
 	ctx.command('note', '笔记本功能', { authority: 2 })
 		.alias('n')
 		.action(async ({ session }) => {
@@ -80,12 +110,36 @@ export function apply(ctx: Context) {
 	ctx.command('note.status', '查看统计信息', { authority: 2 })
 		.alias('note.stat')
 		.alias('note.s')
-		.action(async ({ session }) => {
-			const channelId = `${session.platform}:${session.channelId}`
+		.alias('note.list')
+		.alias('note.l')
+		.option('channel', '-c <channel:string>')
+		.option('forceEdit', '-f')
+		.action(async ({ session, options }) => {
+			const channelId = options.channel
+				? (options.channel.includes(':')
+					? options.channel
+					: `${session.platform}:${options.channel}`)
+				: `${session.platform}:${session.channelId}`
 			if (!(channelId in core.data)) { return '未启用笔记本功能' }
+			const editable = session.subtype === 'private' || options.forceEdit
 			const notes = await core.fetchChannel(channelId)
-			return (session.subtype === 'private' ? '' : (segment.at(session.userId) + '\n')) +
+			const url = ctx.web.registerPage({
+				platform: session.platform,
+				channelId: session.channelId,
+				editable,
+				ids: notes.map(note => note.id)
+			}, 'note', {
+				editable,
+				session,
+				notes_getter: async function () {
+					const notes = await core.fetchChannel(channelId)
+					for (const note of notes) { note.content = markdown.render(note.content) }
+					return notes
+				},
+			}, Time.hour)
+			return segment.quote(session.messageId) +
 				ctx.template.render('note/status', {
+					url,
 					length: notes.length,
 				})
 		})
@@ -96,7 +150,16 @@ export function apply(ctx: Context) {
 			const channelId = `${session.platform}:${session.channelId}`
 			const userId = `${session.platform}:${session.userId}`
 			if (!(channelId in core.data)) { return '未启用笔记本功能' }
-			core.addNote(channelId, userId, content)
+			const recent = pullMessage(`${channelId}:${userId}`)
+			const images = []
+			for (const message of recent) {
+				for (const seg of message) {
+					if (seg.type === 'image' && seg.data.url) {
+						images.push(seg.data.url)
+					}
+				}
+			}
+			core.addNote(channelId, userId, content, { images })
 		})
 
 	ctx.command('note.delete <id:number>', '删除笔记', { authority: 2 })

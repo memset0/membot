@@ -44,18 +44,21 @@ export class Note {
 	}
 
 	async fetchChannel(channelId: string): Promise<Array<NoteMeta>> {
-		assert(channelId in this.data)
-		const result = await this.database.get('note', { channelId })
+		console.log(channelId, this)
+		// assert(channelId in this.data)
+		const result = await this.database.get('note', { channelId, status: { $gt: NoteStatus.deleted } })
 		this.logger.info('fetch channel', channelId, result)
 		return result as Array<NoteMeta>
 	}
 
-	async addNote(channelId: string, userId: string, content: string): Promise<NoteMeta> {
+	async addNote(channelId: string, userId: string, content: string, extend?: NoteExtend): Promise<NoteMeta> {
 		assert(channelId in this.data)
+		this.logger.info('add note', channelId, userId, { content, ...extend })
 		return await this.database.create('note', {
 			channelId,
 			userId,
 			content,
+			extend: extend || {},
 		} as NoteMeta)
 	}
 
