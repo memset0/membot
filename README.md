@@ -2,11 +2,9 @@
 
 <h1>
 membot
-<img src="https://img.shields.io/github/v/release/memset0/membot">
+<img src="https://img.shields.io/badge/build-passing-green.svg">
 <img src="https://img.shields.io/github/issues/memset0/membot">
 <img src="https://img.shields.io/github/languages/code-size/memset0/membot?color=blueviolet">
-<img src="https://img.shields.io/github/repo-size/memset0/membot?color=eb56fd">
-<img src="https://img.shields.io/github/last-commit/memset0/membot/dev">
 <img src="https://img.shields.io/badge/license-AGPL_V3.0-yellowgreen.svg">
 </h1>
 
