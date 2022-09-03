@@ -17,9 +17,9 @@ export type PlainTextData = string | {
 export default function PlainText(data: PlainTextData, { app }: TemplateService): string {
 	if (typeof data === 'string') { data = { text: data } }
 
-	if (data.text.length > 1000) {
+	if (data.text.length > 2000) {
 		const url = app.web.registerPage(null, 'components/plaintext', data, Time.minute * 5)
-		return `内容过长，请访问：${url}（五分钟内有效）`
+		return `内容过长，请访问：${url} （五分钟内有效）`
 	}
 
 	const title = (data.title ? (data.title + '\n') : '')

@@ -18,7 +18,7 @@ declare module 'koishi' {
 
 
 export const name = 'rss'
-export const using = ['database'] as const
+export const using = ['database', 'template'] as const
 
 export function apply(ctx: Context, config: Config) {
 	const logger = ctx.logger('rss')
@@ -180,18 +180,10 @@ export function apply(ctx: Context, config: Config) {
 				if (feed.id) { delete feed.id }
 				if (feed.channel) { delete feed.channel }
 			}
-			const json = JSON.stringify(data)
-			if (session.platform === 'telegram') {
-				for (let i = 0; i < json.length; i += 3000) {
-					await session.send(segment('html') +
-						(i ? '' : `频道 ${channel} 的所有订阅数据\n`) +
-						'<code>' +
-						escapeTelegramHTML(json.slice(i, i + 3000)) +
-						'</code>')
-				}
-			} else {
-				return `频道 ${channel} 的所有订阅数据\n${json}`
-			}
+			return ctx.template.PlainText({
+				title: `频道 ${channel} 的所有订阅数据`,
+				text: JSON.stringify(data, null, 2)
+			})
 		})
 
 	ctx.command('rss.reset', '重置 RSS 订阅', { authority: 4 })

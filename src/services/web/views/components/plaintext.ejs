@@ -2,6 +2,9 @@
 
 <div class="ui card" style="width: 100%">
   <div class="content">
+    <% if (title) { %>
+    <h4><%= title %></h4>
+    <% } %>
     <div class="ui two buttons">
       <div class="ui basic green button" onclick="copy()">Copy</div>
       <div class="ui basic red button" onclick="destory()">Destory</div>
