@@ -4,10 +4,12 @@ import YAML from 'yaml'
 export const name = 'locales'
 export const logger = new Logger('locales')
 
+export interface I18nDict {
+	[command: string]: I18nDict | string
+}
+
 export interface Config {
-	i18n: {
-		[command: string]: string
-	}
+	i18n: I18nDict
 	commands: any
 }
 
@@ -32,8 +34,24 @@ function i18nToYaml(data: I18n.Store) {
 	return YAML.stringify(parsed)
 }
 
+function defineI18n(ctx: Context, lang: string, data: I18nDict) {
+	const dfs = (data: string | I18nDict, chain: string): void => {
+		if (typeof data === 'string') {
+			ctx.i18n._data[lang][chain] = data
+		} else {
+			for (const key in data) {
+				dfs(data[key], chain + '.' + key)
+			}
+		}
+	}
+	for (const key in data) {
+		dfs(data[key], key)
+	}
+}
+
 
 export async function apply(ctx: Context, config: Config) {
 	// logger.info(i18nToYaml(ctx.i18n._data['zh']))
-	ctx.app.i18n.define('zh', config.i18n)
+	// ctx.app.i18n.define('zh', config.i18n)
+	defineI18n(ctx, 'zh', config.i18n)
 }
