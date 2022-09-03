@@ -6,11 +6,14 @@
     <title><%= title.endsWith('membot') ? title : title + ' - membot' %></title>
     <link rel="icon" href="<%- config.faviconUrl || 'https://memset0.cn/img/favicon.png' %>" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" rel="stylesheet" />
+    <style>
+      .ui.container { max-width: 1000px !important; }
+    </style>
   </head>
   <body>
     <div class="ui large borderless fixed menu">
       <div class="ui container">
-        <div class="header item"><%= koishi.nickname %></div>
+        <a href="/" class="header item"><%= koishi.nickname %></a>
         <!--<a class="active item">Link</a>
         <div class="ui dropdown item" tabindex="0">
           Dropdown
@@ -36,4 +39,4 @@
         </div>
       </div>
     </div>
-    <div class="ui container" id="container" style="margin-top: 6rem">
+    <div class="ui container" id="container" style="margin-top: 5.2rem">

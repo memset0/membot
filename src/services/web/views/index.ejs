@@ -1,5 +1,22 @@
 <%- await include('_partial/header'); %>
 
-<%= message %>
+<link href="/assets/markdown.css" rel="stylesheet" />
+
+<div class="ui card" id="index">
+  <div class="content">
+    <div class="markdown">
+      <%- readme %>
+    </div>
+  </div>
+</div>
+
+<style>
+  #index {
+    width: 100%;
+  }
+	#index .content {
+		padding: 2rem;
+	}
+</style>
 
 <%- await include('_partial/footer'); %>

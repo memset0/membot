@@ -44,6 +44,7 @@ For example, if you want to enable its RSS Feed feature, use `ctx.plugin(require
 * [KOOK 开发者平台 文档](https://developer.kookapp.cn/doc/intro)
 * [art-template - 高性能 JavaScript 模板引擎](https://aui.github.io/art-template/)
 * [QQ Face ID Table](https://qq-face.vercel.app/)
+* [github-markdown-css - The minimal amount of CSS to replicate the GitHub Markdown style](https://github.com/sindresorhus/github-markdown-css)
 * [漢典 - 漢語字典, 漢語詞典, 康熙字典, 說文解字, 音韻方言, 字源字形, 異體字](https://www.zdic.net)
 * [DoMCer API](http://api.domcer.com/)
 * [RSS Hub - 🍰 万物皆可 RSS](https://docs.rsshub.app/)

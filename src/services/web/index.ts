@@ -1,4 +1,5 @@
 import { Context } from 'koishi'
+import fs from 'fs'
 import ejs from 'ejs'
 import path from 'path'
 import { URL } from 'url'
@@ -6,6 +7,7 @@ import moment from 'moment'
 import express from 'express'
 import hash from 'object-hash'
 import bodyParser from 'body-parser'
+import MarkdownIt from 'markdown-it'
 import proxy from 'express-http-proxy'
 
 declare module 'koishi' {
@@ -48,6 +50,12 @@ export function apply(ctx: Context, config: Config) {
 
 	const webService = new WebService(ctx, config)
 
+	const markdown = new MarkdownIt({
+		html: true,
+	})
+	const readmeMarkdwon = fs.readFileSync(path.join(__dirname, '../../../README.md')).toString()
+	const readmeHTML = markdown.render(readmeMarkdwon)
+
 	const app = express()
 	app.listen(config.port)
 	app.set('views', path.join(__dirname, 'views'))
@@ -69,7 +77,7 @@ export function apply(ctx: Context, config: Config) {
 		res.render('index', {
 			...globalArgs,
 			title: 'membot',
-			message: 'Hello, World!',
+			readme: readmeHTML,
 		})
 	})
 

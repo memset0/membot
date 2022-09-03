@@ -28,7 +28,7 @@ export function apply(ctx: Context) {
 	ctx.template.register('note/status', renderStatus)
 	const logger = ctx.logger('note')
 	const core = new Note(ctx)
-	const markdown = new MarkdownIt
+	const markdown = new MarkdownIt()
 	const recentMessage: RecentMessage = {}
 
 	function pushMessage(id: string, message: Array<segment.Parsed>): void {
