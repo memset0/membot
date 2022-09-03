@@ -1,6 +1,6 @@
 <img align="right" width="160" src="http://q.qlogo.cn/headimg_dl?dst_uin=1470738407&spec=640">
 
-<h1>membot</h1>
+<h1>membot <img src="https://tokei.rs/b1/github/memset0/membot"></h1>
 
 Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
