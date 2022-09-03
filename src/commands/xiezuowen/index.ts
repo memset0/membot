@@ -88,7 +88,7 @@ export const name = 'xiezuowen' as const
 export function apply(ctx: Context) {
 	const writer = new Writer()
 
-	ctx.command('xiezuowen <主题谓语:string> <主题宾语:string>', '满分作文生成器')
+	ctx.command('xiezuowen <主题谓语:string> <主题宾语:string>', '满分作文生成器', { authority: 2 })
 		.alias('xzw')
 		.usage([
 			'确定主题主语和主题谓语，让本作文生成器为你写一篇满分作文吧',
