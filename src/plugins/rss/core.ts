@@ -87,7 +87,7 @@ export class RSSCore {
 		const registerTime = Date.now()
 		link.search += (link.search ? '&' : '?') + `i=${feed.id}&t=${registerTime % 1000}`
 		const url = link.href
-		this.logger.info('add feed', url)
+		// this.logger.info('add feed', url)
 		if (this.hook[url]) { return false }
 		this.feeder.add({
 			url,
@@ -113,7 +113,7 @@ export class RSSCore {
 		const feeds = (await this.database.get('rssfeed', { id: { $gt: 0 } })) as Feed[]
 		for (const feed of arrayShuffle(feeds)) {
 			await sleep(this.genTimePerturbation(feed.refresh))
-			this.logger.info('init', feed)
+			// this.logger.info('init', feed)
 			this.addFeed(feed)
 		}
 	}

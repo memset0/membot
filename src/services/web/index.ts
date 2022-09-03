@@ -57,12 +57,15 @@ export class WebService {
 	pageCache: { [hash: string]: [string, any] }
 
 	registerPage(hashData: any, template: string, data: any, cacheTime: number = -1): string {
-		const hashed = hash({
+		const hashed = hashData ? hash({
 			_key: hashData?.key || this.config.key,
 			_template: template,
 			...hashData,
 		}, {
 			algorithm: 'sha1',
+		}).slice(0, 8) : hash({
+			_key: hashData?.key || this.config.key,
+			r: Math.random(),
 		}).slice(0, 8)
 		this.pageCache[hashed] = [template, data]
 		if (~cacheTime) {

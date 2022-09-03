@@ -1,0 +1,37 @@
+<%- include('../_partial/header'); %>
+
+<div class="ui card" style="width: 100%">
+  <div class="content">
+    <div class="ui two buttons">
+      <div class="ui basic green button" onclick="copy()">Copy</div>
+      <div class="ui basic red button" onclick="destory()">Destory</div>
+    </div>
+  </div>
+  <div class="extra content">
+    <pre id="membot-plaintext"><code><%= text %></code></pre>
+  </div>
+</div>
+
+<script>
+  function copy() {
+    const clip = navigator.clipboard;
+    if (!clip) {
+      return alert('您的浏览器不支持 Async Clipboard API!');
+    }
+
+    clip.writeText(document.querySelector('#membot-plaintext>code').innerText);
+  }
+
+  function destory() {
+    alert('非常抱歉，该功能暂不支持');
+  }
+</script>
+
+<style>
+  #membot-plaintext {
+    color: black;
+    overflow-x: scroll;
+  }
+</style>
+
+<%- include('../_partial/footer'); %>

@@ -1,7 +1,8 @@
-import { Context, Session } from 'koishi'
+import { App, Context, Session } from 'koishi'
 import { merge } from 'lodash'
 
 import renderColumn from './components/column'
+import renderPlainText from './components/plaintext'
 
 declare module 'koishi' {
 	interface Context {
@@ -9,21 +10,14 @@ declare module 'koishi' {
 	}
 }
 
-export interface Config {
-}
 
-export type RenderFunction = (data: any, template?: Template) => string
+export interface Config { }
 
-export interface Template {
-	[K: string]: any
-	session?: Session
-
-	Column: RenderFunction,
-}
-
+export type RenderFunction = (data: any, service?: TemplateService) => string
 
 
 export const name = 'template' as const
+// export const using = ['web'] as const
 
 export function apply(ctx: Context, config: Config) {
 	Context.service('template')
@@ -31,21 +25,23 @@ export function apply(ctx: Context, config: Config) {
 }
 
 
-
 export class TemplateService {
-	args: Template
+	Column: RenderFunction = this.bind(renderColumn)
+	PlainText: RenderFunction = this.bind(renderPlainText)
+
+	app: App
 	data: { [K: string]: RenderFunction }
+
+	bind(func: RenderFunction): RenderFunction {
+		return (data: any): string => func(data, this)
+	}
 
 	register(name: string, func: RenderFunction): void {
 		this.data[name] = func
 	}
 
-	render(name: string, data: any, session?: Session): string {
-		if (session) {
-			return this.data[name](data, merge(this.args, { session }))
-		} else {
-			return this.data[name](data, this.args)
-		}
+	render(name: string, data: any): string {
+		return this.data[name](data, this)
 	}
 
 	constructor(
@@ -53,8 +49,6 @@ export class TemplateService {
 		private config: Config,
 	) {
 		this.data = {}
-		this.args = {
-			Column: renderColumn,
-		}
+		this.app = ctx.app
 	}
 }
