@@ -149,6 +149,7 @@ export default async function (ctx: Context) {
 			if (!sentence) { return session.execute('help jjwz.edit') }
 			sentence = unescapeCqCode(sentence)
 			if (meta.article.end()) { return '纳尼，你群尚无在写绝句文章！' }
+			if (sentence.length > meta.lengthLimit) { return '啊咧咧，你这也太长了吧' }
 			if (!meta.article.countBack(session.userId)) {
 				if (!Object.keys(options).includes('force')) { return '我寻思刚也不是你写的你改什么呢' }
 				await session.send('你们可都看见了啊，是' + at(session) + '叫我改的')
