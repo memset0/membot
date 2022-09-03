@@ -1,10 +1,12 @@
 import { Context } from 'koishi'
 import ejs from 'ejs'
 import path from 'path'
+import { URL } from 'url'
 import moment from 'moment'
 import express from 'express'
 import hash from 'object-hash'
 import bodyParser from 'body-parser'
+import proxy from 'express-http-proxy'
 
 declare module 'koishi' {
 	interface Context {
@@ -18,15 +20,16 @@ export interface Config {
 	hostname: string
 	logoUrl: string
 	faviconUrl: string
+	proxyPrefix: Array<string>
 }
 
+
+export const name = 'web' as const
 
 const EjsOptions = {
 	async: true
 } as const
 
-
-export const name = 'web' as const
 
 export function apply(ctx: Context, config: Config) {
 	if (!config.key) {
@@ -34,6 +37,7 @@ export function apply(ctx: Context, config: Config) {
 	}
 	config.port = config.port || 3000
 	config.hostname = config.hostname || `http://localhost:${config.port}`
+	config.proxyPrefix = config.proxyPrefix || []
 
 	const app = express()
 	app.listen(config.port)
@@ -59,6 +63,42 @@ export function apply(ctx: Context, config: Config) {
 		})
 	})
 
+	app.use('/proxy', proxy('http://localhost', {
+		https: true,
+		memoizeHost: false,
+		filter(req, res) {
+			if (!(req.method === 'GET')) { return false }
+			console.log(req.headers.referer)
+			const url = req.url.slice(1)
+			let flag = false
+			for (const prefix of config.proxyPrefix) {
+				if (url.startsWith(prefix)) {
+					flag = true
+					break
+				}
+			}
+			return flag
+		},
+		proxyReqPathResolver(req) {
+			const url = new URL(req.url.slice(1))
+			return url.pathname
+		},
+		proxyReqOptDecorator(proxyReqOpts, originalReq) {
+			const url = new URL(originalReq.url.slice(1))
+			console.log(url)
+			proxyReqOpts.host = url.hostname
+			proxyReqOpts.port = url.port ? +url.port : 80
+			console.log(proxyReqOpts)
+			return proxyReqOpts
+		},
+		skipToNextHandlerFilter: function (proxyRes) {
+			return !([200, 400, 401, 404].includes(proxyRes.statusCode));
+		},
+		userResDecorator(proxyRes, proxyResData, userReq, userRes) {
+			return proxyResData
+		},
+	}))
+
 	Context.service('web')
 	ctx.app.web = new WebService(app, ctx, config)
 }
@@ -70,7 +110,7 @@ export class WebService {
 	config: Config
 	global: any
 
-	pageCache: { [hash: string]: [string, any] }
+	pages: { [hash: string]: [string, any] }
 
 	registerPage(hashData: any, template: string, data: any, cacheTime: number = -1): string {
 		const hashed = hashData ? hash({
@@ -83,11 +123,11 @@ export class WebService {
 			_key: hashData?.key || this.config.key,
 			r: Math.random(),
 		}).slice(0, 8)
-		this.pageCache[hashed] = [template, data]
+		this.pages[hashed] = [template, data]
 		if (~cacheTime) {
 			setTimeout(() => {
-				delete this.pageCache[hashed]
-				this.pageCache[hashed] = null
+				delete this.pages[hashed]
+				this.pages[hashed] = null
 			}, cacheTime)
 		}
 		return `${this.config.hostname}/p/${hashed}`
@@ -104,13 +144,13 @@ export class WebService {
 			config,
 		}
 
-		this.pageCache = {}
+		this.pages = {}
 
 		this.app.get('/p/:hash', (req, res, next) => {
-			const data = this.pageCache[req.params.hash]
+			const data = this.pages[req.params.hash]
 			if (!data) {
 				res.status(404)
-				if (Object.keys(this.pageCache).includes(req.params.hash)) {
+				if (Object.keys(this.pages).includes(req.params.hash)) {
 					return res.render('404', {
 						...this.global,
 						type: 'warning',
