@@ -4,19 +4,53 @@
 
 <div class="ui card" id="index">
   <div class="content">
+    <span class="text-header">
+      <i class="book icon"></i>
+      README.md
+    </span>
+  </div>
+  <div class="extra content">
     <div class="markdown">
       <%- readme %>
     </div>
   </div>
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    for (const node of document.querySelectorAll('.markdown a')) {
+      node.setAttribute('rel', 'noreferrer')
+      node.setAttribute('target', '_blank')
+      if (node.getAttribute('href').startsWith('./')) {
+        node.href = 'https://github.com/memset0/membot/tree/master/' + node.getAttribute('href').slice(2)
+      }
+    }
+  });
+</script>
+
 <style>
   #index {
     width: 100%;
   }
-	#index .content {
-		padding: 2rem;
-	}
+
+  #index .content {
+    padding-left: 1.6rem;
+    padding-right: 1.6rem;
+  }
+
+  #index .extra.content {
+    padding-top: 1.6rem;
+    padding-bottom: 1.6rem;
+  }
+
+  #index .extra.content a {
+    color: #0969da;
+  }
+
+  #index .text-header {
+    line-height: 20px;
+    color: grey;
+  }
 </style>
 
 <%- await include('_partial/footer'); %>
