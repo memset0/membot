@@ -4,10 +4,10 @@
 membot
 </h1>
 
-<img src="https://img.shields.io/badge/build-passing-brightgreen.svg">
-<img src="https://img.shields.io/github/issues/memset0/membot?color=blue">
-<img src="https://img.shields.io/github/languages/code-size/memset0/membot?color=blueviolet">
-<img src="https://img.shields.io/badge/license-AGPL_V3.0-lightgrey.svg">
+![https://img.shields.io/badge/build-passing-brightgreen.svg]
+![https://img.shields.io/github/issues/memset0/membot?color=blue]
+![https://img.shields.io/github/languages/code-size/memset0/membot?color=blueviolet]
+![https://img.shields.io/badge/license-AGPL_V3.0-lightgrey.svg]
 
 Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
