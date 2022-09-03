@@ -4,9 +4,9 @@
 
 Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
-## Usage
+### Usage
 
-### Deploy as a bot
+#### Deploy as a bot
 
 This project is dependent on `ffmpeg` to handle media files, make sure you have it installed.
 
@@ -15,19 +15,19 @@ yarn
 yarn start
 ```
 
-### Use as a koishi plugin
+#### Use as a koishi plugin
 
 In order to make development more convenient, there are various complex calling relationships in its code. So we strongly recommend that if you clone the whole repository first and keep its directory structure unchanged.
 
-For example, if you want to install its RSS plugin, use `ctx.plugin(require(<path-of-membot/src/plugins/rss)` to install it. Note that the RSS plugin depends on the web service, so you also need to install the Web Service plugin the same way.
+For example, if you want to enable its RSS Feed feature, use `ctx.plugin(require(<path-of-membot/src/plugins/rss)` to install it. Note that the RSS plugin depends on the web service, so you also need to install the Web Service plugin the same way.
 
-## Features
+### Features
 
 * [Plugin: RSS Feed](./src/plugins/rss)
 * [Plugin: Message Forward](./src/plugins/forward)
 * ...
 
-## Dependences
+### Dependences
 
 * [koishi - Cross-platform Chatbot Framework Made with Love](https://github.com/koishijs/koishi)
 * [satori - The Universal Messenger Protocol](https://github.com/satorijs/satori)
