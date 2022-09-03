@@ -10,8 +10,8 @@ export interface NoteExtend {
 }
 
 export enum NoteStatus {
-	default,
 	deleted,
+	default,
 	archived,
 }
 
@@ -45,18 +45,29 @@ export class Note {
 
 	async fetchChannel(channelId: string): Promise<Array<NoteMeta>> {
 		assert(channelId in this.data)
-		const result = await this.database.get('note', { channelId: { $eq: channelId } })
+		const result = await this.database.get('note', { channelId })
 		this.logger.info('fetch channel', channelId, result)
 		return result as Array<NoteMeta>
 	}
 
-	async addNote(channelId: string, userId: string, content: string) {
+	async addNote(channelId: string, userId: string, content: string): Promise<NoteMeta> {
 		assert(channelId in this.data)
-		await this.database.create('note', {
+		return await this.database.create('note', {
 			channelId,
 			userId,
 			content,
 		} as NoteMeta)
+	}
+
+	async getNote(id: number): Promise<NoteMeta | null> {
+		return ((await this.database.get('note', { id })) as Array<NoteMeta>)[0] || null
+	}
+
+	async deleteNote(channelId: string, userId: string, id: number, force?: boolean) {
+		const note = await this.getNote(id)
+		assert(channelId in this.data && channelId === note.channelId)
+		assert(force || userId === note.userId)
+		await this.database.set('note', { id }, { status: NoteStatus.deleted })
 	}
 
 	constructor(
