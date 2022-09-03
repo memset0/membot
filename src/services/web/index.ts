@@ -70,6 +70,7 @@ export class WebService {
 		this.pageCache[hashed] = [template, data]
 		if (~cacheTime) {
 			setTimeout(() => {
+				delete this.pageCache[hashed]
 				this.pageCache[hashed] = null
 			}, cacheTime)
 		}
@@ -91,8 +92,22 @@ export class WebService {
 
 		this.app.get('/p/:hash', (req, res, next) => {
 			const data = this.pageCache[req.params.hash]
-			if (!data) { return next() }
-			res.render(data[0], {
+			if (!data) {
+				res.status(404)
+				if (Object.keys(this.pageCache).includes(req.params.hash)) {
+					return res.render('404', {
+						...this.global,
+						type: 'warning',
+						message: `请求的页面已过期，请重新调用指令。`,
+					})
+				} else {
+					return res.render('404', {
+						...this.global,
+						message: `请求的页面不存在！您可能输入了错误的地址，或者页面已过期。`,
+					})
+				}
+			}
+			return res.render(data[0], {
 				...this.global,
 				...data[1],
 			})

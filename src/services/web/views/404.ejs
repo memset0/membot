@@ -1,0 +1,12 @@
+<%
+	title = "Error 404";
+	type = typeof(type) !== "undefined" && type ? type : "error";
+%>
+<%- include('./_partial/header') %>
+
+<div class="ui <%- type %> message" style="width: 100%; padding-top: 20px; padding-bottom: 20px">
+  <h2>404 Not Found</h2>
+	<p><%= message %></p>
+</div>
+
+<%- include('./_partial/footer'); %>
