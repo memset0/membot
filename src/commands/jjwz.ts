@@ -96,6 +96,8 @@ export default async function (ctx: Context) {
 			if (session.content === 'undo end') { return session.execute('jjwz.revert') }
 			if (session.content === 'undo') { return session.execute('jjwz.del') }
 			if (session.content === 'show') { return session.execute('jjwz.show') }
+			if (session.content === 'stat') { return session.execute('jjwz.stat') }
+			if (session.content === 'status') { return session.execute('jjwz.status') }
 		}
 		return next()
 	}, true)
