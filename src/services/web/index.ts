@@ -39,6 +39,15 @@ export function apply(ctx: Context, config: Config) {
 	config.hostname = config.hostname || `http://localhost:${config.port}`
 	config.proxyPrefix = config.proxyPrefix || []
 
+	const globalArgs = {
+		koishi: ctx.app.options,
+		title: 'membot',
+		moment,
+		config,
+	}
+
+	const webService = new WebService(ctx, config)
+
 	const app = express()
 	app.listen(config.port)
 	app.set('views', path.join(__dirname, 'views'))
@@ -58,6 +67,7 @@ export function apply(ctx: Context, config: Config) {
 
 	app.get('/', function (req, res) {
 		res.render('index', {
+			...globalArgs,
 			title: 'membot',
 			message: 'Hello, World!',
 		})
@@ -99,15 +109,35 @@ export function apply(ctx: Context, config: Config) {
 		},
 	}))
 
+	app.get('/:hash', (req, res, next) => {
+		const data = webService.pages[req.params.hash]
+		if (!data) {
+			res.status(404)
+			if (req.params.hash in webService.pages) {
+				return res.render('404', {
+					...globalArgs,
+					type: 'warning',
+					message: `请求的页面已过期，请重新调用指令。`,
+				})
+			} else {
+				return res.render('404', {
+					...globalArgs,
+					message: `请求的页面不存在！您可能输入了错误的地址，或者页面已过期。`,
+				})
+			}
+		}
+		return res.render(data[0], {
+			...globalArgs,
+			...data[1],
+		})
+	})
+
 	Context.service('web')
-	ctx.app.web = new WebService(app, ctx, config)
+	ctx.app.web = webService
 }
 
 
 export class WebService {
-	app: express.Application
-	ctx: Context
-	config: Config
 	global: any
 
 	pages: { [hash: string]: [string, any] }
@@ -130,43 +160,13 @@ export class WebService {
 				this.pages[hashed] = null
 			}, cacheTime)
 		}
-		return `${this.config.hostname}/p/${hashed}`
+		return `${this.config.hostname}/${hashed}`
 	}
 
-	constructor(app: express.Application, ctx: Context, config: Config) {
-		this.app = app
-		this.ctx = ctx
-		this.config = config
-		this.global = {
-			koishi: ctx.app.options,
-			title: 'membot',
-			moment,
-			config,
-		}
-
+	constructor(
+		private ctx: Context,
+		private config: Config
+	) {
 		this.pages = {}
-
-		this.app.get('/p/:hash', (req, res, next) => {
-			const data = this.pages[req.params.hash]
-			if (!data) {
-				res.status(404)
-				if (Object.keys(this.pages).includes(req.params.hash)) {
-					return res.render('404', {
-						...this.global,
-						type: 'warning',
-						message: `请求的页面已过期，请重新调用指令。`,
-					})
-				} else {
-					return res.render('404', {
-						...this.global,
-						message: `请求的页面不存在！您可能输入了错误的地址，或者页面已过期。`,
-					})
-				}
-			}
-			return res.render(data[0], {
-				...this.global,
-				...data[1],
-			})
-		})
 	}
 }
