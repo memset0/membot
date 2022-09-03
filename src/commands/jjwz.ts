@@ -51,7 +51,7 @@ export default async function (ctx: Context) {
 			channel,
 			article: new Article(channel, article.title || '', article.data || [])
 		}
-		logger.info('query', channel, '=>', meta)
+		// logger.info('query', channel, '=>', meta)
 		return meta
 	}
 
