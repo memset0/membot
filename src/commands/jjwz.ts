@@ -275,8 +275,9 @@ export default async function (ctx: Context) {
 				owenowlMode: meta.owenowlMode,
 				historyLength: history.length,
 			}, 'jjwz', {
-				title: `绝句文章`,
+				session,
 				history,
+				title: `绝句文章`,
 				data: meta,
 				channelName: session.channelName,
 				renderUser: (userId: string) => {

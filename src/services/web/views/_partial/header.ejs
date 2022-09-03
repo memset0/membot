@@ -14,6 +14,22 @@
     <div class="ui large borderless fixed menu">
       <div class="ui container">
         <a href="/" class="header item"><%= koishi.nickname %></a>
+        <% if (typeof (session) !== 'undefined') { %>
+          <%
+            var displayAvatar = getChannelAvatar(session.platform, session.channelId)
+            var displayName = typeof (displayName) !== undefined && displayName ? displayName : (session.platform + ':' + (session.subtype === 'private' ? session.userId : session.channelId))
+          %>
+          <div class="item">
+            <% if (displayAvatar) { %>
+              <div style="height: 1em; position: absolute">
+                <img class="ui avatar image" style="position: relative; left: -0.5em; top: -0.5em" src="<%- displayAvatar %>">
+              </div>
+              <span style="margin-left: 2rem"><%= displayName %></span>
+            <% } else { %>
+              <%= displayName %>
+            <% }%>
+          </div>
+        <% } %>
         <!--<a class="active item">Link</a>
         <div class="ui dropdown item" tabindex="0">
           Dropdown

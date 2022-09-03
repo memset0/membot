@@ -10,6 +10,8 @@ import bodyParser from 'body-parser'
 import MarkdownIt from 'markdown-it'
 import proxy from 'express-http-proxy'
 
+import { getChannelAvatar } from '../../utils/avatar'
+
 declare module 'koishi' {
 	interface Context {
 		web: WebService
@@ -46,6 +48,7 @@ export function apply(ctx: Context, config: Config) {
 		title: 'membot',
 		moment,
 		config,
+		getChannelAvatar,
 	}
 
 	const webService = new WebService(ctx, config)
