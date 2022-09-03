@@ -2,6 +2,7 @@ import { Context, Database, Logger } from 'koishi'
 import assert from 'assert'
 
 export interface NoteUser {
+	enabled: boolean
 }
 
 export interface NoteExtend {
@@ -18,6 +19,7 @@ export interface NoteMeta {
 	id?: number
 	status?: NoteStatus
 	userId: string
+	channelId: string
 	content: string
 	extend: NoteExtend
 }
@@ -31,26 +33,27 @@ export class Note {
 	private database: Database
 	data: NoteData
 
-	addUser(userId: string, userdata: NoteUser): void {
-		this.logger.info('add user', userId, userdata)
-		this.data[userId] = userdata
+	addChannel(channelId: string, userdata: NoteUser): void {
+		this.logger.info('add channel', channelId, userdata)
+		this.data[channelId] = userdata
 	}
 
-	deleteUser(userId: string): void {
-		this.logger.info('delete user', userId)
-		delete this.data[userId]
+	deleteChannel(channelId: string): void {
+		this.logger.info('delete channel', channelId)
+		delete this.data[channelId]
 	}
 
-	async fetchUser(userId: string): Promise<Array<NoteMeta>> {
-		assert(userId in this.data)
-		const result = await this.database.get('note', { userId: { $eq: userId } })
-		this.logger.info('fetch user', userId, result)
+	async fetchChannel(channelId: string): Promise<Array<NoteMeta>> {
+		assert(channelId in this.data)
+		const result = await this.database.get('note', { channelId: { $eq: channelId } })
+		this.logger.info('fetch channel', channelId, result)
 		return result as Array<NoteMeta>
 	}
 
-	async addNote(userId: string, content: string) {
-		assert(userId in this.data)
+	async addNote(channelId: string, userId: string, content: string) {
+		assert(channelId in this.data)
 		await this.database.create('note', {
+			channelId,
 			userId,
 			content,
 		} as NoteMeta)
