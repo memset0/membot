@@ -1,5 +1,6 @@
 <%- await include('_partial/header') %>
 
+<link href="/assets/markdown.css" rel="stylesheet" />
 <style>
   .note-container {
     width: 100%;
@@ -30,7 +31,7 @@
       </div>
     {{/if}}
     <div class="content">
-      <div class="description">
+      <div class="description markdown">
         {{@ content }}
       </div>
     </div>
