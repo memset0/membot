@@ -6,6 +6,7 @@ import { URL } from 'url'
 import moment from 'moment'
 import express from 'express'
 import hash from 'object-hash'
+import { merge } from 'lodash'
 import bodyParser from 'body-parser'
 import MarkdownIt from 'markdown-it'
 import proxy from 'express-http-proxy'
@@ -69,7 +70,7 @@ export function apply(ctx: Context, config: Config) {
 
 	app.engine('ejs', async (path, data, callback) => {
 		try {
-			let html = await ejs.renderFile(path, data, EjsOptions)
+			let html = await ejs.renderFile(path, merge(globalArgs, data), EjsOptions)
 			callback(null, html)
 		} catch (error) {
 			callback(error, '')
@@ -78,7 +79,6 @@ export function apply(ctx: Context, config: Config) {
 
 	app.get('/', function (req, res) {
 		res.render('index', {
-			...globalArgs,
 			title: 'membot',
 			readme: readmeHTML,
 		})
@@ -106,10 +106,8 @@ export function apply(ctx: Context, config: Config) {
 		},
 		proxyReqOptDecorator(proxyReqOpts, originalReq) {
 			const url = new URL(originalReq.url.slice(1))
-			console.log(url)
 			proxyReqOpts.host = url.hostname
 			proxyReqOpts.port = url.port ? +url.port : 80
-			console.log(proxyReqOpts)
 			return proxyReqOpts
 		},
 		skipToNextHandlerFilter: function (proxyRes) {
@@ -120,25 +118,22 @@ export function apply(ctx: Context, config: Config) {
 		},
 	}))
 
-	app.get('/:hash', (req, res, next) => {
+	app.get('/:hash', (req, res) => {
 		const data = webService.pages[req.params.hash]
 		if (!data) {
 			res.status(404)
 			if (req.params.hash in webService.pages) {
 				return res.render('404', {
-					...globalArgs,
 					type: 'warning',
 					message: `请求的页面已过期，请重新调用指令。`,
 				})
 			} else {
 				return res.render('404', {
-					...globalArgs,
 					message: `请求的页面不存在！您可能输入了错误的地址，或者页面已过期。`,
 				})
 			}
 		}
 		return res.render(data[0], {
-			...globalArgs,
 			...data[1],
 		})
 	})
