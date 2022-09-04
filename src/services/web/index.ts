@@ -6,7 +6,6 @@ import { URL } from 'url'
 import moment from 'moment'
 import express from 'express'
 import hash from 'object-hash'
-import { merge } from 'lodash'
 import bodyParser from 'body-parser'
 import MarkdownIt from 'markdown-it'
 import proxy from 'express-http-proxy'
@@ -49,7 +48,23 @@ export function apply(ctx: Context, config: Config) {
 		title: 'membot',
 		moment,
 		config,
-		getChannelAvatar,
+		displayId: undefined,
+		displayName: undefined,
+		displayAvatar: undefined,
+	}
+
+	function handleArgs(data: any) {
+		for (const key in globalArgs) {
+			if (!(key in data)) {
+				data[key] = globalArgs[key]
+			}
+		}
+		if (data.session) {
+			data.displayId = data.session.subtype === 'private' ? data.session.userId : data.session.channelId
+			data.displayName = data.displayName || (data.session.subtype === 'private' && data.session.username) || (data.session.platform + ':' + data.displayId)
+			data.displayAvatar = getChannelAvatar(data.session.platform, data.session.channelId)
+		}
+		return data
 	}
 
 	const webService = new WebService(ctx, config)
@@ -70,7 +85,7 @@ export function apply(ctx: Context, config: Config) {
 
 	app.engine('ejs', async (path, data, callback) => {
 		try {
-			let html = await ejs.renderFile(path, merge(globalArgs, data), EjsOptions)
+			let html = await ejs.renderFile(path, handleArgs(data), EjsOptions)
 			callback(null, html)
 		} catch (error) {
 			callback(error, '')

@@ -33,14 +33,7 @@
               <button class="ui button">Submit</button>
             </div>
           </div>-->
-          <% if (typeof (session) !== 'undefined') { %>
-            <%
-              var displayId = session.subtype === 'private' ? session.userId : session.channelId
-              var displayAvatar = getChannelAvatar(session.platform, session.channelId)
-              var displayName = typeof (displayName) !== undefined && displayName
-                ? displayName
-                : (session.subtype === 'private' && session.username) || (session.platform + ':' + displayId)
-            %>
+          <% if (displayName) { %>
             <% if (displayAvatar) { %>
               <div class="ui dropdown item" tabindex="0">
                 <div style="height: 1em; position: absolute">
