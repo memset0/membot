@@ -21,6 +21,7 @@ export interface NoteMeta {
 	userId: string
 	channelId: string
 	content: string
+	time: Date
 	extend: NoteExtend
 }
 
@@ -47,7 +48,7 @@ export class Note {
 		// assert(channelId in this.data)
 		const result = await this.database.get('note', { channelId, status: { $gt: NoteStatus.deleted } })
 		this.logger.info('fetch channel', channelId, result.length)
-		return result as Array<NoteMeta>
+		return result.reverse() as Array<NoteMeta>
 	}
 
 	async addNote(channelId: string, userId: string, content: string, extend?: NoteExtend): Promise<NoteMeta> {
@@ -57,6 +58,7 @@ export class Note {
 			channelId,
 			userId,
 			content,
+			time: new Date(),
 			extend: extend || {},
 		} as NoteMeta)
 	}

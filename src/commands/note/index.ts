@@ -54,6 +54,7 @@ export function apply(ctx: Context) {
 		userId: 'string',
 		channelId: 'string',
 		content: 'string',
+		time: 'timestamp',
 		extend: { type: 'json', initial: {} },
 	}, {
 		autoInc: true,
@@ -136,7 +137,7 @@ export function apply(ctx: Context) {
 					for (const note of notes) { note.content = markdown.render(note.content) }
 					return notes
 				},
-			}, Time.hour)
+			}, Time.day)
 			return segment.quote(session.messageId) +
 				ctx.template.render('note/status', {
 					url,
@@ -151,15 +152,17 @@ export function apply(ctx: Context) {
 			const userId = `${session.platform}:${session.userId}`
 			if (!(channelId in core.data)) { return '未启用笔记本功能' }
 			const recent = pullMessage(`${channelId}:${userId}`)
-			const images = []
+			let images = []
 			for (const message of recent) {
 				for (const seg of message) {
-					if (seg.type === 'image' && seg.data.url) {
-						images.push(seg.data.url)
-					}
+					if (seg.type === 'image' && seg.data.url) { images.push(seg.data.url) }
 				}
 			}
-			core.addNote(channelId, userId, content, { images })
+			if (images.length) {
+				images = await Promise.all(images.map(image => ctx.image.upload(image)))
+			}
+			const note = await core.addNote(channelId, userId, content, { images })
+			return `成功添加笔记 #${note.id}`
 		})
 
 	ctx.command('note.delete <id:number>', '删除笔记', { authority: 2 })

@@ -64,7 +64,6 @@ export class ImageService {
 					.buffer(true)
 					.parse(request.parse.image)
 				image = res.body
-				fs.writeFileSync(path.join(__dirname, '../../../temp.png'), res.body)
 			}
 			const req = this.agent.post(this.config.api.root + '/upload')
 				.attach('file', image, { filename: filename || 'membot.png' })
