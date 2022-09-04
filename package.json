@@ -62,7 +62,7 @@
     "express-http-proxy": "^1.6.3",
     "fluent-ffmpeg": "^2.1.2",
     "html-to-text": "^8.2.1",
-    "koishi": "^4.8.4",
+    "koishi": "^4.8.7",
     "lodash": "^4.17.21",
     "markdown-it": "^13.0.1",
     "md5": "^2.3.0",

@@ -40,11 +40,13 @@ export function generateAboutMessage() {
 	const t = (s: any) => ({ type: 'text', data: { content: s as string } })
 
 	const chain = [
-		t('Hello，这里是敲可爱的 memset0 的机器人！\n'),
+		t('Hello，这里是敲可爱的 mem 的机器人！\n'),
 		t('- 不会使用机器人？输入 /help 查看指令列表\n'),
 		t('- 调用指令时，记得前使用字符 / 或 . 作为前缀~\n'),
 		t('- 反馈问题可以直接 at 机器人，但是如果不友善的话...小心机器人不理你哦！\n'),
-		t(`当前机器人版本：${version.app}，koishi 版本：${version.koishi}。\n`),
+		t('技术文档：https://bot.memset0.cn\n'),
+		t('查看源码：https://github.com/memset0/membot\n'),
+		t(`机器人版本：${version.app}，koishi 版本：${version.koishi}\n`),
 	]
 
 	const message = {
@@ -59,7 +61,7 @@ export function generateAboutMessage() {
 export function apply(ctx: Context) {
 	let message: any = null
 
-	ctx.command('about', '关于这个机器人...')
+	ctx.command('about', '关于机器人')
 		.action(({ session }) => {
 			if (!message) {
 				message = generateAboutMessage()
