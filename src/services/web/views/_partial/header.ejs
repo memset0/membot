@@ -8,38 +8,23 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" rel="stylesheet" />
     <style>
       .ui.container { max-width: 1000px !important; }
+      .phone-show { display: none !important; }
+      .ui.menu .ui.dropdown .dropdown.icon:before { content: '' !important; }
+      .ui.menu .ui.dropdown .disabled.item{ opacity: .88 !important; }
+      @media only screen and (max-width: 767px) {
+        .phone-hide { display: none !important; }
+        .phone-show { display: block !important; }
+      }
     </style>
   </head>
   <body>
     <div class="ui large borderless fixed menu">
       <div class="ui container">
         <a href="/" class="header item"><%= koishi.nickname %></a>
-        <% if (typeof (session) !== 'undefined') { %>
-          <%
-            var displayAvatar = getChannelAvatar(session.platform, session.channelId)
-            var displayName = typeof (displayName) !== undefined && displayName ? displayName : (session.platform + ':' + (session.subtype === 'private' ? session.userId : session.channelId))
-          %>
-          <div class="item">
-            <% if (displayAvatar) { %>
-              <div style="height: 1em; position: absolute">
-                <img class="ui avatar image" style="position: relative; left: -0.5em; top: -0.5em" src="<%- displayAvatar %>">
-              </div>
-              <span style="margin-left: 2rem"><%= displayName %></span>
-            <% } else { %>
-              <%= displayName %>
-            <% }%>
-          </div>
-        <% } %>
-        <!--<a class="active item">Link</a>
-        <div class="ui dropdown item" tabindex="0">
-          Dropdown
-          <i class="dropdown icon"></i>
-          <div class="menu" tabindex="-1">
-            <div class="item">Action</div>
-            <div class="divider"></div>
-            <div class="item">Separated Link</div>
-          </div>
-        </div>-->
+        <a class="item" href="https://github.com/memset0/membot" target="_blank">
+          <i class="github icon"></i>
+          <span class="phone-hide">View Source</span>
+        </a>
         <div class="right menu">
           <!--<div class="item">
             <div class="ui action left icon input">
@@ -48,10 +33,33 @@
               <button class="ui button">Submit</button>
             </div>
           </div>-->
-          <a class="item" href="https://github.com/memset0/membot" target="_blank">
-            <i class="github icon"></i>
-            View Source
-          </a>
+          <% if (typeof (session) !== 'undefined') { %>
+            <%
+              var displayId = session.subtype === 'private' ? session.userId : session.channelId
+              var displayAvatar = getChannelAvatar(session.platform, session.channelId)
+              var displayName = typeof (displayName) !== undefined && displayName
+                ? displayName
+                : (session.subtype === 'private' && session.username) || (session.platform + ':' + displayId)
+            %>
+            <% if (displayAvatar) { %>
+              <div class="ui dropdown item" tabindex="0">
+                <div style="height: 1em; position: absolute">
+                  <img class="ui avatar image" style="position: relative; left: -0.5em; top: -0.5em" src="<%- displayAvatar %>">
+                </div>
+                <span class="phone-hide" style="margin-left: 2.2rem"><%= displayName %></span>
+                <i class="dropdown icon phone-show" color="#fff0"></i>
+                <div class="menu" tabindex="-1">
+                  <div class="item disabled phone-show"><%= displayName %></div>
+                  <div class="item disabled">Platform: <%= session.platform %></div>
+                  <div class="item disabled">ID: <%= displayId %></div>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="item">
+                <span class="phone-hide"><%= displayName %></span>
+              </div>
+            <% }%>
+          <% } %>
         </div>
       </div>
     </div>
