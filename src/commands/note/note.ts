@@ -44,7 +44,6 @@ export class Note {
 	}
 
 	async fetchChannel(channelId: string): Promise<Array<NoteMeta>> {
-		console.log(channelId, this)
 		// assert(channelId in this.data)
 		const result = await this.database.get('note', { channelId, status: { $gt: NoteStatus.deleted } })
 		this.logger.info('fetch channel', channelId, result.length)
