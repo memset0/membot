@@ -33,8 +33,8 @@ const koishi = {
 		'database-mysql': config.mysql,
 		'adapter-onebot': { ...config.bots.onebot[0] },
 		'adapter-kook': { ...config.bots.kook[0] },
-		// 'adapter-telegram': { ...config.bots.telegram[0] },
-		'./src/adapters/telegram': { ...config.bots.telegram[0] },
+		'adapter-telegram': { ...config.bots.telegram[0] },
+		// './src/adapters/telegram': { ...config.bots.telegram[0] },
 
 		help: {
 			options: false,
