@@ -61,13 +61,12 @@ export function apply(ctx: Context, config: Config) {
 		}
 		if (data.session) {
 			data.displayId = data.session.subtype === 'private' ? data.session.userId : data.session.channelId
-			ctx.logger('debug').info('!!!', data.session,await getChannelName(data.session.platform, data.session.channelId, ctx))
 			data.displayName = data.displayName
 				|| (data.session.subtype === 'private' && data.session.username)
 				|| (await getChannelName(data.session.platform, data.session.channelId, ctx))
 				|| (data.session.platform + ':' + data.displayId)
 			data.displayAvatar = data.displayAvatar
-				|| getChannelAvatar(data.session.platform, data.session.channelId)
+				|| (await getChannelAvatar(data.session.platform, data.session.channelId, ctx))
 		}
 		return data
 	}
@@ -109,7 +108,6 @@ export function apply(ctx: Context, config: Config) {
 		memoizeHost: false,
 		filter(req, res) {
 			if (!(req.method === 'GET')) { return false }
-			console.log(req.headers.referer)
 			const url = req.url.slice(1)
 			let flag = false
 			for (const prefix of config.proxyPrefix) {
