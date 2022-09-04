@@ -3,6 +3,8 @@
 /config.yml
 /rss.json
 
+.vite
+
 # Logs
 logs
 *.log

@@ -44,13 +44,15 @@ const koishi = {
 		console: {
 			// open: true,
 		},
-		// chat: {},
 		recall: {},
 		logger: {},
-		// suggest: {},
 		status: {},
 		sandbox: {},
-		// manager: {},
+		dataview: {},
+		...(process.env.NODE_ENV === 'development' ? {} : {
+			chat: {},
+			insight: {},
+		}),
 		// puppeteer: {},
 		// commands: {},   // not works
 	}
@@ -64,7 +66,7 @@ for (const dir of [
 	...scan(path.join(__dirname, './src/services')),
 	...scan(path.join(__dirname, './src/plugins')),
 	...scan(path.join(__dirname, './src/commands')),
-	...scan(path.join(__dirname, './src/scripts')),
+	// ...scan(path.join(__dirname, './src/scripts')),
 ]) {
 	const name = path.basename(dir, path.extname(path.basename(dir)))
 	if (name == '_deprecated') {
