@@ -14,7 +14,7 @@ export async function apply(ctx: Context) {
 		/**
 		 * 风险控制
 		 */
-		if (session.platform === 'onebot' && session.type === 'message' && (session.subtype === 'private' || !session.guildId || !session.channelId)) {
+		if (session.platform === 'onebot' && session.type === 'message' && (session.subtype === 'private' || !session.channelId)) {
 			const user = await ctx.database.getUser(session.platform, session.author.userId)
 			const authority = user?.authority ? user.authority : 1
 			if (authority <= 1) {
@@ -46,18 +46,6 @@ export async function apply(ctx: Context) {
 			}
 			return
 		}
-
-		/** 
-		 * 指令临时禁用
-		 */
-		// if (prefixes.includes(session.content[0])) {
-		// 	const content = session.content.slice(1)
-		// 	if (!(config.master[session.platform] && config.master[session.platform] == session.author.userId)) {
-		// 		if (content.startsWith('recall') || content.startsWith('usage') || content.startsWith('timer')) {
-		// 			return '该指令被暂时禁用。'
-		// 		}
-		// 	}
-		// }
 
 		return next()
 	}, true /* 表示前置中间件 */)

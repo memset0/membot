@@ -43,6 +43,10 @@ const koishi = {
 		sudo: {},
 		recall: {},
 		'rate-limit': {},
+		commands: {
+			recall: { authority: 3 },
+			sudo: { authority: 4 },
+		},
 
 		console: {
 			// open: true,
@@ -58,7 +62,6 @@ const koishi = {
 		}),
 
 		// puppeteer: {},
-		// commands: {},   // not works
 	}
 }
 
