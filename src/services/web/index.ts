@@ -10,7 +10,7 @@ import bodyParser from 'body-parser'
 import MarkdownIt from 'markdown-it'
 import proxy from 'express-http-proxy'
 
-import { getChannelAvatar } from '../../utils/avatar'
+import { getChannelAvatar, getChannelName } from '../../utils/avatar'
 
 declare module 'koishi' {
 	interface Context {
@@ -53,7 +53,7 @@ export function apply(ctx: Context, config: Config) {
 		displayAvatar: undefined,
 	}
 
-	function handleArgs(data: any) {
+	async function handleArgs(data: any) {
 		for (const key in globalArgs) {
 			if (!(key in data)) {
 				data[key] = globalArgs[key]
@@ -61,8 +61,13 @@ export function apply(ctx: Context, config: Config) {
 		}
 		if (data.session) {
 			data.displayId = data.session.subtype === 'private' ? data.session.userId : data.session.channelId
-			data.displayName = data.displayName || (data.session.subtype === 'private' && data.session.username) || (data.session.platform + ':' + data.displayId)
-			data.displayAvatar = getChannelAvatar(data.session.platform, data.session.channelId)
+			ctx.logger('debug').info('!!!', data.session,await getChannelName(data.session.platform, data.session.channelId, ctx))
+			data.displayName = data.displayName
+				|| (data.session.subtype === 'private' && data.session.username)
+				|| (await getChannelName(data.session.platform, data.session.channelId, ctx))
+				|| (data.session.platform + ':' + data.displayId)
+			data.displayAvatar = data.displayAvatar
+				|| getChannelAvatar(data.session.platform, data.session.channelId)
 		}
 		return data
 	}
@@ -85,7 +90,7 @@ export function apply(ctx: Context, config: Config) {
 
 	app.engine('ejs', async (path, data, callback) => {
 		try {
-			let html = await ejs.renderFile(path, handleArgs(data), EjsOptions)
+			let html = await ejs.renderFile(path, await handleArgs(data), EjsOptions)
 			callback(null, html)
 		} catch (error) {
 			callback(error, '')
