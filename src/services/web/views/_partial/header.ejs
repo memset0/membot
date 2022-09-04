@@ -9,7 +9,7 @@
     <style>
       .ui.container { max-width: 1000px !important; }
       .phone-show { display: none !important; }
-      .ui.menu .ui.dropdown .dropdown.icon:before { content: '' !important; }
+      .ui.menu .ui.dropdown .dropdown.icon.phone-show:before { content: '' !important; }
       .ui.menu .ui.dropdown .disabled.item{ opacity: .88 !important; }
       @media only screen and (max-width: 767px) {
         .phone-hide { display: none !important; }
@@ -40,7 +40,7 @@
                   <img class="ui avatar image" style="position: relative; left: -0.5em; top: -0.5em" src="<%- displayAvatar %>">
                 </div>
                 <span class="phone-hide" style="margin-left: 2.2rem"><%= displayName %></span>
-                <i class="dropdown icon phone-show" color="#fff0"></i>
+                <i class="dropdown icon phone-show"></i>
                 <div class="menu" tabindex="-1">
                   <div class="item disabled phone-show"><%= displayName %></div>
                   <div class="item disabled">Platform: <%= session.platform %></div>
@@ -48,8 +48,13 @@
                 </div>
               </div>
             <% } else { %>
-              <div class="item">
-                <span class="phone-hide"><%= displayName %></span>
+              <div class="ui dropdown item" tabindex="0">
+                <span><%= displayName %></span>
+                <i class="dropdown icon"></i>
+                <div class="menu" tabindex="-1">
+                  <div class="item disabled">Platform: <%= session.platform %></div>
+                  <div class="item disabled">ID: <%= displayId %></div>
+                </div>
               </div>
             <% }%>
           <% } %>
