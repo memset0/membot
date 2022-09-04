@@ -47,7 +47,7 @@ export class Note {
 		console.log(channelId, this)
 		// assert(channelId in this.data)
 		const result = await this.database.get('note', { channelId, status: { $gt: NoteStatus.deleted } })
-		this.logger.info('fetch channel', channelId, result)
+		this.logger.info('fetch channel', channelId, result.length)
 		return result as Array<NoteMeta>
 	}
 
