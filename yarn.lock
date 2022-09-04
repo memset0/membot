@@ -239,6 +239,13 @@
   resolved "https://registry.yarnpkg.com/@koishijs/plugin-status/-/plugin-status-6.1.5.tgz#1e8df103eca7508a0db4c8fc1223716b83d9e27a"
   integrity sha512-WRIc0Ri3AR8kOOz6y9KrRGbH9CjofxUAFEtrdNvzjTk4AfORlOjWsll9QtBGkf/UvU+NZM+kApPMYecmW9EpAg==
 
+"@koishijs/plugin-sudo@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@koishijs/plugin-sudo/-/plugin-sudo-1.1.3.tgz#4162e12bb41f71615d4a9ccce695c133fef7f40a"
+  integrity sha512-Q1nvFf2aFyBitDMbhWDL0fLLTwOA4K3WLYJvXsh92DZZdFCBG6EhfQEUdAqHVPT+KNDxdPItJbTuAN5HzMyZJA==
+  dependencies:
+    "@koishijs/helpers" "^1.2.3"
+
 "@koishijs/scripts@^2.0.3":
   version "2.0.4"
   resolved "https://registry.npmmirror.com/@koishijs/scripts/-/scripts-2.0.4.tgz#ba980ded0ead20b1d558490e92bc8a93c2dafe5f"

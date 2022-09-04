@@ -40,11 +40,14 @@ const koishi = {
 			options: false,
 			shortcut: false,
 		},
+		sudo: {},
+		recall: {},
 		'rate-limit': {},
+
 		console: {
 			// open: true,
+			// devMode: true,
 		},
-		recall: {},
 		logger: {},
 		status: {},
 		sandbox: {},
@@ -53,6 +56,7 @@ const koishi = {
 			chat: {},
 			insight: {},
 		}),
+
 		// puppeteer: {},
 		// commands: {},   // not works
 	}
