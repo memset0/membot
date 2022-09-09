@@ -1,9 +1,11 @@
-/logs
 /deploy.bat
 /config.yml
 /rss.json
 
 .vite
+dist
+dist-ssr
+logs
 
 # Logs
 logs

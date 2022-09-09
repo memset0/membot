@@ -124,20 +124,24 @@ export function apply(ctx: Context) {
 			if (!(channelId in core.data)) { return '未启用笔记本功能' }
 			const editable = session.subtype === 'private' || options.forceEdit
 			const notes = await core.fetchChannel(channelId)
-			const url = ctx.web.registerPage({
+			const url = ctx.web.register({
 				platform: session.platform,
 				channelId: session.channelId,
 				editable,
 				ids: notes.map(note => note.id)
-			}, 'note', {
-				editable,
-				session,
-				notes_getter: async function () {
-					const notes = await core.fetchChannel(channelId)
-					for (const note of notes) { note.content = markdown.render(note.content) }
-					return notes
+			}, {
+				layout: 'note',
+				cacheTime: Time.day,
+				data: {
+					editable,
+					session,
+					notes_getter: async function () {
+						const notes = await core.fetchChannel(channelId)
+						for (const note of notes) { note.content = markdown.render(note.content) }
+						return notes
+					},
 				},
-			}, Time.day)
+			})
 			return segment.quote(session.messageId) +
 				ctx.template.render('note/status', {
 					url,

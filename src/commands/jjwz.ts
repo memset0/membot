@@ -267,30 +267,35 @@ export default async function (ctx: Context) {
 				}
 				if (!segment.avatar.length) { delete segment.avatar }
 			}
-			const url = ctx.web.registerPage({
-				platform: session.platform,
-				channelId: session.channelId,
-				lengthLimit: meta.lengthLimit,
-				comboLimit: meta.comboLimit,
-				owenowlMode: meta.owenowlMode,
-				historyLength: history.length,
-			}, 'jjwz', {
-				session,
-				history,
-				title: `绝句文章`,
-				data: meta,
-				channelName: session.channelName,
-				renderUser: (userId: string) => {
-					if (userId in userInfo) {
-						return `<img class='ui avatar image' src='${userInfo[userId].avatar}'> <span>${userInfo[userId].username}</span>`
-					} else {
-						return `<span>${userId}</span>`
-					}
-				},
-			}, Time.hour)
+			// const url = ctx.web.register({
+			// 	platform: session.platform,
+			// 	channelId: session.channelId,
+			// 	lengthLimit: meta.lengthLimit,
+			// 	comboLimit: meta.comboLimit,
+			// 	owenowlMode: meta.owenowlMode,
+			// 	historyLength: history.length,
+			// }, {
+			// 	layout: 'jjwz',
+			// 	cacheTime: Time.hour,
+			// 	data: {
+			// 		session,
+			// 		history,
+			// 		title: `绝句文章`,
+			// 		data: meta,
+			// 		channelName: session.channelName,
+			// 		renderUser: (userId: string) => {
+			// 			if (userId in userInfo) {
+			// 				return `<img class='ui avatar image' src='${userInfo[userId].avatar}'> <span>${userInfo[userId].username}</span>`
+			// 			} else {
+			// 				return `<span>${userId}</span>`
+			// 			}
+			// 		},
+			// 	}
+			// })
 			return [
 				`当前规则：每个人可以连续添加 ${meta.comboLimit} 条绝句，每条绝句的长度限制为 ${meta.lengthLimit}。${meta.owenowlMode ? 'OwenOwl 模式已启用！' : ''}`,
-				`本群已写了 ${history.length} 篇绝句文章，前往 ${url} 查看历史记录（一小时内有效）。`,
+				`本群已写了 ${history.length} 篇绝句文章。`,
+				// `本群已写了 ${history.length} 篇绝句文章，前往 ${url} 查看历史记录（一小时内有效）。`,
 			].join('\n')
 		})
 }

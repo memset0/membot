@@ -7,6 +7,7 @@
         "commands/*"
       ],
     },
+    "jsx": "preserve",
     "strict": false,
     "strictNullChecks": false,
     "forceConsistentCasingInFileNames": true,

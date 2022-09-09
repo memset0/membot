@@ -1,6 +1,6 @@
 import { Time, Session, segment } from 'koishi'
 import { TemplateService } from '../index'
-import { WebService } from '../../web/index'
+import { WebService } from '../../web/app'
 
 declare module 'koishi' {
 	interface Context {
@@ -17,19 +17,21 @@ export type PlainTextData = string | {
 export default function PlainText(data: PlainTextData, { app }: TemplateService): string {
 	if (typeof data === 'string') { data = { text: data } }
 
-	if (data.text.length > 2000) {
-		const url = app.web.registerPage(null, 'components/plaintext', data, Time.minute * 5)
+	if (data.text.length > 20) {
+		const url = app.web.register(null, {
+			layout: 'plaintext',
+			cacheTime: Time.minute * 5,
+			data: {
+				text: data.text,
+			},
+		})
 		return `内容过长，请访问：${url} （五分钟内有效）`
 	}
 
 	const title = (data.title ? (data.title + '\n') : '')
 
 	if (data.session?.platform === 'telegram') {
-		return segment('html') +
-			title +
-			'<pre><code>' +
-			data.text +
-			'</code></pre>'
+		return segment('html') + title + '<pre><code>' + data.text + '</code></pre>'
 	}
 
 	return title + data.text
