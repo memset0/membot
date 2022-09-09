@@ -19,7 +19,7 @@ export function pageError(code: number, message?: string): PageData {
 }
 
 export default async function fetch(): Promise<PageData> {
-	let apiHost = window.location.protocol + window.location.host
+	let apiHost = window.location.protocol + '//' + window.location.host
 	if (config.devHost && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
 		apiHost = config.devHost
 	}
