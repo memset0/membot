@@ -15,9 +15,9 @@ Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
 #### Deploy as a bot
 
-It means you will start the bot with all features enabled. However, this will probably cost you a bit of time on the config file. Due to the limitation of my energy, I would not provide template configuration files in the near future, you can refer to the `Config` interfaces in the code by yourself.
+It means you will start the bot with all features enabled. However, this will probably cost you a bit of time on the config file. Due to the limitation of my energy, template configuration files would not be provided in the near future, you can refer to the `Config` interfaces in the code by yourself.
 
-Notice our project is dependent on `ffmpeg` to handle media files, make sure you have it installed before launching.
+Notice that our image operatoring service is dependent on ffmpeg to handle, make sure you have it installed before launching.
 
 ```shell
 yarn
@@ -26,9 +26,9 @@ yarn start
 
 #### Use as a koishi plugin
 
-In order to make my bot's development more light-weighted and convenient, there are various complex calling relationships in code. Therefore, we strongly recommend you that you should clone the whole repository and keep its directory structure unchanged.
+To make my development process more convenient, there are various complex calling relationships in the code. Therefore, we strongly recommend you to clone the whole repository and to keep its directory structure unchanged.
 
-For example, if you just want to enable its RSS Feed feature, use `ctx.plugin` to install it. Noticed that the RSS plugin depends on the Web Service, it's also needed to inject the Web Service plugin before the RSS plugin. Your code would be like:
+For example, if you just want to enable its RSS Feed feature, use `ctx.plugin`. But noticed that the RSS plugin depends on the Web Service, it's also needed to inject the Web Service before the RSS one. Then your code would be like:
 
 ```typescript
 ctx.plugin(require('<path>/membot/src/services/web'));
