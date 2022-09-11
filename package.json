@@ -1,6 +1,6 @@
 {
   "name": "membot",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "main": "koishi.config.js",
   "repository": "https://github.com/memset0/membot.git",
   "author": "memset0 <memset0@outlook.com>",
