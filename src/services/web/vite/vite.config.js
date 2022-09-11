@@ -37,6 +37,7 @@ export default defineConfig({
       resolvers: [
         ArcoResolver({
           sideEffect: true,
+          resolveIcons: true,
         }),
       ],
     })

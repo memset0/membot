@@ -21,7 +21,7 @@ async function update() {
       <Header />
     </a-layout-header>
     <a-layout-content>
-      <div class="main container">
+      <div class="container main-container">
         <PageHome v-if="layout === 'home'" />
         <PageError v-else-if="layout === 'error'" />
         <PagePlainText v-else-if="layout === 'plaintext'" />
@@ -35,5 +35,7 @@ async function update() {
 </template>
 
 <style scoped>
-
+.main-container {
+  margin-top: 20px;
+}
 </style>
