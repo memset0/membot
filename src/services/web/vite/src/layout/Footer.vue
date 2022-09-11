@@ -1,13 +1,24 @@
 <script setup lang="ts">
+import ExternalLink from '../components/ExternalLink.vue';
 const { logoUrl } = useSiteData()
 </script>
 
 <template>
 	<div class="footer">
 		<div class="container footer-container">
-			<Avatar :src="logoUrl"/>
-			<p>Yet Another Open Source &amp; Cross-platform Chatbot</p>
-			<p>Powered by koishi&nbsp;&nbsp;·&nbsp;&nbsp;Code by memset0</p>
+			<Avatar :src="logoUrl" />
+			<p>
+				Yet Another Open Source
+				&amp;
+				Cross-platform Chatbot
+			</p>
+			<p>
+				Powered by
+				<ExternalLink href="https://github.com/koishijs/koishi" class="footer-link">koishi</ExternalLink>
+				&nbsp;·&nbsp;
+				Code by
+				<ExternalLink href="https://github.com/memset0" class="footer-link">memset0</ExternalLink>
+			</p>
 		</div>
 	</div>
 </template>
@@ -23,4 +34,6 @@ const { logoUrl } = useSiteData()
 	padding: 20px;
 	color: rgb(var(--gray-6));
 }
+
+.footer-link {}
 </style>

@@ -23,6 +23,7 @@ declare module '@vue/runtime-core' {
     ASubMenu: typeof import('@arco-design/web-vue')['SubMenu']
     ASwitch: typeof import('@arco-design/web-vue')['Switch']
     Avatar: typeof import('./src/components/Avatar.vue')['default']
+    ExternalLink: typeof import('./src/components/ExternalLink.vue')['default']
     Footer: typeof import('./src/layout/Footer.vue')['default']
     Header: typeof import('./src/layout/Header.vue')['default']
     IconFile: typeof import('@arco-design/web-vue/es/icon')['IconFile']
