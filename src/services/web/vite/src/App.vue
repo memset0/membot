@@ -36,6 +36,6 @@ async function update() {
 
 <style scoped>
 .main-container {
-  margin-top: 20px;
+  margin-top: 80px;
 }
 </style>

@@ -6,9 +6,18 @@ const { readme } = usePageData().data
 <template>
 	<a-card>
 		<template #title>
-			<icon-file />
-			README.md
+			<div class="readme-header">
+				README.md
+			</div>
 		</template>
 		<Markdown :html="readme" />
 	</a-card>
 </template>
+
+<style scoped>
+.readme-header {
+	color: rgb(var(--gray-5));
+	font-size: 13px;
+	font-weight: bold;
+}
+</style>
