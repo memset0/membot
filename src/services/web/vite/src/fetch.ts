@@ -24,7 +24,7 @@ export default async function fetch(): Promise<PageData> {
 		apiHost = config.devHost
 	}
 
-	let id: string
+	let id: string | null = null
 	if (window.location.search) {
 		for (const args of window.location.search.substring(1).split('&')) {
 			const pair = args.split('=', 2)

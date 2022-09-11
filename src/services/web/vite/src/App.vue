@@ -1,56 +1,37 @@
-<script lang="ts">
-import { ref } from 'vue'
-import fetch, { PageData } from './fetch'
+<script setup lang="ts">
+import fetch from './fetch'
 
-import PageHome from './pages/Home.vue'
-import PageError from './pages/Error.vue'
-import PagePlainText from './pages/PlainText.vue'
+let layout = ref('loading')
+update()
 
-import Header from './layout/Header.vue'
-
-export default {
-  components: {
-    PageHome,
-    PageError,
-    PagePlainText,
-    Header,
-  },
-  data() {
-    return {
-      layout: ref('loading'),
-      data: {},
-    }
-  },
-  methods: {
-    async update() {
-      const res = await fetch()
-      console.log('[receive]', res)
-      for (const key in res) {
-        this[key] = res[key]
-      }
-    }
-  },
-  async mounted() {
-    await this.update()
+async function update() {
+  const newPageData = await fetch()
+  const pageData = usePageData()
+  console.log('[receive]', pageData, newPageData)
+  for (const key in newPageData) {
+    pageData[key] = newPageData[key]
   }
+  if (newPageData.layout) { layout.value = newPageData.layout }
 }
 </script>
 
 <template>
-  <n-loading-bar-provider>
-    <n-space vertical size="large">
-      <n-layout position="absolute">
-        <Header />
-        <n-layout content-style="padding: 24px;">
-          <div class="main container">
-            <PageHome v-if="layout === 'home'" />
-            <PageError v-if="layout === 'error'" />
-            <PagePlainText v-if="layout === 'plaintext'" />
-          </div>
-        </n-layout>
-      </n-layout>
-    </n-space>
-  </n-loading-bar-provider>
+  <a-layout style="height: 400px;">
+    <a-layout-header>
+      <Header />
+    </a-layout-header>
+    <a-layout-content>
+      <div class="main container">
+        <PageHome v-if="layout === 'home'" />
+        <PageError v-else-if="layout === 'error'" />
+        <PagePlainText v-else-if="layout === 'plaintext'" />
+        <div v-else>No Layout Found: {{ layout }}</div>
+      </div>
+    </a-layout-content>
+    <a-layout-footer>
+      <Footer />
+    </a-layout-footer>
+  </a-layout>
 </template>
 
 <style scoped>

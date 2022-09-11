@@ -7,13 +7,15 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    ALayout: typeof import('@arco-design/web-vue')['Layout']
+    ALayoutContent: typeof import('@arco-design/web-vue')['LayoutContent']
+    ALayoutFooter: typeof import('@arco-design/web-vue')['LayoutFooter']
+    ALayoutHeader: typeof import('@arco-design/web-vue')['LayoutHeader']
+    Footer: typeof import('./src/layout/Footer.vue')['default']
     Header: typeof import('./src/layout/Header.vue')['default']
     Markdown: typeof import('./src/components/Markdown.vue')['default']
-    NAlert: typeof import('naive-ui')['NAlert']
-    NCard: typeof import('naive-ui')['NCard']
-    NLayout: typeof import('naive-ui')['NLayout']
-    NLayoutHeader: typeof import('naive-ui')['NLayoutHeader']
-    NLoadingBarProvider: typeof import('naive-ui')['NLoadingBarProvider']
-    NSpace: typeof import('naive-ui')['NSpace']
+    PageError: typeof import('./src/layout/PageError.vue')['default']
+    PageHome: typeof import('./src/layout/PageHome.vue')['default']
+    PagePlainText: typeof import('./src/layout/PagePlainText.vue')['default']
   }
 }

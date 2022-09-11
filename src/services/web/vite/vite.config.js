@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
+import { ArcoResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,6 +12,7 @@ export default defineConfig({
     AutoImport({
       imports: [
         'vue',
+        'pinia',
         {
           'naive-ui': [
             'useDialog',
@@ -21,13 +22,23 @@ export default defineConfig({
           ],
         },
       ],
+      dirs: [
+        './src/data',
+      ],
+      resolvers: [
+        ArcoResolver()
+      ],
     }),
     Components({
       dirs: [
         path.join(__dirname, 'src/layout'),
         path.join(__dirname, 'src/components'),
       ],
-      resolvers: [NaiveUiResolver()],
+      resolvers: [
+        ArcoResolver({
+          sideEffect: true,
+        }),
+      ],
     })
   ]
 })

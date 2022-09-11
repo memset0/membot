@@ -2,17 +2,15 @@
 </script>
 
 <template>
-	<n-layout-header bordered>
-		<div class="header container">
-			<div class="header-item">
-				membot
-			</div>
+	<div class="header container">
+		<div class="header-item">
+			membot
 		</div>
-	</n-layout-header>
+	</div>
 </template>
 
 <style scoped>
 .header {
-	padding: 12px;
+	padding: 16px;
 }
 </style>
