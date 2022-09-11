@@ -51,12 +51,12 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll) })
 	box-shadow: 0 2px 1px -1px rgb(0 0 0 / 12%),
 		0 1px 1px 0 rgb(0 0 0 / 10%),
 		0 1px 3px 0 rgb(0 0 0 / 08%);
-	transition: box-shadow .15s;
+	transition: box-shadow .2s;
 
 	&.header-scrolled {
-		box-shadow: 0 3px 2px -2px rgb(0 0 0 / 12%),
-			0 2px 2px 0 rgb(0 0 0 / 10%),
-			0 2px 4px 0 rgb(0 0 0 / 08%);
+		box-shadow: 0 4px 2px -2px rgb(0 0 0 / 09%),
+			0 3px 3px 0 rgb(0 0 0 / 06%),
+			0 3px 6px 0 rgb(0 0 0 / 04%);
 	}
 }
 </style>
