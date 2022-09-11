@@ -19,9 +19,11 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll) })
 		<div class="container header-container">
 			<div class="header-menu">
 				<a-menu :selectedKeys="['home']" mode='horizontal'>
-					<a-menu-item key="home">
-						<a-link href="/">membot</a-link>
-					</a-menu-item>
+					<a href="/">
+						<a-menu-item key="home">
+							membot
+						</a-menu-item>
+					</a>
 				</a-menu>
 			</div>
 		</div>
@@ -38,8 +40,8 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll) })
 	z-index: 100;
 
 	.header-menu {
-		margin-left: -30px;
-		margin-right: -30px;
+		margin-left: -16px;
+		margin-right: -16px;
 	}
 }
 
