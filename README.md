@@ -11,9 +11,9 @@ membot
 
 Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
-### Usage
+### Deploy
 
-#### Deploy as a bot
+#### As an independent bot
 
 It means you will start the bot with all features enabled. However, this will probably cost you a bit of time on the config file. Due to the limitation of my energy, template configuration files would not be provided in the near future, you can refer to the `Config` interfaces in the code by yourself.
 
@@ -24,7 +24,7 @@ yarn
 yarn start
 ```
 
-#### Use as a koishi plugin
+#### As a koishi plugin
 
 To make my development process more convenient, there are various complex calling relationships in the code. Therefore, we strongly recommend you to clone the whole repository and to keep its directory structure unchanged.
 
