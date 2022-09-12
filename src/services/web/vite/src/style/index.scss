@@ -10,27 +10,3 @@ body,
   height: 100%;
   background: rgb(250, 250, 252);
 }
-
-.container {
-  width: 92%;
-  max-width: $container-max-width;
-  margin-left: auto;
-  margin-right: auto;
-  & > .arco-card {
-    border-radius: 10px;
-    & > .arco-card-body {
-      padding: 24px;
-    }
-  }
-  @media (max-width: 768px) {
-    width: 100%;
-    & > .arco-card {
-      border-radius: 0px;
-      border-left: none;
-      border-right: none;
-      & > .arco-card-body {
-        padding: 16px;
-      }
-    }
-  }
-}

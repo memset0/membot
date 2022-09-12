@@ -26,7 +26,7 @@ const { logoUrl } = useSiteData()
 <style scoped>
 .footer {
 	/* background: rgb(229, 230, 235); */
-	margin-top: 60px;
+	margin-top: 12px;
 }
 
 .footer-container {

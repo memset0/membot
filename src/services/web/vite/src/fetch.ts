@@ -2,6 +2,7 @@ import axios from 'axios'
 import config from './config'
 
 export interface PageData {
+	id: string
 	layout: string
 	data: any
 }
@@ -10,6 +11,7 @@ export function pageError(code: number, message?: string): PageData {
 	if (code === 404 && !message) { message = 'Not Found' }
 
 	return {
+		id: '',
 		layout: 'error',
 		data: {
 			code,
@@ -55,5 +57,8 @@ export default async function fetch(): Promise<PageData> {
 		return pageError(404)
 	}
 
-	return res.data as unknown as PageData
+	return {
+		id,
+		...res.data,
+	} as unknown as PageData
 }
