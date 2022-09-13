@@ -49,6 +49,7 @@ ctx.plugin(require('<path>/membot/src/plugins/rss'));
 * [go-cqhttp - cqhttp 的 golang 实现，轻量、原生跨平台](https://github.com/Mrs4s/go-cqhttp)
 * [Telegram Bot API](https://core.telegram.org/bots/api)
 * [KOOK 开发者平台 文档](https://developer.kookapp.cn/doc/intro)
+* [OneBot 12 标准草案](https://12.onebot.dev/)
 * [Vue.js - The Progressive JavaScript Framework](https://vuejs.org/)
 * [Pinia - The Vue Store that you will enjoy using](https://pinia.vuejs.org/)
 * [Arco Design Vue - 字节跳动出品的企业级设计系统](https://arco.design/vue)
@@ -58,7 +59,6 @@ ctx.plugin(require('<path>/membot/src/plugins/rss'));
 * [RSS Hub - 🍰 万物皆可 RSS](https://docs.rsshub.app/)
 * [小嘿作文生成器 - 可根据输入的主题谓语、主题宾语，自动随机生成海量作文。适用于中学考试议论文的学习与研究](https://zuowen.jackjyq.com/)
 * [DoMCer API](http://api.domcer.com/)
-* [~~art-template - 高性能 JavaScript 模板引擎 (deprecated)~~](https://aui.github.io/art-template/)
-* [~~王斌给您对对联 -_-! (deprecated)~~](https://ai.binwang.me/couplet/)
-* [~~文学网 - 文言文字典 (deprecated)~~](https://wyw.hwxnet.com/)
-<!-- * [OneBot 12 标准草案](https://12.onebot.dev/) -->
+* [~~(Deprecated) art-template - 高性能 JavaScript 模板引擎~~](https://aui.github.io/art-template/)
+* [~~(Deprecated) 王斌给您对对联 -_-!~~](https://ai.binwang.me/couplet/)
+* [~~(Deprecated) 文学网 - 文言文字典~~](https://wyw.hwxnet.com/)
