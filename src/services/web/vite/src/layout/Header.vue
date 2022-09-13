@@ -21,22 +21,7 @@ const id = computed(() => usePageData().id)
 	<div class="header" :class="onTop ? '' : 'header-scrolled'">
 		<div class="container header-container">
 			<div class="header-content">
-				<a-page-header :style="{ background: 'var(--color-bg-2)' }" :subtitle="pageTitle">
-					<!-- <template #breadcrumb>
-						<a-breadcrumb>
-							<a-breadcrumb-item>Home</a-breadcrumb-item>
-							<a-breadcrumb-item>Channel</a-breadcrumb-item>
-							<a-breadcrumb-item>News</a-breadcrumb-item>
-						</a-breadcrumb>
-					</template> -->
-					<template #back-icon>
-						<div v-if="id === 'home' || !id">
-							<icon-home />
-						</div>
-						<div v-else>
-							<icon-left />
-						</div>
-					</template>
+				<a-page-header :style="{ background: 'var(--color-bg-2)' }" :subtitle="pageTitle" :show-back="false">
 					<template #title>
 						<a href="/">membot</a>
 					</template>
@@ -67,7 +52,7 @@ const id = computed(() => usePageData().id)
 		}
 	}
 
-	.arco-page-header-title > a{
+	.arco-page-header-title>a {
 		color: inherit;
 		text-decoration: none;
 	}
