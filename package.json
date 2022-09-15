@@ -8,6 +8,7 @@
   "scripts": {
     "start": "yarn run vite:build && cross-env NODE_ENV=production yarn koishi start -r ts-node/register -r yml-register",
     "dev": "cross-env NODE_ENV=development yarn koishi start -r ts-node/register -r yml-register --watch",
+    "deploy": "rm -f src/services/web/vite/components.d.ts && git pull && yarn && yarn start",
     "web:start": "cross-env NODE_ENV=development ts-node -r yml-register src/services/web/dev",
     "web:dev": "cross-env NODE_ENV=development concurrently \"yarn run vite:dev\" \"ts-node -r yml-register src/services/web/dev\"",
     "vite:dev": "cross-env NODE_ENV=development vite src/services/web/vite",
