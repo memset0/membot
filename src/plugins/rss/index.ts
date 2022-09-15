@@ -48,7 +48,7 @@ export function apply(ctx: Context, config: Config) {
 
 	ctx.command('rss', 'RSS 订阅')
 
-	ctx.command('rss.sub <url:text>', '订阅 RSS', { authority: 3 })
+	ctx.command('rss.sub <url:string>', '订阅 RSS', { authority: 3 })
 		.option('title', '-t 设置标题')
 		.option('refresh', '-r 设置刷新时间')
 		.action(async ({ session, options }, url: string) => {
