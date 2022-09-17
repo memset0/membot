@@ -14,7 +14,9 @@ onMounted(() => { window.addEventListener('scroll', onScroll) })
 onUnmounted(() => { window.removeEventListener('scroll', onScroll) })
 
 const pageTitle = ref('')
-const id = computed(() => usePageData().id)
+// const id = computed(() => usePageData().id)
+const user = computed(() => usePageData().user)
+const channel = computed(() => usePageData().channel)
 </script>
 
 <template>
@@ -27,9 +29,7 @@ const id = computed(() => usePageData().id)
 					</template>
 					<template #extra>
 						<div class="header-extra">
-							<!-- <a-avatar class="header-avatar" :style="{ backgroundColor: '#3370ff' }" :size="24">
-								<IconUser />
-							</a-avatar> -->
+							<HeaderAvatar :user="user" :channel="channel" />
 							<ExternalLink href="https://github.com/memset0/membot">
 								<div class="header-avatar header-avatar-icon">
 									<icon-github :size="24" />

@@ -1,11 +1,8 @@
 import axios from 'axios'
 import config from './config'
 
-export interface PageData {
-	id: string
-	layout: string
-	data: any
-}
+import { UserMeta, ChannelMeta, PageData } from './types'
+
 
 export function pageError(code: number, message?: string): PageData {
 	if (code === 404 && !message) { message = 'Not Found' }
