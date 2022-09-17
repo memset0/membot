@@ -1,3 +1,5 @@
+// This util is deprecated, use `usermeta.ts` instead.
+
 import { Bot, Context } from 'koishi'
 import { TelegramBot } from '@satorijs/adapter-telegram'
 

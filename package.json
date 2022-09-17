@@ -91,6 +91,7 @@
     "koa-static": "^5.0.0",
     "koishi": "^4.8.7",
     "lodash": "^4.17.21",
+    "lru-cache": "^7.14.0",
     "markdown-it": "^13.0.1",
     "md5": "^2.3.0",
     "moment": "^2.29.4",

@@ -1,4 +1,4 @@
-import { Time, Context, segment } from 'koishi'
+import { Context, Time, segment } from 'koishi'
 import YAML from 'yaml'
 import { cloneDeep } from 'lodash'
 import MarkdownIt from 'markdown-it'
@@ -125,20 +125,27 @@ export function apply(ctx: Context) {
 			const editable = session.subtype === 'private' || options.forceEdit
 			const notes = await core.fetchChannel(channelId)
 			const url = ctx.web.register({
-				platform: session.platform,
-				channelId: session.channelId,
-				editable,
-				ids: notes.map(note => note.id)
-			}, {
-				layout: 'note',
+				session,
 				cacheTime: Time.day,
-				data: {
+				hash: {
+					platform: session.platform,
+					channelId: session.channelId,
 					editable,
-					session,
-					notes_getter: async function () {
-						const notes = await core.fetchChannel(channelId)
-						for (const note of notes) { note.content = markdown.render(note.content) }
-						return notes
+					// ids: notes.map(note => note.id)
+				},
+				data: {
+					layout: 'note',
+					cacheTime: Time.day,
+					data: {
+						editable,
+					},
+					methods: {
+						notes: async function () {
+							const fetcher = core.fetchChannel.bind(core)
+							const notes = await fetcher(channelId)
+							for (const note of notes) { note.content = markdown.render(note.content) }
+							return notes
+						},
 					},
 				},
 			})

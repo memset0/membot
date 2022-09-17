@@ -9,4 +9,3 @@ const app = new Koa()
 const config = koishiConfig.plugins['./src/services/web']
 
 const web = new WebService(ctx, app, config)
-web.register('test', { layout: 'basic', data: 'hello' })

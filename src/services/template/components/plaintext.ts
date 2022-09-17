@@ -17,12 +17,14 @@ export type PlainTextData = string | {
 export default function PlainText(data: PlainTextData, { app }: TemplateService): string {
 	if (typeof data === 'string') { data = { text: data } }
 
-	if (data.text.length > 20) {
-		const url = app.web.register(null, {
-			layout: 'plaintext',
+	if (data.text.length > 2000) {
+		const url = app.web.register({
 			cacheTime: Time.minute * 5,
 			data: {
-				text: data.text,
+				layout: 'plaintext',
+				data: {
+					text: data.text,
+				},
 			},
 		})
 		return `内容过长，请访问：${url} （五分钟内有效）`

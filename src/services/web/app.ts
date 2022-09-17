@@ -1,86 +1,132 @@
-import { Logger, Context } from 'koishi'
+import { Logger, Context, Session, Time } from 'koishi'
 import fs from 'fs'
 import Koa from 'koa'
 import path from 'path'
-import { URL } from 'url'
+import assert from 'assert'
 import cors from '@koa/cors'
 import hash from 'object-hash'
 import sendFile from 'koa-send'
 import Router from '@koa/router'
+import { cloneDeep } from 'lodash'
 import staticHost from 'koa-static'
 import MarkdownIt from 'markdown-it'
 import bodyParser from 'koa-bodyparser'
 
 import { Config } from './index'
+import { UserMeta, ChannelMeta, getUser, getChannel } from '../../utils/usermeta'
 
 const viteDist = path.join(__dirname, 'vite/dist')
 
-export interface PageData {
-	layout: string
-	cacheTime?: number
-	data: any
+type PageMethodCallback = (() => any) | {
+	arguments: Array<string>
 }
 
+export interface PageData {
+	layout: string
+	data: any
+	user?: UserMeta | Promise<UserMeta>
+	channel?: ChannelMeta | Promise<ChannelMeta>
+	cacheTime?: number
+	methods?: {
+		[k: string]: PageMethodCallback | boolean
+	}
+}
+
+export interface PageArgument {
+	route?: string
+	hash?: any
+	data: PageData
+	session?: Session
+	cacheTime?: number
+}
+
+export class WebAuthorizeError extends Error { }
+
 export class WebService {
+	private defaultCacheTime = Time.day
+
 	private router: Router
 	private logger: Logger
 	private markdown: MarkdownIt
 
 	private pages: { [hash: string]: PageData }
 
-	register(hashData: any, data: PageData): string {
+	private async parseUser(session: Session): Promise<UserMeta> {
+		assert(session.subtype === 'private')
+		return getUser(session.platform, session.userId, this.ctx)
+	}
+
+	private async parseChannel(session: Session): Promise<ChannelMeta> {
+		return getChannel(session.platform, session.channelId, this.ctx)
+	}
+
+	private async handlePageData(data: PageData): Promise<PageData> {
+		data.user = data.user && (await data.user)
+		data.channel = data.channel && (await data.channel)
+		return data
+	}
+
+	async authorize(route: string, session: Session) {
+		if (!route || !(route in this.pages)) {
+			throw new WebAuthorizeError('对应路由不存在')
+		}
+		if (session.subtype !== 'private') {
+			throw new WebAuthorizeError('只支持在私有回话中授权')
+		}
+		const source: PageData = this.pages[route]
+		if (source.user) {
+			throw new WebAuthorizeError('对应链接已被授权')
+		}
+		const target = cloneDeep(source)
+		target.user = await this.parseUser(session)
+		return target
+	}
+
+	register(argv: PageArgument): string {
+		const { data } = argv
+
 		let route: string
-		if (!hashData) {
-			route = hash({
-				_key: hashData?.key || this.config.key,
-				r: Math.random(),
-			}).slice(0, 8)
-		} else if (typeof hashData === 'string') {
-			route = hashData
+		if (argv.route) {
+			route = argv.route
+		} else if (!argv.hash) {
+			route = hash({ r: Math.random() }, { algorithm: 'sha1' }).slice(0, 8)
 		} else {
-			route = hash({
-				_key: hashData?.key || this.config.key,
-				...hashData,
-			}, {
-				algorithm: 'sha1',
-			}).slice(0, 8)
+			route = hash({ _key: argv.hash?.key || this.config.key, hash: argv.hash }, { algorithm: 'sha1' }).slice(0, 8)
+		}
+
+		if (argv.session) {
+			if (argv.session.subtype === 'private') {
+				data.user = data.user || this.parseUser(argv.session)
+			} else {
+				data.channel = data.channel || this.parseChannel(argv.session)
+			}
 		}
 
 		this.pages[route] = data
 
-		if (data?.cacheTime) {
-			setTimeout(() => {
-				delete this.pages[route]
-				this.pages[route] = null
-			}, data.cacheTime)
-		}
+		setTimeout(() => {
+			delete this.pages[route]
+			this.pages[route] = null
+		}, argv.cacheTime || this.defaultCacheTime)
 
 		return `${this.config.hostname}/${route}`
 	}
 
 	registerKoaRouter(): void {
-		this.router.get('/api/get/:key', (ctx, next) => {
+		this.router.get('/api/get/:key', async (ctx, next) => {
 			const key = ctx.params.key as string
 			if (key in this.pages) {
 				let data = this.pages[key]
-				let goNext = false
-				if (data instanceof Function) {
-					data = data(ctx, () => { goNext = true })
-				}
-				if (!goNext) {
-					ctx.body = data
-				} else {
-					next()
-				}
+				ctx.body = await this.handlePageData(data)
 			} else {
-				next()
+				await next()
 			}
 		})
 
 		this.router.get('/:key', async (ctx, next) => {
 			const key = ctx.params.key as string
 			if (key in this.pages) {
-				ctx.url = '/'   // SPA Fallback, rewrite to index
+				ctx.url = '/'   // The SPA Fallback, should rewrite to index page
 				await next()
 			} else {
 				await next()
@@ -130,14 +176,22 @@ export class WebService {
 		this.app.listen(this.config.port)
 	}
 
-	registerHomePage() {
+	registerGlobalPages() {
+		this.register({
+			route: 'test',
+			data: { layout: 'basic', data: 'hello' },
+		})
+
 		const readmeMarkdown = fs.readFileSync(path.join(__dirname, '../../../README.md')).toString()
 		const readmeHTML = this.markdown.render(readmeMarkdown)
-		this.register('home', {
-			layout: 'home',
+		this.register({
+			route: 'home',
 			data: {
-				readme: readmeHTML,
-			}
+				layout: 'home',
+				data: {
+					readme: readmeHTML,
+				},
+			},
 		})
 	}
 
@@ -155,6 +209,6 @@ export class WebService {
 
 		this.registerKoaRouter()
 		this.registerKoaApp()
-		this.registerHomePage()
+		this.registerGlobalPages()
 	}
 }
