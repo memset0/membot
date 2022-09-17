@@ -32,6 +32,7 @@ export function parseUserId(id: string) {
 
 export async function apply(ctx: Context, config: Config) {
 	const db = ctx.database
+	const logger = ctx.logger('auth')
 
 	ctx.model.extend('user', {
 		authority: { type: 'integer', initial: 1 },
@@ -75,7 +76,8 @@ export async function apply(ctx: Context, config: Config) {
 			const userId = parseUserId(id)
 			const user = await db.getUser(platform, userId)
 			if (!user) { return '无效的目标用户' }
-
+			logger.info('give', level, user)
+			
 			const selfAuthority = session.user.authority
 			const targetAuthority = Object.keys(user).includes('authority') ? user.authority : 1
 
