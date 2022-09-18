@@ -3,7 +3,7 @@ const { readme } = usePageData().data
 </script>
 
 <template>
-	<a-card>
+	<a-card class="main-card">
 		<template #title>
 			<div class="readme-header">
 				<IconFile :style="{fontSize:'14px',marginRight:'10px'}" />

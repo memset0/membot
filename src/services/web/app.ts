@@ -15,6 +15,8 @@ import bodyParser from 'koa-bodyparser'
 import { Config } from './index'
 import { UserMeta, ChannelMeta, getUser, getChannel } from '../../utils/usermeta'
 
+export { Context as RouteContext } from 'koa'
+
 const viteDist = path.join(__dirname, 'vite/dist')
 
 type PageMethodCallback = (() => any) | {
@@ -60,10 +62,15 @@ export class WebService {
 		return getChannel(session.platform, session.channelId, this.ctx)
 	}
 
-	private async handlePageData(data: PageData): Promise<PageData> {
-		data.user = data.user && (await data.user)
-		data.channel = data.channel && (await data.channel)
-		return data
+	private async handlePageData(page: PageData, ctx: Koa.Context): Promise<PageData> {
+		page.user = page.user && (await page.user)
+		page.channel = page.channel && (await page.channel)
+		for (const key in page.data) {
+			if (page.data[key] instanceof Function) {
+				page.data[key] = await page.data[key](ctx)
+			}
+		}
+		return page
 	}
 
 	async authorize(route: string, session: Session) {
@@ -117,7 +124,7 @@ export class WebService {
 			const key = ctx.params.key as string
 			if (key in this.pages) {
 				let data = this.pages[key]
-				ctx.body = await this.handlePageData(data)
+				ctx.body = await this.handlePageData(cloneDeep(data), ctx)
 			} else {
 				await next()
 			}

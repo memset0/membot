@@ -1,28 +1,10 @@
 import { Context, Database, Logger } from 'koishi'
 import assert from 'assert'
 
+import { NoteMeta, NoteExtend, NoteStatus } from './types'
+
 export interface NoteUser {
 	enabled: boolean
-}
-
-export interface NoteExtend {
-	images?: Array<string>
-}
-
-export enum NoteStatus {
-	deleted,
-	default,
-	archived,
-}
-
-export interface NoteMeta {
-	id?: number
-	status?: NoteStatus
-	userId: string
-	channelId: string
-	content: string
-	time: Date
-	extend: NoteExtend
 }
 
 export interface NoteData {

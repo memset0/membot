@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageNote from '../../../../commands/note/frontend/App.vue'
+
 import fetch from './fetch'
 
 let layout = ref('loading')
@@ -27,6 +29,7 @@ async function update() {
         <PageHome v-else-if="layout === 'home'" />
         <PageError v-else-if="layout === 'error'" />
         <PagePlainText v-else-if="layout === 'plaintext'" />
+        <PageNote v-else-if="layout==='note'" />
         <div v-else>No Layout Found: {{ layout }}</div>
       </div>
     </a-layout-content>

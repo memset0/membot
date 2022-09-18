@@ -138,14 +138,14 @@ export function apply(ctx: Context) {
 					cacheTime: Time.day,
 					data: {
 						editable,
-					},
-					methods: {
-						notes: async function () {
+						notes: async () => {
 							const fetcher = core.fetchChannel.bind(core)
 							const notes = await fetcher(channelId)
 							for (const note of notes) { note.content = markdown.render(note.content) }
 							return notes
 						},
+					},
+					methods: {
 					},
 				},
 			})
