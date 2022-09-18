@@ -22,7 +22,8 @@ async function update() {
     </a-layout-header>
     <a-layout-content>
       <div class="container main-container">
-        <PageHome v-if="layout === 'home'" />
+        <PageLoading v-if="layout === 'loading'" />
+        <PageHome v-else-if="layout === 'home'" />
         <PageError v-else-if="layout === 'error'" />
         <PagePlainText v-else-if="layout === 'plaintext'" />
         <div v-else>No Layout Found: {{ layout }}</div>

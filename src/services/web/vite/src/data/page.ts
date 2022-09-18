@@ -6,7 +6,7 @@ export const usePageData = defineStore('pageData', {
 		id: '',
 		layout: 'loading',
 		user: undefined,
-		channel:undefined,
+		channel: undefined,
 		data: ({} as PageData['data']),
 	} as PageData),
 })

@@ -18,6 +18,7 @@ declare module '@vue/runtime-core' {
     APopover: typeof import('@arco-design/web-vue')['Popover']
     ASkeleton: typeof import('@arco-design/web-vue')['Skeleton']
     ASkeletonShape: typeof import('@arco-design/web-vue')['SkeletonShape']
+    ASpin: typeof import('@arco-design/web-vue')['Spin']
     Avatar: typeof import('./src/components/Avatar.vue')['default']
     ExternalLink: typeof import('./src/components/ExternalLink.vue')['default']
     Footer: typeof import('./src/layout/Footer.vue')['default']
@@ -28,6 +29,7 @@ declare module '@vue/runtime-core' {
     Markdown: typeof import('./src/components/Markdown.vue')['default']
     PageError: typeof import('./src/layout/PageError.vue')['default']
     PageHome: typeof import('./src/layout/PageHome.vue')['default']
+    PageLoading: typeof import('./src/layout/PageLoading.vue')['default']
     PagePlainText: typeof import('./src/layout/PagePlainText.vue')['default']
   }
 }
