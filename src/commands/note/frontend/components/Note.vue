@@ -32,12 +32,31 @@ defineProps<{
 	</div>
 </template>
 
-<style scoped style="scss">
+<style lang="scss">
 .note-card {
 	max-width: 600px;
 	margin-left: auto;
 	margin-right: auto;
 	margin-bottom: 16px;
 	overflow: hidden;
+
+
+	&>.arco-card-body {
+		padding: 12px !important;
+	}
+}
+
+.note-content {
+	&>*:first-child {
+		margin-block-start: 0 !important;
+		margin-inline-start: 0 !important;
+		margin-top: 0 !important;
+	}
+
+	&>*:last-child {
+		margin-block-end: 0 !important;
+		margin-inline-end: 0 !important;
+		margin-bottom: 0 !important;
+	}
 }
 </style>

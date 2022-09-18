@@ -20,7 +20,6 @@ declare module '@vue/runtime-core' {
     ASkeleton: typeof import('@arco-design/web-vue')['Skeleton']
     ASkeletonShape: typeof import('@arco-design/web-vue')['SkeletonShape']
     ASpin: typeof import('@arco-design/web-vue')['Spin']
-    ATypographyText: typeof import('@arco-design/web-vue')['TypographyText']
     Avatar: typeof import('./src/components/Avatar.vue')['default']
     ExternalLink: typeof import('./src/components/ExternalLink.vue')['default']
     Footer: typeof import('./src/layout/Footer.vue')['default']
