@@ -5,5 +5,11 @@ defineProps<{
 </script>
 
 <template>
-	<img alt="note-image" class="note-image" :style="{ width: '100%' }" :src="image" />
+	<a-image alt="note-image" class="note-image" :src="image" />
 </template>
+
+<style scoped>
+.note-image {
+	max-height:300px;
+}
+</style>

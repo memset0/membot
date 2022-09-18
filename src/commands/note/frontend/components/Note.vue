@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NoteImage from './NoteImage.vue'
+import NoteImageGroup from './NoteImageGroup.vue'
 import { NoteMeta } from '../../types'
 defineProps<{
 	note: NoteMeta,
@@ -10,9 +10,7 @@ defineProps<{
 	<div>
 		<a-card class="main-card note-card">
 			<template #cover>
-				<template v-for="image in note.extend.images">
-					<NoteImage :image="image" />
-				</template>
+				<NoteImageGroup :images="note.extend.images" />
 			</template>
 			<a-card-meta>
 				<template #description>

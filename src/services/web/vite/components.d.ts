@@ -11,6 +11,8 @@ declare module '@vue/runtime-core' {
     AAvatarGroup: typeof import('@arco-design/web-vue')['AvatarGroup']
     ACard: typeof import('@arco-design/web-vue')['Card']
     ACardMeta: typeof import('@arco-design/web-vue')['CardMeta']
+    AImage: typeof import('@arco-design/web-vue')['Image']
+    AImagePreviewGroup: typeof import('@arco-design/web-vue')['ImagePreviewGroup']
     ALayout: typeof import('@arco-design/web-vue')['Layout']
     ALayoutContent: typeof import('@arco-design/web-vue')['LayoutContent']
     ALayoutFooter: typeof import('@arco-design/web-vue')['LayoutFooter']
