@@ -6,9 +6,11 @@ defineProps<{
 </script>
 
 <template>
-	<a-image-preview-group>
-		<div v-for="image in images">
-			<NoteImage :image="image" />
-		</div>
-	</a-image-preview-group>
+	<div class="note-image-group">
+		<a-image-preview-group>
+			<div v-for="image in images">
+				<NoteImage :image="image" />
+			</div>
+		</a-image-preview-group>
+	</div>
 </template>

@@ -10,7 +10,7 @@ defineProps<{
 	<div>
 		<a-card class="main-card note-card">
 			<template #cover>
-				<NoteImageGroup :images="note.extend.images" />
+				<NoteImageGroup v-if="note.extend.images && note.extend.images.length" :images="note.extend.images" />
 			</template>
 			<a-card-meta>
 				<template #description>
@@ -54,6 +54,10 @@ defineProps<{
 			margin-inline-end: 0 !important;
 			margin-bottom: 0 !important;
 		}
+	}
+
+	.note-image-group {
+		border-bottom: 1px solid var(--color-neutral-3);
 	}
 }
 </style>
