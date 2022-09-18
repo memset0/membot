@@ -43,6 +43,8 @@ defineProps<{
 	}
 
 	.note-content {
+		color: black;
+
 		&>*:first-child {
 			margin-block-start: 0 !important;
 			margin-inline-start: 0 !important;
