@@ -62,11 +62,11 @@ function update(user: undefined | UserMeta, channel: undefined | ChannelMeta, po
 	<div v-if="user || channel" class="header-avatar-group">
 		<a-popover>
 			<a-avatar-group :size="28">
-				<a-avatar v-if="user" :style="{ backgroundColor: '#7BC616' }" class="header-avatar">
+				<a-avatar v-if="user" :style="user.avatar ? {} : { backgroundColor: '#7BC616' }" class="header-avatar">
 					<img v-if="user.avatar" alt="avatar" :src="user.avatar" />
 					<span v-else>{{ userShort }}</span>
 				</a-avatar>
-				<a-avatar v-if="channel" :style="{ backgroundColor: '#168CFF' }" class="header-avatar">
+				<a-avatar v-if="channel" :style="channel.avatar ? {} : { backgroundColor: '#168CFF' }" class="header-avatar">
 					<img v-if="channel.avatar" alt="avatar" :src="channel.avatar" />
 					<span v-else>{{ channelShort }}</span>
 				</a-avatar>
