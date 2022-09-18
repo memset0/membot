@@ -38,7 +38,7 @@ function update(user: undefined | UserMeta, channel: undefined | ChannelMeta, po
 
 	userShort.value = user && (user.name || user.id).slice(0, 1)
 	channelShort.value = channel && (channel.name || channel.id).slice(0, 1)
-	
+
 	popover.splice(0, popover.length)
 	if (user?.platform || channel?.platform) {
 		const platform = user?.platform || channel?.platform
@@ -48,12 +48,12 @@ function update(user: undefined | UserMeta, channel: undefined | ChannelMeta, po
 		}
 	}
 	if (user) {
-		addMeta('User ID', user.id)
 		if (user.name) { addMeta('User', user.name) }
+		addMeta('User ID', user.id)
 	}
 	if (channel) {
-		if (!channel.id.startsWith('private:')) { addMeta('Channel ID', channel.id) }
 		if (channel.name) { addMeta('Channel', channel.name) }
+		if (!channel.id.startsWith('private:')) { addMeta('Channel ID', channel.id) }
 	}
 }
 </script>
