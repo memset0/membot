@@ -40,6 +40,7 @@ web.register({
 		"methods": {},
 		"channel": {
 			"id": "private:1470738407",
+			"platform": "onebot",
 			"name": "test-note",
 			"avatar": "https://q.qlogo.cn/headimg_dl?dst_uin=1470738407&spec=640"
 		}

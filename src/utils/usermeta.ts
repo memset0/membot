@@ -5,12 +5,14 @@ import { TelegramBot } from '@satorijs/adapter-telegram'
 
 export interface UserMeta {
 	id: string
+	platform: string
 	name?: string
 	avatar?: string
 }
 
 export interface ChannelMeta {
 	id: string
+	platform: string
 	name?: string
 	avatar?: string
 }
@@ -58,17 +60,17 @@ export const getChannel = cache.decorate(_getChannel, 'channel')
 export const getChannelName = cache.decorate(_getChannelName, 'channel-name')
 export const getChannelAvatar = cache.decorate(_getChannelAvatar, 'channel-avatar')
 
-export async function _getUser(platform: string, userId: string, ctx?: Context): Promise<UserMeta>{
+export async function _getUser(platform: string, userId: string, ctx?: Context): Promise<UserMeta> {
 	let res: any
-	const user = { id: userId } as UserMeta
+	const user = { id: userId, platform } as UserMeta
 	if (res = await getUserName(platform, userId, ctx)) { user.name = res }
 	if (res = await getUserAvatar(platform, userId, ctx)) { user.avatar = res }
 	return user
 }
 
-export async function _getChannel(platform: string, channelId: string, ctx?: Context):Promise<ChannelMeta> {
+export async function _getChannel(platform: string, channelId: string, ctx?: Context): Promise<ChannelMeta> {
 	let res: any
-	const channel = { id: channelId } as ChannelMeta
+	const channel = { id: channelId, platform } as ChannelMeta
 	if (res = await getChannelName(platform, channelId, ctx)) { channel.name = res }
 	if (res = await getChannelAvatar(platform, channelId, ctx)) { channel.avatar = res }
 	return channel

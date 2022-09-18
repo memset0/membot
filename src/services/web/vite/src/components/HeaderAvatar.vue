@@ -1,12 +1,61 @@
 <script setup lang="ts">
 import { UserMeta, ChannelMeta } from '../../../../../utils/usermeta'
 
-const { user, channel } = defineProps<{
+interface DescriptionsItem {
+	label: string
+	value: string
+}
+
+const props = defineProps<{
 	user: undefined | UserMeta,
 	channel: undefined | ChannelMeta,
 }>()
-const userShort = user && (user.name || user.id).slice(0, 1)
-const channelShort = channel && (channel.name || channel.id).slice(0, 1)
+const user = ref<undefined | UserMeta>(undefined)
+const channel = ref<undefined | ChannelMeta>(undefined)
+const userShort = ref('')
+const channelShort = ref('')
+const popover: Array<DescriptionsItem> = []
+
+update(props.user, props.channel, popover)
+watch(props, () => {
+	// console.log('update:', user, channel)
+	user.value = props.user
+	channel.value = props.channel
+	update(props.user, props.channel, popover)
+})
+onMounted(() => {
+	// console.log('mounted:', user, channel)
+	user.value = props.user
+	channel.value = props.channel
+	update(props.user, props.channel, popover)
+})
+
+
+function update(user: undefined | UserMeta, channel: undefined | ChannelMeta, popover: Array<DescriptionsItem>) {
+	function addMeta(label: string, value: string) { popover.push({ label, value }) }
+	function firstUpper([first, ...rest]: string): string { return first.toUpperCase() + rest.join('') }
+	function namePlatform(platform: string) { return platform === 'onebot' ? 'QQ' : firstUpper(platform) }
+
+	userShort.value = user && (user.name || user.id).slice(0, 1)
+	channelShort.value = channel && (channel.name || channel.id).slice(0, 1)
+	
+	popover.splice(0, popover.length)
+	if (user?.platform || channel?.platform) {
+		const platform = user?.platform || channel?.platform
+		addMeta('Platform', namePlatform(platform))
+		if (user && channel && user.platform != channel.platform) {
+			addMeta('Channel Platform', namePlatform(channel.platform))
+		}
+	}
+	if (user) {
+		addMeta('User ID', user.id)
+		if (user.name) { addMeta('User', user.name) }
+	}
+	if (channel) {
+		if (!channel.id.startsWith('private:')) { addMeta('Channel ID', channel.id) }
+		if (channel.name) { addMeta('Channel', channel.name) }
+	}
+}
 </script>
 	
 <template>
@@ -23,8 +72,7 @@ const channelShort = channel && (channel.name || channel.id).slice(0, 1)
 				</a-avatar>
 			</a-avatar-group>
 			<template #content>
-				<p>Here is the text content</p>
-				<p>Here is the text content</p>
+				<a-descriptions :column="1" :data="popover" :align="{ label: 'right' }" />
 			</template>
 		</a-popover>
 	</div>
