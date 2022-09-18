@@ -38,5 +38,6 @@ defineProps<{
 	margin-left: auto;
 	margin-right: auto;
 	margin-bottom: 16px;
+	overflow: hidden;
 }
 </style>
