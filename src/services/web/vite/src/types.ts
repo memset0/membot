@@ -14,6 +14,7 @@ export interface PageData {
 	id: string
 	layout: string
 	data: any
+	title?: string
 	user?: UserMeta,
 	channel?: ChannelMeta
 }

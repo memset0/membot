@@ -11,6 +11,7 @@ async function update() {
   for (const key in newPageData) {
     pageData[key] = newPageData[key]
   }
+  if (newPageData.title) { document.title = newPageData.title + document.title.split(' - ').pop() }
   if (newPageData.layout) { layout.value = newPageData.layout }
 }
 </script>
