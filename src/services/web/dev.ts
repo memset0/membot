@@ -22,7 +22,10 @@ web.register({
 				"content": "<p>with image</p>\n",
 				"time": "2022-09-18T01:42:31.000Z",
 				"extend": {
-					"images": ["https://bot.memset0.cn/static/2022/09/18/63267786af92f.png"]
+					"images": [
+						"https://bot.memset0.cn/static/2022/09/18/63267786af92f.png",
+						"https://static.memset0.cn/img/v5/2022/09/18/632697e9cce6a.png",
+					]
 				}
 			}, {
 				"id": 17,
