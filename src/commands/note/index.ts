@@ -3,7 +3,8 @@ import YAML from 'yaml'
 import { cloneDeep } from 'lodash'
 import MarkdownIt from 'markdown-it'
 
-import { Note, NoteStatus, NoteUser, NoteMeta } from './note'
+import { Note, NoteUser } from './note'
+import { NoteStatus, NoteMeta } from './types'
 import renderStatus from './templates/status'
 
 declare module 'koishi' {
