@@ -15,6 +15,8 @@ import bodyParser from 'koa-bodyparser'
 import { Config } from './index'
 import { UserMeta, ChannelMeta, getUser, getChannel } from '../../utils/usermeta'
 
+import { shorturlMiddlewareFactory } from '../../commands/shorturl'
+
 export { Context as RouteContext } from 'koa'
 
 const viteDist = path.join(__dirname, 'vite/dist')
@@ -89,6 +91,12 @@ export class WebService {
 		return target
 	}
 
+	getPluginMiddlewares():Array<Koa.Middleware> {
+		return [
+			shorturlMiddlewareFactory(this.ctx)
+		]
+	}
+
 	register(argv: PageArgument): string {
 		const { data } = argv
 
@@ -161,6 +169,10 @@ export class WebService {
 			index: false,
 			gzip: true,
 		}))
+
+		for (const middleware of this.getPluginMiddlewares()) {
+			this.app.use(middleware)
+		}
 
 		this.app
 			.use(this.router.routes())
