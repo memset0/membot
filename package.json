@@ -6,9 +6,10 @@
   "author": "memset0 <memset0@outlook.com>",
   "license": "AGPL-3.0-or-later",
   "scripts": {
-    "start": "yarn run vite:build && cross-env NODE_ENV=production yarn koishi start -r ts-node/register -r yml-register",
+    "start": "yarn run vite:build && yarn run app:start",
     "dev": "cross-env NODE_ENV=development yarn koishi start -r ts-node/register -r yml-register --watch",
     "deploy": "rm -f src/services/web/vite/components.d.ts && git pull && yarn && yarn start",
+    "app:start": "cross-env NODE_ENV=production yarn koishi start -r ts-node/register -r yml-register",
     "web:start": "cross-env NODE_ENV=development ts-node -r yml-register src/services/web/dev",
     "web:dev": "cross-env NODE_ENV=development concurrently \"yarn run vite:dev\" \"ts-node -r yml-register src/services/web/dev\"",
     "vite:dev": "cross-env NODE_ENV=development vite src/services/web/vite",
