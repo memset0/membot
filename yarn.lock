@@ -294,6 +294,11 @@
   dependencies:
     "@koishijs/helpers" "^1.2.3"
 
+"@koishijs/plugin-verifier@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@koishijs/plugin-verifier/-/plugin-verifier-1.0.6.tgz#ef04d52dac1dfad3fe63f5c9610a5700c3f80315"
+  integrity sha512-nRlk2K7YR1WKzA9ofoiYh5VXTf0ZE2M080h0v6wEA97cNmMPvZjHaYPYJ8sJItct83XbUM2EB3Doq59uT2vsPg==
+
 "@koishijs/scripts@^2.0.3":
   version "2.0.4"
   resolved "https://registry.npmmirror.com/@koishijs/scripts/-/scripts-2.0.4.tgz#ba980ded0ead20b1d558490e92bc8a93c2dafe5f"
