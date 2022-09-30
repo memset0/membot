@@ -11,6 +11,8 @@ membot
 
 Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
+![](https://count.getloli.com/get/@membot?theme=rule34)
+
 ### Deploy
 
 #### As an independent bot
