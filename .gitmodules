@@ -1,3 +1,0 @@
-[submodule "packages/koishi-plugin-shorturl"]
-	path = packages/koishi-plugin-shorturl
-	url = git@github.com:koishijs/koishi-plugin-shorturl.git
