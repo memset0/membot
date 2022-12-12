@@ -17,9 +17,11 @@ Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
 #### As an independent bot
 
-It means you will start the bot with all features enabled. However, this will probably cost you a bit of time on the config file. Due to the limitation of my energy, template configuration files would not be provided in the near future, you can refer to the `Config` interfaces in the code by yourself.
+To deploy as an independent bot, which means you will start the bot with all features enabled, will probably cost you quite a lot time on the config file. Due to the lack of my time, I wouldn't provide a template configuration file currently. However, you can refer to the `Config` interfaces in the code by yourself.
 
-Notice that our image operatoring service is dependent on ffmpeg to handle, make sure you have it installed before launching.
+Notice that our image operating service is dependent on `ffmpeg` to handle. If you enabled any submodules depending on it, make sure you have it installed before launching.
+
+To start the bot, run following commands.
 
 ```shell
 yarn
@@ -28,9 +30,11 @@ yarn start
 
 #### As a koishi plugin
 
-To make my development process more convenient, there are various complex calling relationships in the code. Therefore, we strongly recommend you to clone the whole repository and to keep its directory structure unchanged.
+On the propose of making development more convenient, various complex dependencies are included in code. Therefore, I strongly recommend you to clone the whole repository and import my modules directly without changing directory structure.
 
-For example, if you just want to enable its RSS Feed feature, use `ctx.plugin`. But noticed that the RSS plugin depends on the Web Service, it's also needed to inject the Web Service before the RSS one. Then your code would be like:
+If you just want to enable the RSS feature, which is depending on the web service plugin, for example. You should have koishi configured firstly and use `ctx.plugin` method to import packages of this project.
+
+Here is an example code. Remember to replace `<path>` pattern with the correct relative location of `membot` folder.
 
 ```typescript
 ctx.plugin(require('<path>/membot/src/services/web'));
