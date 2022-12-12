@@ -17,11 +17,11 @@ Yet Another Open Source & Cross-platform Chatbot Powered by Koishi
 
 #### As an independent bot
 
-To deploy as an independent bot, which means you will start the bot with all features enabled, will probably cost you quite a lot time on the config file. Due to the lack of my time, I wouldn't provide a template configuration file currently. However, you can refer to the `Config` interfaces in the code by yourself.
+To deploy as an independent bot, which means you will start the bot with all features enabled, will probably cost you quite a lot time on the configuration. Due to the lack of my time, I wouldn't provide a template configuration file currently. However, you can refer to the `Config` interfaces in the code to the modules by yourself.
 
-Notice that our image operating service is dependent on `ffmpeg` to handle. If you enabled any submodules depending on it, make sure you have it installed before launching.
+Notice that our image operations are dependent on [*ffmpeg*](https://github.com/FFmpeg/FFmpeg) to handle. If you enabled any submodules depending on the image service, make sure you have *ffmpeg* installed before launching.
 
-To start the bot, run following commands.
+To start the bot, please run following commands.
 
 ```shell
 yarn
@@ -30,9 +30,9 @@ yarn start
 
 #### As a koishi plugin
 
-On the propose of making development more convenient, various complex dependencies are included in code. Therefore, I strongly recommend you to clone the whole repository and import my modules directly without changing directory structure.
+On the propose of making development more convenient, various complex dependencies are included in code. Therefore, I strongly recommend you to clone the whole repository and import modules directly without changing directory structure.
 
-If you just want to enable the RSS feature, which is depending on the web service plugin, for example. You should have koishi configured firstly and use `ctx.plugin` method to import packages of this project.
+If you just want to enable the RSS feature, which is depending on the web service plugin, for example. You should have koishi deployed firstly and use `ctx.plugin` method to import packages of this project.
 
 Here is an example code. Remember to replace `<path>` pattern with the correct relative location of `membot` folder.
 
