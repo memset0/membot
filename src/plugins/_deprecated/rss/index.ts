@@ -110,17 +110,22 @@ export function apply(ctx: Context, config: Config) {
 		.action(async ({ session }) => {
 			const channel = `${session.platform}:${session.channelId}`
 			const feeds = await ctx.database.get('rssfeed', { channel })
-			let output = ''
-			if (session.platform === 'telegram') {
-				output += segment('html')
-				for (const feed of feeds) {
-					output += `<b>#${feed.id}.</b> ${escapeTelegramHTML(getDisplayName(feed))}\n`
-				}
-			} else {
-				for (const feed of feeds) {
-					output += `#${feed.id}. ${getDisplayName(feed)}\n`
-				}
+			let output = '';
+			for (const feed of feeds) {
+				output += `#${feed.id}. ${getDisplayName(feed)}\n`
 			}
+			// if (session.platform === 'telegram') {
+			// 	output += segment('html')
+			// 	for (const feed of feeds) {
+			// 		output += `<b>#${feed.id}.</b> ${escapeTelegramHTML(getDisplayName(feed))}\n`
+			// 	}
+			// } else {
+			// 	for (const feed of feeds) {
+			// 		output += `#${feed.id}. ${getDisplayName(feed)}\n`
+			// 	}
+			// }
+			logger.info(feeds)
+			logger.info(output)
 			return output
 		})
 

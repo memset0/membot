@@ -24,11 +24,11 @@ export interface JjwzHistoryMeta extends JjwzMeta {
 }
 
 
-export const name = 'jjwz' as const
+export const name = 'jjwz'
 export const using = ['web', 'database'] as const
 
 export default async function (ctx: Context) {
-	const logger = ctx.logger(name)
+	// const logger = ctx.logger(name)
 	const config = {
 		lengthLimit: 5,
 		comboLimit: 1,
@@ -36,9 +36,9 @@ export default async function (ctx: Context) {
 
 	function at(session: Session): string {
 		if (session.platform === 'telegram') {
-			return segment.at(session.author.username || session.author.nickname || session.author.userId)
+			return segment.at(session.author.username || session.author.nickname || session.author.userId).toString()
 		}
-		return segment.at(session.author.userId)
+		return segment.at(session.author.userId).toString()
 	}
 
 	async function query(channel: string): Promise<JjwzMeta | null> {

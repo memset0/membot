@@ -1,4 +1,4 @@
-import { Context, Time, segment } from 'koishi'
+import { Context, Element, Time, segment } from 'koishi'
 import YAML from 'yaml'
 import { cloneDeep } from 'lodash'
 import MarkdownIt from 'markdown-it'
@@ -18,7 +18,7 @@ declare module 'koishi' {
 }
 
 interface RecentMessage {
-	[K: string]: Array<Array<segment.Parsed>>
+	[K: string]: Array<Array<Element>>
 }
 
 
@@ -32,13 +32,13 @@ export function apply(ctx: Context) {
 	const markdown = new MarkdownIt()
 	const recentMessage: RecentMessage = {}
 
-	function pushMessage(id: string, message: Array<segment.Parsed>): void {
+	function pushMessage(id: string, message: Array<Element>): void {
 		if (!recentMessage[id]) { recentMessage[id] = [] }
 		recentMessage[id].push(message)
 		if (recentMessage[id].length > 3) { recentMessage[id].splice(0, 1) }
 	}
 
-	function pullMessage(id: string): Array<Array<segment.Parsed>> {
+	function pullMessage(id: string): Array<Array<Element>> {
 		if (!recentMessage[id]) { return [] }
 		const result = recentMessage[id]
 		recentMessage[id] = null
@@ -80,7 +80,7 @@ export function apply(ctx: Context) {
 		const channelId = `${session.platform}:${session.channelId}`
 		if (channelId in core.data) {
 			const userId = `${session.platform}:${session.userId}`
-			pushMessage(`${channelId}:${userId}`, segment.parse(session.content))
+			pushMessage(`${channelId}:${userId}`, session.elements)
 		}
 		return next()
 	})
@@ -166,8 +166,11 @@ export function apply(ctx: Context) {
 			const recent = pullMessage(`${channelId}:${userId}`)
 			let images = []
 			for (const message of recent) {
-				for (const seg of message) {
-					if (seg.type === 'image' && seg.data.url) { images.push(seg.data.url) }
+				for (const element of message) {
+					if (element.type === 'image' && element.attrs.url) {
+						logger.info('discover image', element)
+						images.push(element.attrs.url)
+					}
 				}
 			}
 			if (images.length) {

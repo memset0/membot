@@ -20,6 +20,8 @@ export const globalFilterOut = {
 	]
 } as Filter
 
+export const _skipFeed = true;
+
 
 export function getDisplayName(feed: Feed): string {
 	return feed.options.title || `${(new URL(feed.url)).hostname} 的订阅`
@@ -83,6 +85,10 @@ export class RSSCore {
 	}
 
 	addFeed(feed: Feed): boolean {
+		if (_skipFeed) {
+			return true
+		}
+
 		const link = new URL(feed.url)
 		const registerTime = Date.now()
 		link.search += (link.search ? '&' : '?') + `i=${feed.id}&t=${registerTime % 1000}`

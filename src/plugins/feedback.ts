@@ -1,4 +1,5 @@
 import { Bot, Context, Session, segment } from 'koishi'
+import { deepCopy } from '../utils/type'
 
 import { Broadcast } from '../templates/broadcast'
 
@@ -16,11 +17,22 @@ export async function apply(ctx: Context, config: Config) {
 	// logger.info('config', config)
 
 	ctx.middleware((session: Session, next) => {
-		const keyString = segment('at', { id: session.bot.selfId })
+		let isMentioned = false
+		for (const element of session.elements) {
+			if (element.type === "at" && element.attrs.id == session.bot.selfId) {
+				isMentioned = true
+				break
+			}
+		}
 
-		if (session.content.indexOf(keyString) !== -1 && !session.content.startsWith('[CQ:quote,id=')) {
-			let content = session.content
-			if (content.replace(keyString, '').replace(/\s/g, '') == '') {
+		if (isMentioned) {
+			let isEmptyMessage = true
+			for (const element of session.elements) {
+				if (element.type === 'text' && element.attrs.content.trim() !== '') {
+					isEmptyMessage = false
+				}
+			}
+			if (isEmptyMessage) {
 				return segment('at', { id: session.author.userId }) + `欢迎使用机器人的反馈功能，想说什么话请直接在消息中@本机器人哦` + footer
 			}
 
@@ -32,10 +44,17 @@ export async function apply(ctx: Context, config: Config) {
 			if (session.guildId !== 'private') { replyCommand += `-a ${session.author.userId} ` }
 			replyCommand += `(message)`
 
+			const elements = deepCopy(session.elements)
+			for (const i in session.elements) {
+				if (elements[i].type === "at" && elements[i].attrs.id == session.bot.selfId) {
+					elements[i] = segment.text('@'+ctx.root.config.nickname)
+				}
+			}
+
 			const broadcast = new Broadcast({
 				type: 'Feedback',
 				title: '来自 ' + (session.guildId === 'private' ? `用户 ${user}` : `群聊 ${channel} 的用户 ${user}`),
-				content: content.replace(keyString, '@' + ctx.options.nickname).trim(),
+				elements: elements,
 				operation: [
 					['封禁', `.bot.ban ${session.author.userId} -p ${session.platform}`],
 					['回复', replyCommand],

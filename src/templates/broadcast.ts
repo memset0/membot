@@ -1,4 +1,4 @@
-import { segment } from 'koishi'
+import { Element, segment } from 'koishi'
 import structuredClone from '@ungap/structured-clone';
 
 import { Template } from './template'
@@ -16,6 +16,7 @@ export interface Broadcast {
 	linkname?: string
 
 	content?: string
+	elements?: Array<Element>
 
 	operation?: [string, string][]
 	tag?: string[]
@@ -31,7 +32,7 @@ export class Broadcast extends Template {
 
 		if (data.image || data.images?.length) {
 			for (const image of data.image ? [data.image] : data.images) {
-				buffer += segment.image(image)
+				buffer += segment.image(image).toString()
 				if (platform !== 'telegram') { buffer += '\n' }
 			}
 		}
@@ -52,9 +53,14 @@ export class Broadcast extends Template {
 			}
 		}
 
-		if (data.content) {
-			buffer += data.content
-			if (!data.content.endsWith('\n')) buffer += '\n'
+		const content = data.content
+			? data.content
+			: (data.elements
+				? segment.transform(data.elements, {}).map(x => x.toString()).join('')
+				: '')
+		buffer += content
+		if (!content.endsWith('\n')) {
+			buffer += '\n'
 		}
 
 		if (data.operation?.length) {
@@ -63,7 +69,8 @@ export class Broadcast extends Template {
 					buffer += '· '
 				}
 				if (platform === 'telegram') {
-					buffer += `${name}: <code>${command}</code>\n`
+					buffer += `${name}: ${command}\n`
+					// buffer += `${name}: <code>${command}</code>\n`
 				} else {
 					buffer += `${name}:  ${command}\n`
 				}
@@ -77,11 +84,10 @@ export class Broadcast extends Template {
 			buffer += '\n'
 		}
 
-		if (platform === 'telegram') {
-			buffer = segment('html') + buffer
-		}
+		buffer = buffer.replace(/\s+$/, '')
+		buffer = buffer.replace(/\n/g, '<text content="\n"></text>')   // 确保纯文本内容和 XML 元素混排时能正确换行
 
-		return buffer.replace(/\s+$/, '')
+		return buffer
 	}
 
 	toString(platform?: string): string {

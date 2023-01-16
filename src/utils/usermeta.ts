@@ -84,7 +84,7 @@ export async function _getUserAvatar(platform: string, userId: string, ctx?: Con
 		const bot = switchBot(ctx, 'telegram') as unknown as TelegramBot
 		const chat = await bot.internal.getChat({ chat_id: userId })
 		const file = await bot.internal.getFile({ file_id: chat.photo.small_file_id })
-		const res = await bot.http.file.get(`/${file.file_path}`, { responseType: 'arraybuffer' })
+		const res = await bot.file.get(`/${file.file_path}`, { responseType: 'arraybuffer' })
 		const base64 = `data:image/jpeg;base64,` + res.toString('base64')
 		return base64
 	}
@@ -102,7 +102,7 @@ export async function _getChannelAvatar(platform: string, channelId: string, ctx
 		const bot = switchBot(ctx, 'telegram') as unknown as TelegramBot
 		const chat = await bot.internal.getChat({ chat_id: channelId })
 		const file = await bot.internal.getFile({ file_id: chat.photo.small_file_id })
-		const res = await bot.http.file.get(`/${file.file_path}`, { responseType: 'arraybuffer' })
+		const res = await bot.file.get(`/${file.file_path}`, { responseType: 'arraybuffer' })
 		const base64 = `data:image/jpeg;base64,` + res.toString('base64')
 		return base64
 	}

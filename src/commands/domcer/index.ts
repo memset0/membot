@@ -27,7 +27,7 @@ export async function apply(ctx: Context, config: Config) {
 	ctx.template.register('domcer/megawalls', renderMegawalls)
 	ctx.template.register('domcer/megawallsRound', renderMegawallsRound)
 
-	ctx.command('domcer', '查询 DoMCer 服务器数据', { hidden: true })
+	ctx.command('domcer', '查询 DoMCer 服务器数据'/*, { hidden: true }*/)
 
 	commandBW.apply(ctx)
 	commandMW.apply(ctx)

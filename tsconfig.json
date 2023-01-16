@@ -7,7 +7,6 @@
         "commands/*"
       ],
     },
-    "jsx": "preserve",
     "strict": false,
     "strictNullChecks": false,
     "forceConsistentCasingInFileNames": true,
@@ -19,6 +18,8 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "jsxImportSource": "@satorijs/element",
   },
   "include": [
     "src/**/*"
